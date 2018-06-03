@@ -1,3 +1,394 @@
+# config/locales/blacklight.en.yml
+
 en:
+
   blacklight:
-    application_name: 'Blacklight'
+
+    application_name:   'Virgo'
+    welcome:            'Welcome!'
+
+    back_to_bookmarks:  'Back to Bookmarks'
+    back_to_search:     'Back to search'          # was: 'Back to Search'
+    did_you_mean:       'Did you mean to type: %{options}?'
+
+    and:                'and'
+    or:                 'or'
+
+    entry_name:
+      default:          'entry'
+
+    no_link:            'None available'
+    feedback:           '%{application} Feedback'
+
+    # =========================================================================
+    # Nav header
+    # =========================================================================
+
+    header_links:
+      bookmarks:        'Bookmarks'
+      login:            'Sign in'                 # was: 'Login'
+      logout:           'Sign out'                # was: 'Log Out'
+      saved_searches:   'Saved Searches'
+      search_history:   'History'
+
+    # =========================================================================
+    # Page footer
+    # =========================================================================
+
+    footer_links:
+      library_staff:    'Staff Directory'
+      organization:     'UVA Home'
+      organization_it:  'ITS'
+      library_search:   'Library Site Search'
+      library_hours:    'Hours'
+      library_map:      'Map'
+      library_policies: 'Policies'
+      library_news:     'Press'
+      library_jobs:     'Jobs'
+      info_chat:        'Questions? Ask a Librarian'
+      info_terms:       'Terms of Use'
+      info_opt_out:     'Tracking Opt-out'
+      gov_doc:          'U.S. Government documents'
+      gov_doc_1:        'This library is a Congressionally designated depository for %{link}.'
+      gov_doc_2:        'Public access to the Government documents is guaranteed by public law.'
+
+    # =========================================================================
+    # Tools
+    # =========================================================================
+
+    tools:
+
+      title:            'Tools'
+
+      #librarian_view:  @see config/locales/blacklight_marc.en.yml
+      citation:         'Bibliographic citations' # was: 'Cite'
+      email:            'Send via email'          # was: 'Email'
+      sms:              'Send via text message'   # was: 'SMS This'
+      clear:            'Clear'
+
+    # =========================================================================
+    # Tools - Bibliographic citations
+    # =========================================================================
+
+    citation:
+      mla:              'MLA'
+      apa:              'APA'
+      chicago:          'Chicago'
+
+    # =========================================================================
+    # Tools - Email input form
+    # =========================================================================
+
+    email:
+
+      form:
+        title:          'Email This'
+        to:             'Email:'
+        message:        'Message:'
+        submit:         'Send'
+
+      text:
+        subject:
+          one:          'Item Record: %{title}'
+          other:        'Item records'
+        default_title:  'N/A'
+        message:        'Message:  %{message}'
+        title:          'Title:    %{value}'
+        author:         'Author:   %{value}'
+        format:         'Format:   %{value}'
+        language:       'Language: %{value}'
+        url:            'URL:      %{url}'
+
+      success:          'Email Sent'
+      errors:
+        to:
+          invalid:      'You must enter a valid email address.'
+          blank:        'You must enter a recipient in order to send this message.'
+
+    # =========================================================================
+    # Tools - SMS text input form
+    # =========================================================================
+
+    sms:
+
+      form:
+        title:          'SMS This'
+        to:             'Phone Number:'
+        carrier:        'Carrier'
+        carrier_prompt: 'Please select your carrier'
+        submit:         'Send'
+
+      text:
+        title:          '%{value}'
+        author:         ' by %{value}'
+        url:            '%{url}'                  # was: 'Link: %{url}'
+
+      success:          'SMS Sent'
+      errors:
+        to:
+          invalid:      'You must enter a valid 10-digit phone number.'
+          blank:        'You must enter a recipient phone number in order to send this message.'
+        carrier:
+          blank:        'You must select a cell service carrier.'
+          invalid:      'You must enter a valid cell service carrier.'
+
+    # =========================================================================
+    # My Account page
+    # =========================================================================
+
+    account:
+
+      title:            'My Account'
+      signed_out:       'Signed out'
+
+    # =========================================================================
+    # Bookmarks page
+    # =========================================================================
+
+    bookmarks:
+
+      title:            'Bookmarks'
+      page_title:       ~ # Erase value supplied by gem in favor of :title.
+      list_title:       'Your Bookmarks'
+
+      no_bookmarks:     'You have no bookmarks.'
+      need_login:       'Please sign in to manage and view your bookmarks.'
+      delete:           'Remove'
+
+      add:
+        button:         'Bookmark'
+        success:
+          one:          'Successfully added bookmark.'
+          other:        'Successfully added bookmarks.'
+        failure:        'Sorry, there was a problem saving the bookmarks.'
+
+      remove:
+        button:         'Remove bookmark'
+        action_confirm: 'Remove this bookmark?'
+        success:        'Successfully removed bookmark.'
+        failure:        'Sorry, there was a problem removing the bookmarks.'
+
+      clear:
+        action_title:   'Clear All'
+        action_confirm: 'Clear your bookmarks?'
+        success:        'Cleared your bookmarks.'
+        failure:        'Sorry, there was a problem clearing your bookmarks.'
+
+    # =========================================================================
+    # Saved searches page
+    # =========================================================================
+
+    saved_searches:
+
+      title:            'Saved Searches'
+      page_title:       ~ # Erase value supplied by gem in favor of :title.
+      list_title:       'Your saved searches'
+
+      no_searches:      'You have no saved searches.'
+      need_login:       'Please sign in to manage and view your saved searches.'
+      delete:           'delete'
+
+      add:
+        success:        'Successfully saved your search.'
+        failure:        'There was a problem saving your search.'
+
+      remove:
+        success:        'Successfully removed that saved search.'
+        failure:        'There was a problem removing your search.'
+
+      clear:
+        action_title:   'Clear All'
+        action_confirm: 'Clear your saved searches?'
+        success:        'Cleared your saved searches.'
+        failure:        'There was a problem clearing your searches.'
+
+    # =========================================================================
+    # Search history page
+    # =========================================================================
+
+    search_history:
+
+      title:            'Search History'
+      page_title:       ~ # Erase value supplied by gem in favor of :title.
+      recent:           'Your recent searches'
+
+      no_history:       'You have no search history.'
+      forget:           'forget'
+      save:             'save'
+
+      clear:
+        action_title:   'Clear All'
+        action_confirm: 'Clear your search history?'
+        success:        'Cleared your search history.'
+        failure:        'There was a problem clearing your search history.'
+
+    # =========================================================================
+    # Index pages (search results)
+    # =========================================================================
+
+    search:
+
+      # i18n key 'title' is deprecated and will be removed in Blacklight 6.0
+      title:                    '%{application_name} Search Results'
+      page_title:
+        title:                  '%{constraints} - %{application_name} Search Results'
+        constraint:             '%{label}: %{value}'
+        many_constraint_values: '%{values} selected'
+      search_results:           'Search Results'
+      search_results_header:    'Search Constraints'
+      #librarian_view:          @see config/locales/blacklight_marc.en.yml
+
+      # =======================================================================
+      # Controls
+      # =======================================================================
+
+      start_over:           'Start over'
+      rss_feed:             'RSS for results'
+      atom_feed:            'Atom for results'
+
+      # =======================================================================
+      # Flash error messages
+      # =======================================================================
+
+      errors:
+        invalid_solr_id:    "Sorry, you have requested a record that doesn't exist."
+        request_error:      "Sorry, I don't understand your search."
+        ebsco_eds:          'EBSCO Discovery Service: %{error}'
+        solr:               'Solr search index: %{error}'
+        unknown:            'Unknown error.'
+        authorization:
+          general:          'Please login to view.'
+          eds:              'Please sign on to complete this article search.'
+          eds_blocked:      'Your IP address has been blocked from making article searches. Please contact a librarian.'
+        connect:
+          general:          'Could not connect to external service.'
+          eds:              'Could not connect to EBSCO Discovery Service: %{error}'
+          solr:             'Could not connect to Solr search service: %{error}'
+        receive:
+          general:          'Could not receive data from remote system.'
+          eds:              'Article search provider reports: %{error}'
+
+      # =======================================================================
+      # Page size menu
+      # =======================================================================
+
+      per_page:
+        button_label:       '%{count} per page'
+        label:              '%{count}<span class="sr-only"> per page</span>'
+        title:              'Number of results to display per page'
+        submit:             'Update'
+
+      # =======================================================================
+      # Sort menu
+      # =======================================================================
+
+      sort:
+        label:              'Sort by %{field}'
+        submit:             'sort results'
+        disabled_note:      'Not meaningful without search terms'
+
+      # =======================================================================
+      # Search box
+      # =======================================================================
+
+      form:
+        search_field:
+          label:            'Search in'
+          title:            'Targeted search options'
+          post_label:       'for'
+        search:
+          label:            'search for'
+          placeholder:      'Search...'
+        submit:             'Search'
+
+      # =======================================================================
+      # Search results pagination
+      #
+      # NOTE: Relation to kaminari.en.yml:
+      # pagination_info       -> helpers.page_entries_info.one_page.display_entries
+      # entry_pagination_info -> helpers.page_entries.info.more_pages
+      # =======================================================================
+
+      pagination:
+        title:              'Results navigation'
+        at_beginning:       'Already at the beginning of the list.'
+        at_end:             'Already at the end of the list.'
+
+      pagination_info:
+        no_items_found:     'No %{entry_name} found'
+        single_item_found:  '<strong>1</strong> %{entry_name} found'
+        pages:
+          one:              '<strong>%{start_num}</strong> - <strong>%{end_num}</strong> of <strong>%{total_num}</strong>'
+          other:            '<strong>%{start_num}</strong> - <strong>%{end_num}</strong> of <strong>%{total_num}</strong>'
+
+      entry_pagination_info:
+        one:                '<strong>%{current}</strong> of <strong>%{total}</strong>'
+        other:              '<strong>%{current}</strong> of <strong>%{total}</strong>'
+
+      # =======================================================================
+      # Search results item list
+      # =======================================================================
+
+      documents:
+        counter:            '%{counter}. '
+
+      # =======================================================================
+      # Search results facets
+      # =======================================================================
+
+      facets:
+
+        title:              'Limit your search'
+        clear:              'Clear Filter'
+        count:              '%{number}'
+        missing:            '[Missing]'
+        more_html:          'more <span class="sr-only">%{field_name}</span> »'
+
+        selected:
+          remove:           '[remove]'
+
+        sort:
+          count:            'Numerical Sort'
+          index:            'A-Z Sort'
+
+      group:
+        more:               'more »'
+
+      # =======================================================================
+      # Applied search filters
+      # =======================================================================
+
+      filters:
+        title:              'You searched for:'
+        label:              '%{label}:'
+        remove:
+          value:            'Remove constraint %{value}'
+          label_value:      'Remove constraint %{label}: %{value}'
+
+      index:
+        label:              '%{label}:'
+
+      show:
+        title:              '%{document_title} - %{application_name}'
+        label:              '%{label}:'
+
+      fields:
+        default:            'Keyword'
+
+      bookmarks:
+        present:            'In Bookmarks'
+        absent:             'Bookmark'
+        inprogress:         'Saving...'
+
+      zero_results:
+        title:              'No results found for your search.'
+        modify_search:      'Try modifying your search.'
+        use_fewer_keywords: 'Use fewer keywords to start, then refine your search using the links on the left.'
+        search_fields:      'you searched by %{search_fields}'
+        search_everything:  'try searching everything'
+
+      view_title:           'View results as: '
+
+      view:
+        list:               'List'
+

@@ -1,0 +1,35 @@
+# config/admins.yml
+
+# The admins.yml file may or may not be present in the /config directory when
+# Virgo is running. If this file is not present, no admin privileges are given
+# to any user, logged in or not logged in.
+#
+# When this file is present, those users whose computing IDs are listed in this
+# file have those privileges granted for the privilege group under which they
+# are listed.
+#
+# Under a privilege group, each user is listed by <computing ID>: <name>
+#
+# The <name> may be left blank; it is simply for documentation of the full name
+# of the person with that computing ID.
+
+# Privilege group 'about'.
+# Users who have the privilege to see detail data on the /about page.
+about:
+  cmw5mc: Christopher Welte
+  dpg3k:  Dave Goldstein
+  jgc4q:  Zeke Crater
+  jh9xp:  Jill Heinze
+  md5wz:  Mike Durbin
+  mjb7q:  Melinda Baumann
+  rmg6f:  Bob Gartland
+  rsl6m:  Robin Ruggaber
+  tss6n:  Tim Stevens
+  xw5d:   Xiaoming Wang
+
+# Privilege group 'all'.
+# Users who have the privileges to do all of the above.
+all:
+  naw4t:  Nestor Walker
+  rh9ec:  Bob Haschart
+  rwl:    Ray Lubinsky

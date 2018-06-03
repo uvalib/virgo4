@@ -1,0 +1,23 @@
+<%# app/views/catalog/_facet_limit.html.erb -%>
+<%-
+  # Expandable panel of facet value selections with link to facet browse popup.
+
+  paginator = facet_paginator(facet_field, display_facet)
+  more_facets =
+    unless paginator.last_page? || (params[:action] == 'facet')
+      label = t(
+        "more_#{field_name}_html",
+        scope:      'blacklight.search.facets',
+        field_name: facet_field.label,
+        default:    :more_html
+      )
+      path = search_facet_path(id: facet_field.key)
+      link_to(label, path, class: 'more_facets_link')
+    end
+-%>
+<ul class="facet-values list-unstyled">
+  <%= render_facet_limit_list(paginator, facet_field.key) %>
+  <%- if more_facets -%>
+    <li class="more_facets_link"><%= more_facets %></li>
+  <%- end -%>
+</ul>

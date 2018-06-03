@@ -1,0 +1,17 @@
+<%# app/views/bookmarks/_refworks.html.erb -%>
+<%-
+  # Export bookmarked documents to RefWorks.
+  # TODO: export bookmarks to Refworks
+
+  docs = document_list ||= @document_list || []
+  export_key ||= :refworks_marc_text
+  return unless docs.any? { |doc| doc.exports_as?(export_key) }
+
+  label ||= t('blacklight.tools.refworks')
+  url   ||= refworks_document_path(search_state.params_for_search)
+  opt   ||= { id: 'refworksLink', class: 'btn btn-default' }
+
+-%>
+<li class="refworks">
+  <%= outlink(label, url, opt) %>
+</li>

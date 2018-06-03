@@ -1,0 +1,11 @@
+<%# app/views/catalog/_announcements.html.erb -%>
+<%-
+  # Catalog lens announcements.
+
+  items = [ # TODO: testing; replace with fetched content items
+    'First catalog announcement...',
+    'Second catalog announcement...',
+    'Third catalog announcement...'
+  ]
+-%>
+<%= render 'shared/announcements', announcements: items %>

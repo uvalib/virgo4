@@ -1,0 +1,18 @@
+# config/locales/blacklight_marc.en.yml
+
+en:
+
+  blacklight:
+
+    tools:
+      librarian_view:   'Librarian view'
+      endnote:          'Export to EndNote'
+      refworks:         'Export to RefWorks'
+      zotero:           'Export to Zotero RIS'
+
+
+    search:
+      librarian_view:
+        title:          'Librarian View'
+        empty:          'No MARC metadata for this item.'
+        leader:         'LEADER %{leader}'

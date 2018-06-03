@@ -1,0 +1,74 @@
+// app/assets/stylesheets/shared/_common.scss
+
+//=============================================================================
+// Common definitions.
+//=============================================================================
+
+%dd-item-format {
+    .label {
+        display:        inline-block;
+        vertical-align: text-top;
+    }
+}
+
+//=============================================================================
+// Common settings.
+//=============================================================================
+
+// Prevent pages with little content (like empty bookmarks or saved searches)
+// from allowing the footer to hike up to the middle of the screen on a desktop
+// display.
+#main-container {
+    min-height: 65vh;
+}
+
+.page-header {
+    margin-top: 0;
+}
+
+.page-heading {
+    margin-top: 0.25em;
+}
+
+.facets-heading {
+    margin-top:    22px;
+    margin-bottom: 7px;
+}
+
+.facet_select {
+    @include hyphens(none);
+}
+
+.top-panel-heading {
+    padding-top: 0;
+}
+
+// Search constraints
+.filterName {
+    font-variant: all-small-caps;
+}
+.filterValue {
+
+    color: #3c763d;
+
+    .constraint-connector {
+        margin-left:  0.25em;
+        margin-right: 0.25em;
+    }
+}
+
+// Hide COinS element.
+.Z3988 {
+    display: none;
+}
+
+// Shrink Bootstrap printer glyph to match up with FontAwesome RSS icon.
+.glyphicon-print:before {
+    font-size: 85%;
+}
+
+// Change cursor over auto-suggest menu entries.
+.tt-selectable {
+    cursor: pointer;
+    &:hover { background-color: whitesmoke; }
+}

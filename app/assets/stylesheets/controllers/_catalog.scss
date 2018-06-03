@@ -1,0 +1,9 @@
+// app/assets/stylesheets/controllers/_catalog.scss
+
+//=============================================================================
+// Catalog - Show pages
+//=============================================================================
+
+dd.blacklight-format_facet {
+    @extend %dd-item-format;
+}

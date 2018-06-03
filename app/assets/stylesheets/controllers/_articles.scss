@@ -1,0 +1,130 @@
+// app/assets/stylesheets/controllers/_articles.scss
+
+//=============================================================================
+// Articles - Settings
+//=============================================================================
+
+// Control the width of the abstract:
+//
+//  *true*  = Use all available horizontal space to up the right edge of the
+//              display.
+//
+//  *false* = Constrain to the width of the metadata area so that text does not
+//              encroach on the area under the tools panel.
+//
+$article-abstract-full-width: false;
+
+// Control the width of the abstract:
+//
+//  *true*  = Use all available horizontal space to up the right edge of the
+//              display.
+//
+//  *false* = Constrain to the width of the metadata area so that text does not
+//              encroach on the area under the tools panel.
+//
+$article-fulltext-full-width: false;
+
+//=============================================================================
+// Articles - Definitions
+//=============================================================================
+
+// Articles panels
+%article-panel {
+    padding:       0.5em;
+    border-radius: 4px;
+    border:         1px solid #888;
+}
+
+// Span full width of content area.
+%article-full-width {
+    width:       100%;
+    margin-left: 0;
+}
+
+//=============================================================================
+// Articles - General
+//=============================================================================
+
+// Links
+dd.blacklight-eds_all_links {
+    ul.list-unstyled {
+        margin-bottom: 0;
+    }
+}
+dt.blacklight-eds_plink {
+    visibility: hidden;
+}
+
+//=============================================================================
+// Articles - Show pages
+//=============================================================================
+
+// Other (translated) titles.
+dd.blacklight-eds_other_titles {
+    font-weight: bold;
+}
+
+dd.blacklight-eds_publication_type_facet {
+    @extend %dd-item-format;
+}
+
+// Abstract.
+dt.blacklight-eds_abstract {
+    @if $article-abstract-full-width {
+        display: none;
+    }
+}
+dd.blacklight-eds_abstract {
+    //@extend %article-panel;
+    @if $article-abstract-full-width {
+        @extend %article-full-width;
+    }
+}
+
+// Embedded full text.
+dt.blacklight-eds_html_fulltext {
+    @if $article-fulltext-full-width {
+        display: none;
+    }
+    @else {
+        visibility: hidden;
+    }
+}
+dd.blacklight-eds_html_fulltext {
+
+    > .anchor {
+        margin-top:    0;
+        margin-bottom: 0.75em;
+    }
+
+    > .scroller {
+
+        @extend %article-panel;
+        @if $article-fulltext-full-width {
+            @extend %article-full-width;
+        }
+
+        max-height: 97vh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        resize:     both;
+
+        h1 {
+            margin-top: 0;
+            font-size:  x-large;
+        }
+
+        h2 {
+            font-size:  large;
+        }
+    }
+}
+
+//=============================================================================
+// Articles - EBSCO XML fields
+//=============================================================================
+
+// For "Published in" (:eds_composed_title) on search results entries.
+searchLink {
+    font-style: italic;
+}

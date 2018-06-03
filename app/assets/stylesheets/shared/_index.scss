@@ -1,0 +1,75 @@
+// app/assets/stylesheets/shared/_index.scss
+
+//=============================================================================
+// Common definitions for search result (index) pages.
+//=============================================================================
+
+#sortAndPerPage {
+    .tools.btn-group {
+        .rss-link,
+        .atom-link,
+        .print-view-link {
+            margin-left: 0.5em;
+            > * {
+                font-size:   150%;
+                line-height: 150%;
+            }
+        }
+    }
+}
+
+// Facet panels
+.panel-title a {
+    text-decoration: none;
+}
+
+// Document list
+#documents .document {
+
+    .document-title-heading {
+
+        display:   flex;
+        font-size: larger;
+
+        .document-counter {
+            display:        inline-block;
+            margin-right:   0.25em;
+            vertical-align: top;
+        }
+
+        a {
+            display: inline-block;
+        }
+    }
+
+    // In search results, scale the thumbnail to limit its height.
+    .document-thumbnail {
+
+        width:      180px;
+        max-height: 120px;
+        object-fit: contain;
+
+        a {
+            max-height: inherit;
+            max-width:  inherit;
+            object-fit: inherit;
+
+            img {
+                float:      right;
+                max-height: inherit;
+                border:     1px solid lightgray;
+            }
+        }
+    }
+
+    &.blacklight-coin {
+        .document-thumbnail {
+            a {
+                img {
+                    border:        none;
+                    border-radius: 50%;
+                }
+            }
+        }
+    }
+}

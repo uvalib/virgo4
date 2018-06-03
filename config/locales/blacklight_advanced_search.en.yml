@@ -1,0 +1,28 @@
+# config/locales/blacklight_advanced_search.en.yml
+
+en:
+
+  blacklight_advanced_search:
+
+    all: 'all'
+    any: 'any'
+
+    op:
+      OR:
+        menu_label:   'any'
+        filter_label: 'any of'
+      AND:
+        menu_label:   'all'
+        filter_label: 'all of'
+
+    form:
+
+      title:            'More Search Options'
+      search_context:   'Within search'
+      query_criteria_heading_html: 'Find items that match %{select_menu} of'
+      limit_criteria_heading_html: '<strong>AND</strong> have these attributes'
+
+      sort_label:       'Sort results by'
+      start_over:       'Clear'                   # was: 'Start over'
+      search_btn:       'Search'
+

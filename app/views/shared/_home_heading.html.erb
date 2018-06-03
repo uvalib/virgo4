@@ -1,0 +1,38 @@
+<%# app/views/shared/_home_heading.html.erb -%>
+<%-
+  # The heading at the top of each lens home page.
+
+  lens    ||= current_lens_key
+  heading ||= t("blacklight.#{lens}.welcome", default: :'blacklight.welcome')
+
+  # A fall-back page name for browser history and browser tabs.
+  unless has_page_title?
+    content_for(:page_title) {
+      t("blacklight.#{lens}.page_title", default: heading)
+    }
+  end
+
+  path       = request.fullpath
+  total_cols = 12
+  head_cols  = 7
+  nav_cols   = total_cols - head_cols
+
+  lens_links = {
+    all:      root_path,
+    catalog:  search_catalog_path,
+    articles: search_articles_path,
+    video:    search_video_path,
+    music:    search_music_path,
+  }.map { |label, url|
+    next unless url
+    at_lens_home = (url == root_path) ? (path == url) : path.start_with?(url)
+    link = link_to(label.to_s.capitalize, url)
+    opt  = at_lens_home ? { class: 'disabled' } : {}
+    content_tag(:li, link, opt)
+  }.compact.join("\n").html_safe
+
+-%>
+<div class="page-header row">
+  <h2 class="col-md-<%= head_cols %> page-heading"><%= heading %></h2>
+  <ul class="nav nav-pills col-md-<%= nav_cols %>"><%= lens_links %></ul>
+</div>

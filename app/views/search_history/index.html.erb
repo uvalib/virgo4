@@ -1,0 +1,94 @@
+<%# app/views/search_history/index.html.erb -%>
+<%-
+  # The "Search History" page renders each document type according to its own
+  # presenter.
+  #
+  # The structure of this template aligns closely with:
+  # @see app/views/bookmarks/index.html.erb
+  # @see app/views/saved_searches/index.html.erb
+
+  searches ||= @searches
+
+  title ||= t('blacklight.search_history.title')
+  width ||= 'col-md-9'
+
+  # Page name for browser history and browser tabs.
+  content_for(:page_title) {
+    t('blacklight.search_history.page_title', default: title)
+  }
+
+  error =
+    if searches.blank?
+      t('blacklight.search_history.no_history')
+    end
+
+  list_title = clear_list_button = delete_label = save_label = nil
+  unless error
+    list_title         = t('blacklight.search_history.recent')
+    clear_list_title   = t('blacklight.search_history.clear.action_title')
+    clear_confirmation = t('blacklight.search_history.clear.action_confirm')
+    clear_list_path    = blacklight.clear_search_history_path
+    clear_list_button  =
+      link_to(
+        clear_list_title,
+        clear_list_path,
+        method: :delete,
+        data:   { confirm: clear_confirmation },
+        class:  'btn btn-danger pull-right'
+      )
+    delete_label = t('blacklight.search_history.forget')
+    save_label   = t('blacklight.search_history.save')
+  end
+-%>
+<div id="content" class="<%= width -%>">
+
+  <h2 class='page-heading'><%= title %></h2>
+
+  <%- if error -%>
+
+    <h3 class='section-heading'><%= error %></h3>
+
+  <%- else -%>
+
+    <%= clear_list_button %>
+    <h3 class='section-heading'><%= list_title %></h3>
+
+    <table class="table table-striped search_history">
+      <%- index  = 0  -%>
+      <%- ctrlrs = {} -%>
+      <%- searches.each do |search| -%>
+        <%- query = search.sorted_query -%>
+        <%- next unless query_has_constraints?(query) -%>
+        <%- type = lens_key_for(query[:controller]) -%>
+        <%- ctrlrs[type] ||= lens_for(type).instance(@response, request) -%>
+        <%- index += 1 -%>
+        <tr id="<%= "document_#{index}" -%>">
+          <td class="search-type">
+            <%= search_type_label(type) %>
+          </td>
+          <td class="query">
+            <%= ctrlrs[type].instance_exec(query) do |q| -%>
+              <%- link_params = search_state.reset(q).to_hash -%>
+              <%- view_context.link_to_previous_search(link_params) -%>
+            <%- end -%>
+          </td>
+          <%- if has_user_authentication_provider? -%>
+            <td class="actions">
+              <%- id = search.id -%>
+              <%- not_saved = !(current_or_guest_user && search.saved?) -%>
+              <%- label = not_saved ? save_label : delete_label -%>
+              <%- path  = blacklight.forget_search_path(id) -%>
+              <%- path  = blacklight.save_search_path(id) if not_saved -%>
+              <%- opt   = { class: 'btn btn-' } -%>
+              <%- opt[:class] += (not_saved ? 'default' : 'danger') -%>
+              <%- opt[:method] = :put if not_saved -%>
+              <%= button_to(label, path, opt) -%>
+            </td>
+          <%- end -%>
+        </tr>
+      <%- end -%>
+    </table>
+
+  <%- end -%>
+
+</div>

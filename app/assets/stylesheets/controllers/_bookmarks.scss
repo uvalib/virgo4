@@ -1,0 +1,16 @@
+// app/assets/stylesheets/controllers/_bookmarks.scss
+
+//=============================================================================
+// Bookmarks page
+//=============================================================================
+
+body.blacklight-bookmarks-index {
+    // Make metadata values wrap so that text does not encroach on the side of
+    // the display with the bookmark controls.
+    .document-metadata {
+        @extend .col-sm-9;
+        @extend .col-lg-10;
+        width: auto;
+        padding-left: 0;
+    }
+}

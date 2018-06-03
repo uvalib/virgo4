@@ -1,0 +1,58 @@
+# config/subnets.yml
+#
+# Local UVA subnets.
+#
+# A web client on one of these subnets is considered "on Grounds".
+#
+# @see https://its.virginia.edu/network/ipspace.html
+# @see https://www.ipaddressguide.com/cidr
+
+# == VPN IP address ranges
+#
+# CIDR             # Network                  | Range start   | Range end
+# ---------------- # ------------------------ | ------------- | ---------------
+- 128.143.0.0/23   # UVA Anywhere             | 128.143.0.1   | 128.143.1.255
+- 172.18.0.0/19    # Joint VPN                | 172.18.0.1    | 172.18.31.255
+- 172.18.32.0/22   # More Secure VPN          | 172.18.32.1   | 172.18.35.255
+
+# == Public IP address ranges
+#
+# CIDR             # Network                  | Range start   | Range end
+# ---------------- # ------------------------ | ------------- | ---------------
+- 128.143.0.0/16   # Academic Open & Health System
+- 137.54.0.0/18    # Internet NAT             | 137.54.0.1    | 137.54.63.255
+- 137.54.64.0/18   # Health System            | 137.54.64.1   | 137.54.172.255
+- 137.54.128.0/17  # More Secure              | 137.54.128.1  | 137.54.255.255
+- 199.111.40.0/21  # Dormitories/NAT          | 199.111.40.1  | 199.111.47.255
+- 199.111.48.0/20  # Dormitories/NAT          | 199.111.48.1  | 199.111.54.255
+- 199.111.160.0/19 # Dormitories/NAT          | 199.111.160.1 | 199.111.191.255
+- 199.111.192.0/18 # Dormitories/NAT          | 199.111.192.1 | 199.111.255.255
+
+# == Private IP address ranges - Internal UVA Access Only
+#
+# CIDR             # Network                  | Range start   | Range end
+# ---------------- # ------------------------ | ------------- | ---------------
+- 10.160.0.0/13    # Registration             | 10.160.0.1    | 10.167.255.255
+- 10.168.0.0/15    # Registration             | 10.168.0.1    | 10.169.255.255
+- 172.16.0.0/16    # Academic Open & Health System
+- 172.19.0.0/16    # Dormitories
+
+# == Private IP address ranges - Internet Access via NAT/Public IP
+#
+#   jefferson               - Wireless Encrypted
+#   cavalier                - Wireless Encrypted
+#   wahoo                   - Wireless Unencrypted
+#   Welcome_to_UVa_Wireless - Wireless Unencrypted
+#
+# CIDR             # Network                  | Range start   | Range end
+# ---------------- # ------------------------ | ------------- | ---------------
+- 10.142.0.0/15    # Guest (Welcome...)       | 10.142.0.1    | 10.143.255.255
+- 10.144.0.0/15    # Guest (Welcome...)       | 10.144.0.1    | 10.145.255.255
+- 172.23.0.0/16    # More Secure (jefferson)
+- 172.25.0.0/16    # Academic (cavalier)
+- 172.26.0.0/18    # Dormitories (cavalier)   | 172.26.0.1    | 172.26.63.255
+- 172.26.128.0/18  # Dormitories (wahoo)      | 172.26.128.1  | 172.26.191.255
+- 172.26.192.0/18  # Dormitories Wired        | 172.26.192.1  | 172.26.255.255
+- 172.27.0.0/16    # Academic (wahoo)
+- 172.28.0.0/16    # Academic Protected
+- 172.29.0.0/16    # Academic Protected

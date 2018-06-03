@@ -1,0 +1,40 @@
+<%# app/views/bookmarks/index.html.erb -%>
+<%-
+  # The "Bookmarks" page renders each document type according to its own
+  # presenter.
+  #
+  # The structure of this template aligns closely with:
+  # @see app/views/saved_searches/index.html.erb
+  # @see app/views/search_history/index.html.erb
+
+  docs = document_list ||= @document_list
+
+  title ||= t('blacklight.bookmarks.title')
+  width ||= 'col-md-12'
+
+  # Page name for browser history and browser tabs.
+  content_for(:page_title) {
+    t('blacklight.bookmarks.page_title', default: title)
+  }
+
+  error =
+    if current_or_guest_user.blank?
+      t('blacklight.bookmarks.need_login')
+    elsif docs.blank?
+      t('blacklight.bookmarks.no_bookmarks')
+    end
+
+  template_opts = { document_list: docs }
+
+-%>
+<div id="content" class="<%= width -%>">
+  <h2 class='page-heading'><%= title %></h2>
+  <%- if error -%>
+    <h3 class='section-heading'><%= error %></h3>
+  <%- else -%>
+    <%= render 'sort_and_per_page' %>
+    <%= render 'tools', template_opts %>
+    <%= render 'document_list', template_opts %>
+    <%= render 'results_pagination' %>
+  <%- end -%>
+</div>

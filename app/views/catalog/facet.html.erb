@@ -1,0 +1,44 @@
+<%# app/views/catalog/facet.html.erb -%>
+<%-
+  # Popup facet selection dialog.
+  #
+  # TODO: If there is a communication error with Solr/EDS/etc then the modal
+  # dialog essentially goes blank.  What would be more desirable would be to
+  # have the contents of div.facet_pagination and div.facet_extended_list
+  # remain unchanged and to show the flash message.  This may require changes
+  # to app/assets/javascripts/blacklight/ajax_modal.js.
+
+  modal_title        = facet_field_label(@facet.key)
+  show_index_buttons = @facet.index_range && @display_facet.index?
+  modal_close_button =
+    button_tag(
+      '&times;'.html_safe,
+      type:           'button',
+      class:          'ajax-modal-close close',
+      'data-dismiss': 'modal',
+      'aria-hidden':  true
+    )
+-%>
+
+<div class="facet_pagination top">
+  <%= render 'facet_pagination' %>
+</div>
+
+<div class="modal-header">
+  <%= modal_close_button %>
+  <h3 class="modal-title"><%= modal_title %></h3>
+  <%= render '/flash_msg', layout: 'shared/flash_messages' %>
+  <%= render 'facet_index_navigation' if show_index_buttons %>
+</div>
+
+<div class="modal-body">
+  <div class="facet_extended_list">
+    <%= render_facet_limit(@display_facet, layout: false) %>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <div class="facet_pagination bottom">
+    <%= render 'facet_pagination' %>
+  </div>
+</div>

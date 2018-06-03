@@ -1,0 +1,27 @@
+<%# app/views/catalog/_document_list.html.erb -%>
+<%-
+  # A list of zero or more documents.
+  #
+  # NOTE: The Blacklight-provided template would require that every "lens" type
+  # have its own _document.html.erb.  This allows 'catalog/_document.html.erb'
+  # to be selected if the lens type has not defined its own partial.
+
+  docs = documents ||= @document_list
+
+  # The caller may provide additional CSS classes via the :css_class option.
+  css_class =
+    css_classes(css_class ||= nil) { |classes|
+      classes << "documents-#{document_index_view_type}"
+    }
+
+  no_results ||= t('blacklight.search.zero_results.title')
+-%>
+<div id="documents" class="<%= css_class %>">
+  <%- if docs.blank? -%>
+    <%= no_results %>
+  <%- else -%>
+    <%- docs.each_with_index do |doc, index| -%>
+      <%= render 'document', document: doc, document_counter: index %>
+    <%- end -%>
+  <%- end -%>
+</div>

@@ -1,0 +1,52 @@
+# config/locales/ebsco_eds.en.yml
+
+en:
+
+  ebsco_eds:
+
+    message:
+      title:    'Restricted to UVA users; please login to see this item.'
+
+    html_fulltext:
+      #title:    h1
+      sbt:      b
+      #jsection: i
+      et:       u
+
+    links:
+      view:     'View'
+      eds:      'Find @ UVA'
+      plink:    'Online via <b>EBSCO Discovery Service</b>'
+      default:  'Link'
+      sign_on:  ' (sign on to view)'
+
+    fulltext_links:
+      pdf:
+        label:  'PDF Full Text'
+        icon:   'PDF Full Text Icon'
+      ebook_pdf:
+        label:  'PDF eBook Full Text'
+        icon:   'PDF eBook Full Text Icon'
+      ebook_epub:
+        label:  'ePub eBook Full Text'
+        icon:   'ePub eBook Full Text Icon'
+      cataloglink:
+        label:  'Link'
+        icon:   'Catalog Link Icon'
+      smartlinks:
+        label:  'Linked Full Text'
+        icon:   'Linked Full Text Icon'
+      customlink_fulltext:
+        label:  'Custom Link'
+        icon:   'Custom Link Icon'
+      html:
+        label:  'Full Text in Browser'
+        icon:   'Full Text in Browser Icon'
+
+    non_fulltext_links:
+      customlink_other:
+        label:  'Custom Link'
+        icon:   'Custom Link Icon'
+
+    bib_publication_date:
+      format:   '%04d-%02d-%02d'

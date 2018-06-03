@@ -1,0 +1,14 @@
+// app/assets/stylesheets/controllers/_advanced_search.scss
+
+@import 'blacklight_advanced_search/advanced_results';
+@import 'blacklight_advanced_search/blacklight_advanced_search_styles.css.scss';
+
+//=============================================================================
+// Advanced Search form
+//=============================================================================
+
+.blacklight-advanced-facet-select {
+    .label-and-count {
+        padding-left: 1.25em;
+    }
+}

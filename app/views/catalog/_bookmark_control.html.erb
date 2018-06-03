@@ -1,0 +1,33 @@
+<%# app/views/catalog/_bookmark_control.html.erb -%>
+<%-
+  # Toggle for adding or removing an entry from bookmarks.
+
+  doc = document ||= @document
+  return unless doc && current_or_guest_user
+
+  id       = doc.id.to_s
+  bookmark = bookmark_record(doc)
+  http     = bookmark ? :delete  : :put
+  action   = bookmark ? 'remove' : 'add'
+  lens     = bookmark&.lens || current_lens_key
+
+  form_path = bookmark_path(doc)
+  form_opt  = {
+    method:             http,
+    class:              'bookmark_toggle',
+    'data-doc-id':      id,
+    'data-present':     t('blacklight.search.bookmarks.present'),
+    'data-absent':      t('blacklight.search.bookmarks.absent'),
+    'data-inprogress':  t('blacklight.search.bookmarks.inprogress')
+  }
+
+  button_label = t("blacklight.bookmarks.#{action}.button")
+  button_opt   = {
+    id:    "bookmark_toggle_#{id.parameterize}",
+    class: "bookmark_#{action} btn btn-default"
+  }
+-%>
+<%= form_tag(form_path, form_opt) do %>
+  <%= hidden_field_tag('lens', lens) %>
+  <%= submit_tag(button_label, button_opt) %>
+<%- end -%>

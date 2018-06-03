@@ -1,0 +1,16 @@
+// app/assets/stylesheets/shared/_print.scss
+
+//=============================================================================
+// Adjustments for print media
+//=============================================================================
+
+// In the actual print rendering, let the printer driver control the margins.
+@media print {
+    html, body {
+        margin:  0;
+        padding: 0;
+    }
+    body > * {
+        width: 100%;
+    }
+}

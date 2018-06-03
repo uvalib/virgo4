@@ -1,0 +1,32 @@
+// app/assets/stylesheets/shared/_history.scss
+
+//=============================================================================
+// Search History table
+//=============================================================================
+
+.search_history {
+
+    .search-type {
+
+        font-size:      100%;
+        vertical-align: text-bottom;
+
+        // Give the lens labels a consistent width.
+        .label {
+            display:   inline-block;
+            width:     90%;
+            min-width: fit-content;
+            max-width: 100%;
+        }
+    }
+
+    // Put some separation between the name and the value.
+    .filterName::after {
+        content: ' ';
+    }
+
+    // Align action buttons under the "Clear" button.
+    .actions {
+        text-align: right;
+    }
+}

@@ -1,0 +1,21 @@
+<%# app/views/shared/_featured.html.erb -%>
+<%-
+  # Lens home "featured" items.
+
+  featured_items ||= nil
+  featured_items = Array.wrap(featured_items).reject(&:blank?)
+  return unless featured_items.present?
+
+  lens    ||= current_lens_key
+  heading ||= t("blacklight.#{lens}.featured_items.title", default: nil)
+  heading ||= t('blacklight.lens.featured_items.title', lens: lens)
+
+-%>
+<div id="featured">
+  <h3 class='section-heading'><%= heading %></h3>
+  <ul>
+    <%- featured_items.each do |item| -%>
+      <li><%= h(item) -%></li>
+    <%- end -%>
+  </ul>
+</div>

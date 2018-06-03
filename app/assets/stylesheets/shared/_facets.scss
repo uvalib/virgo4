@@ -1,0 +1,25 @@
+// app/assets/stylesheets/shared/_facets.scss
+
+//=============================================================================
+// Facet pagination dialog
+//=============================================================================
+
+// To accomodate a centered page number, .pull-right and .pull-left have to be
+// eliminated from the button groups within this element.
+.facet_pagination.bottom {
+
+    display:         flex;
+    justify-content: space-between;
+
+    &:before, &:after { display: none; }
+
+    .current-page {
+        cursor: default;
+    }
+
+    .sort_options {
+        .active {
+            cursor: default;
+        }
+    }
+}

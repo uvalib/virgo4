@@ -1,0 +1,23 @@
+<%# app/views/catalog/_sort_and_per_page.html.erb -%>
+<%-
+  # Controls for pagination, export, and others.
+
+  page_controls       ||= show_pagination?
+  collection_controls ||= true
+  rss                 ||= rss_button
+  atom                ||= nil # atom_button # TODO: ?
+  print               ||= print_view_button
+  export_controls     ||= rss || atom || print
+
+-%>
+<div id="sortAndPerPage" class="clearfix">
+  <%= render partial: 'paginate_compact', object: @response if page_controls %>
+  <%- if export_controls -%>
+    <div class="tools btn-group pull-right">
+      <%= rss %>
+      <%= atom %>
+      <%= print %>
+    </div>
+  <%- end -%>
+  <%= render_results_collection_tools if collection_controls %>
+</div>

@@ -1,0 +1,13 @@
+<%# app/views/catalog/_show_header_default.html.erb -%>
+<%-
+  # Main values displayed at the top of the item details show page content.
+
+  doc = document ||= @document
+
+  title_tag  ||= :h1
+  author_tag ||= :h4
+
+  opt = { title_tag: title_tag, author_tag: author_tag }
+
+-%>
+<%= render_document_heading(doc, opt) %>

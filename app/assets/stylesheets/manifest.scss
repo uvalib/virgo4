@@ -1,0 +1,56 @@
+// app/assets/stylesheets/manifest.scss
+
+//=============================================================================
+// Local Bootstrap defaults
+//=============================================================================
+
+@import 'shared/variables';
+
+//=============================================================================
+// Blacklight styles
+//=============================================================================
+
+@import 'blacklight';
+@import 'blacklight_marc';
+
+//=============================================================================
+// Local definitions
+//=============================================================================
+
+@import 'shared/mixins';
+
+//=============================================================================
+// Local settings - general-purpose
+//=============================================================================
+
+@import 'shared/common';
+@import 'shared/header';
+@import 'shared/footer';
+@import 'shared/modal';
+
+//=============================================================================
+// Local settings - per action for any controller
+//=============================================================================
+
+@import 'shared/index';
+@import 'shared/show';
+@import 'shared/facets';
+@import 'shared/history';
+
+//=============================================================================
+// Local settings - controller-specific
+//=============================================================================
+
+@import 'controllers/catalog';
+@import 'controllers/articles';
+@import 'controllers/bookmarks';
+@import 'controllers/saved_searches';
+@import 'controllers/search_history';
+@import 'controllers/advanced_search';
+
+//=============================================================================
+// Local overrides
+//=============================================================================
+
+@import 'shared/print';
+@import 'shared/debug';
