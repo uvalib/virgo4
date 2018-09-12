@@ -1,11 +1,5 @@
-# config/environments/development.rb
-#
-# frozen_string_literal: true
-# warn_indent:           true
-
 Rails.application.configure do
-
-  # Settings specified here take precedence over those in config/application.rb
+  # Settings specified here will take precedence over those in config/application.rb.
 
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
@@ -19,7 +13,7 @@ Rails.application.configure do
   config.consider_all_requests_local = true
 
   # Enable/disable caching. By default caching is disabled.
-  # Run `rails dev:cache` to toggle caching.
+  # Run rails dev:cache to toggle caching.
   if Rails.root.join('tmp', 'caching-dev.txt').exist?
     config.action_controller.perform_caching = true
 
@@ -33,8 +27,7 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
-  # Store uploaded files on the local file system.
-  # (See config/storage.yml for options.)
+  # Store uploaded files on the local file system (see config/storage.yml for options)
   config.active_storage.service = :local
 
   # Don't care if the mailer can't send.
@@ -62,11 +55,7 @@ Rails.application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
-  # Use an evented file watcher to asynchronously detect changes in source
-  # code, routes, locales, etc. This feature depends on the listen gem.
+  # Use an evented file watcher to asynchronously detect changes in source code,
+  # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
-
-  # Allow Web Console on all internal networks.
-  config.web_console.whitelisted_ips +=
-    ActionDispatch::RemoteIp::TRUSTED_PROXIES
 end

@@ -1,11 +1,5 @@
-# config/environments/test.rb
-#
-# frozen_string_literal: true
-# warn_indent:           true
-
 Rails.application.configure do
-
-  # Settings specified here take precedence over those in config/application.rb
+  # Settings specified here will take precedence over those in config/application.rb.
 
   # The test environment is used exclusively to run your application's
   # test suite. You never need to work with it otherwise. Remember that
@@ -34,7 +28,7 @@ Rails.application.configure do
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
 
-  # Store uploaded files on the local file system in a temporary directory.
+  # Store uploaded files on the local file system in a temporary directory
   config.active_storage.service = :test
 
   config.action_mailer.perform_caching = false

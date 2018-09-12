@@ -10,7 +10,7 @@ ruby '~> 2.5.1'
 # =============================================================================
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.2.0'
+gem 'rails', '~> 5.2'
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
 # Use Puma as the app server
@@ -54,14 +54,13 @@ gem 'tzinfo-data', platforms: %i(mingw mswin x64_mingw jruby)
 # @see https://github.com/ebsco/edsapi-ruby/wiki/Quick-Start
 # =============================================================================
 
-gem 'blacklight', '>= 6.1'
+gem 'blacklight', github: 'projectblacklight/blacklight', tag: 'v7.0.0.rc1'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'jquery-rails'
 gem 'devise'
 gem 'devise-guests', '~> 0.6'
-gem 'blacklight-marc', '~> 6.1'
-gem 'blacklight_advanced_search'
-gem 'unicode'
+gem 'blacklight-marc', '~> 6.2'
+#gem 'blacklight_advanced_search'
 gem 'ebsco-eds'
 
 # =============================================================================
@@ -73,10 +72,6 @@ group :development, :test do
   # console.
   gem 'byebug', platforms: %i(mri mingw x64_mingw)
 
-  # Adds support for Capybara system testing and selenium driver.
-  gem 'capybara', '>= 2.15', '< 4.0'
-  gem 'selenium-webdriver'
-
   # For testing Blacklight with a local Solr instance.
   gem 'solr_wrapper', '>= 0.3'
 end
@@ -85,9 +80,6 @@ group :development do
   # Support RubyMine built-in debugger.
   gem 'ruby-debug-ide'
   gem 'debase'
-
-  # Use Capistrano for deployment
-  # gem 'capistrano-rails'
 
   # Access an interactive console on exception pages or by calling 'console'
   # anywhere in the code.
@@ -101,6 +93,9 @@ group :development do
 end
 
 group :test do
+  # Adds support for Capybara system testing and selenium driver.
+  gem 'capybara', '>= 2.15', '< 4.0'
+  gem 'selenium-webdriver'
   # Easy installation and use of chromedriver to run system tests with Chrome.
   gem 'chromedriver-helper'
 end
