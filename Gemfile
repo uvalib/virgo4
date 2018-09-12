@@ -60,7 +60,7 @@ gem 'jquery-rails'
 gem 'devise'
 gem 'devise-guests', '~> 0.6'
 gem 'blacklight-marc', '~> 6.2'
-#gem 'blacklight_advanced_search'
+gem 'blacklight_advanced_search', github: 'dkinzer/blacklight_advanced_search', branch: 'blacklight-7'
 gem 'ebsco-eds'
 
 # =============================================================================
@@ -99,3 +99,10 @@ group :test do
   # Easy installation and use of chromedriver to run system tests with Chrome.
   gem 'chromedriver-helper'
 end
+
+group :development, :test do
+end
+
+gem 'bootstrap', '~> 4.0'
+gem 'popper_js'
+gem 'twitter-typeahead-rails', '0.11.1.pre.corejavascript'

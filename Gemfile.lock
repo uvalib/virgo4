@@ -1,4 +1,13 @@
 GIT
+  remote: https://github.com/dkinzer/blacklight_advanced_search.git
+  revision: 0304199a417e00aaf347c76c078af71257a98ff3
+  branch: blacklight-7
+  specs:
+    blacklight_advanced_search (6.3.1)
+      blacklight
+      parslet
+
+GIT
   remote: https://github.com/projectblacklight/blacklight.git
   revision: 489b581beba9f1897fe3d9a9abe8fec8b41421c5
   tag: v7.0.0.rc1
@@ -60,6 +69,8 @@ GEM
     archive-zip (0.11.0)
       io-like (~> 0.3.0)
     arel (9.0.0)
+    autoprefixer-rails (9.1.4)
+      execjs
     bcrypt (3.1.12)
     bibtex-ruby (4.4.7)
       latex-decode (~> 0.0)
@@ -73,9 +84,13 @@ GEM
       traject (~> 2.1)
     bootsnap (1.3.2)
       msgpack (~> 1.0)
+    bootstrap (4.1.3)
+      autoprefixer-rails (>= 6.0.3)
+      popper_js (>= 1.12.9, < 2)
+      sass (>= 3.5.2)
     builder (3.2.3)
     byebug (10.0.2)
-    capybara (3.7.1)
+    capybara (3.7.2)
       addressable
       mini_mime (>= 0.1.3)
       nokogiri (~> 1.8)
@@ -207,6 +222,8 @@ GEM
     nokogumbo (1.5.0)
       nokogiri
     orm_adapter (0.5.0)
+    parslet (1.8.2)
+    popper_js (1.14.3)
     public_suffix (3.0.3)
     puma (3.12.0)
     rack (2.0.5)
@@ -306,9 +323,13 @@ GEM
     turbolinks (5.2.0)
       turbolinks-source (~> 5.2)
     turbolinks-source (5.2.0)
+    twitter-typeahead-rails (0.11.1.pre.corejavascript)
+      actionpack (>= 3.1)
+      jquery-rails
+      railties (>= 3.1)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
-    uglifier (4.1.18)
+    uglifier (4.1.19)
       execjs (>= 0.3.0, < 3)
     unf (0.1.4)
       unf_ext
@@ -333,7 +354,9 @@ PLATFORMS
 DEPENDENCIES
   blacklight!
   blacklight-marc (~> 6.2)
+  blacklight_advanced_search!
   bootsnap (>= 1.1.0)
+  bootstrap (~> 4.0)
   byebug
   capybara (>= 2.15, < 4.0)
   chromedriver-helper
@@ -345,6 +368,7 @@ DEPENDENCIES
   jbuilder (~> 2.5)
   jquery-rails
   listen (>= 3.0.5, < 3.2)
+  popper_js
   puma (~> 3.11)
   rails (~> 5.2)
   rsolr (>= 1.0, < 3)
@@ -356,6 +380,7 @@ DEPENDENCIES
   spring-watcher-listen (~> 2.0.0)
   sqlite3
   turbolinks (~> 5)
+  twitter-typeahead-rails (= 0.11.1.pre.corejavascript)
   tzinfo-data
   uglifier (>= 1.3.0)
   web-console (>= 3.3.0)
