@@ -9,13 +9,13 @@ GIT
 
 GIT
   remote: https://github.com/projectblacklight/blacklight.git
-  revision: 489b581beba9f1897fe3d9a9abe8fec8b41421c5
-  tag: v7.0.0.rc1
+  revision: dabb2e75e9ef991b0d0d34b743c4949fcb4d1254
+  branch: master
   specs:
     blacklight (7.0.0.rc1)
       deprecation
       globalid
-      jbuilder
+      jbuilder (~> 2.7)
       kaminari (>= 0.15)
       nokogiri (~> 1.6)
       rails (~> 5.0)

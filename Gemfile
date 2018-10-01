@@ -54,14 +54,16 @@ gem 'tzinfo-data', platforms: %i(mingw mswin x64_mingw jruby)
 # @see https://github.com/ebsco/edsapi-ruby/wiki/Quick-Start
 # =============================================================================
 
-gem 'blacklight', github: 'projectblacklight/blacklight', tag: 'v7.0.0.rc1'
+gem 'blacklight', github: 'projectblacklight/blacklight', branch: :master
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'jquery-rails'
 gem 'devise'
 gem 'devise-guests', '~> 0.6'
-gem 'blacklight-marc', '~> 6.2'
 gem 'blacklight_advanced_search', github: 'dkinzer/blacklight_advanced_search', branch: 'blacklight-7'
 gem 'ebsco-eds'
+
+# incompatible with blacklight 7, also probably not needed
+#gem 'blacklight-marc', '~> 6.2'
 
 # =============================================================================
 # :section: Testing and development
