@@ -16,6 +16,9 @@
 //
 // Required by Blacklight
 //= require jquery
+//= require 'blacklight_advanced_search'
+
+
 //= require popper
 // Twitter Typeahead for autocomplete
 //= require twitter/typeahead
