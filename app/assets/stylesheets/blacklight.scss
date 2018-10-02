@@ -1,5 +1,7 @@
-// app/assets/stylesheets/blacklight.scss
+@import 'bootstrap';
 
 @import 'blacklight/blacklight';
+$padding-xs-horizontal: 1em;
+$nav-link-padding: 2px;
 @import 'blacklight_marc';
-@import 'blacklight_advanced_search';
+

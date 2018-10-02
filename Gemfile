@@ -83,3 +83,10 @@ gem 'rsolr', '>= 1.0', '< 3'
 gem 'devise'
 gem 'devise-guests', '~> 0.6'
 gem 'blacklight-marc', '~> 6.1'
+group :development, :test do
+end
+
+gem 'bootstrap', '~> 4.0'
+gem 'popper_js'
+gem 'twitter-typeahead-rails', '0.11.1.pre.corejavascript'
+gem 'jquery-rails'
