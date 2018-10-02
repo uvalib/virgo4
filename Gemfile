@@ -60,3 +60,26 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+
+# =============================================================================
+# :section: Blacklight with ebsco-eds
+#
+# Via `rails generate blacklight:install --devise --marc --solr_version=latest`
+#
+# @see https://github.com/projectblacklight/blacklight/wiki/Quickstart
+# @see https://github.com/projectblacklight/blacklight_advanced_search
+# @see https://github.com/projectblacklight/blacklight/blob/release-4.7/doc/Blacklight-4.0-release-notes-and-upgrade-guide.md
+# @see https://github.com/ebsco/edsapi-ruby/wiki/Quick-Start
+# =============================================================================
+
+gem 'blacklight', github: 'projectblacklight/blacklight', branch: :master
+
+
+group :development, :test do
+  gem 'solr_wrapper', '>= 0.3'
+end
+
+gem 'rsolr', '>= 1.0', '< 3'
+gem 'devise'
+gem 'devise-guests', '~> 0.6'
+gem 'blacklight-marc', '~> 6.1'
