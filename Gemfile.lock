@@ -1,4 +1,12 @@
 GIT
+  remote: https://github.com/RayLubinsky/blacklight_advanced_search.git
+  revision: 35edfa1ab50f2e1b8b571e8c1f5dd2d725a94747
+  specs:
+    blacklight_advanced_search (6.4.1)
+      blacklight (>= 6.0.1)
+      parslet
+
+GIT
   remote: https://github.com/projectblacklight/blacklight.git
   revision: dabb2e75e9ef991b0d0d34b743c4949fcb4d1254
   branch: master
@@ -171,6 +179,7 @@ GEM
     nokogiri (1.8.4)
       mini_portile2 (~> 2.3.0)
     orm_adapter (0.5.0)
+    parslet (1.8.2)
     popper_js (1.14.3)
     public_suffix (3.0.3)
     puma (3.12.0)
@@ -295,6 +304,7 @@ PLATFORMS
 DEPENDENCIES
   blacklight!
   blacklight-marc (~> 6.1)
+  blacklight_advanced_search (~> 6.4)!
   bootsnap (>= 1.1.0)
   bootstrap (~> 4.0)
   byebug
