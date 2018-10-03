@@ -217,6 +217,10 @@ class CatalogController < ApplicationController
     config.add_show_field 'marc_error_a',             label: 'MARC Errors'
     config.add_show_field 'date_indexed_a',           label: 'Date Indexed'
 
+    # MARC data for Librarian View that has to be in the set of fields acquired
+    # from Solr but is not for display on the show page.
+    config.add_show_field 'fullrecord', label: 'MARC', if: false
+
     # "fielded" search configuration. Used by pulldown among other places.
     # For supported keys in hash, see rdoc for Blacklight::SearchFields
     #
@@ -292,4 +296,23 @@ class CatalogController < ApplicationController
     # default 'mySuggester', uncomment and provide it below
     # config.autocomplete_suggester = 'mySuggester'
   end
+
+  protected
+
+  # NOTE: Added for blacklight-marc
+  #
+  # Retrieve a document, given the doc id.
+  #
+  # @param [String, Array<String>] id
+  # @param [Hash, nil]             extra_controller_params
+  #
+  # @return [Blacklight::Solr::Response, Blacklight::SolrDocument]
+  #
+  # @see Blacklight::SearchService#fetch
+  #
+  def fetch(id, extra_controller_params = nil)
+    extra_controller_params ||= {}
+    search_service.fetch(id, extra_controller_params)
+  end
+
 end
