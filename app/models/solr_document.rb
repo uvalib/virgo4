@@ -1,21 +1,20 @@
 # frozen_string_literal: true
 class SolrDocument
-  include Blacklight::Solr::Document    
-      # The following shows how to setup this blacklight document to display marc documents
-  extension_parameters[:marc_source_field] = :marc_display
-  extension_parameters[:marc_format_type] = :marcxml
+  include Blacklight::Solr::Document
+
+  extension_parameters[:marc_source_field] = :fullrecord
+  extension_parameters[:marc_format_type]  = :marcxml
+
   use_extension( Blacklight::Solr::Document::Marc) do |document|
-    document.key?( :marc_display  )
+    document.key?(extension_parameters[:marc_source_field])
   end
-  
-  field_semantics.merge!(    
-                         :title => "title_display",
-                         :author => "author_display",
-                         :language => "language_facet",
-                         :format => "format"
-                         )
 
-
+  field_semantics.merge!(
+    title:    'title_a',
+    author:   'author_a',
+    language: 'language_a',
+    format:   'format_a'
+  )
 
   # self.unique_key = 'id'
 
@@ -31,4 +30,5 @@ class SolrDocument
   # and Blacklight::Document::SemanticFields#to_semantic_values
   # Recommendation: Use field names from Dublin Core
   use_extension(Blacklight::Document::DublinCore)
+
 end
