@@ -1,6 +1,7 @@
 <%-
   sort_label   ||= t('blacklight_advanced_search.form.sort_label')
   sort_fields  ||= blacklight_config.sort_fields
+  sort_fields = sort_fields.map { |field, _| [sort_field_label(field), field] }
   current_sort ||= current_sort_field&.key
 
   sort_menu      = options_for_select(sort_fields, h(current_sort))
