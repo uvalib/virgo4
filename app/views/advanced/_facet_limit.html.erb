@@ -1,22 +1,19 @@
-<%# app/views/advanced/_facet_limit.html.erb -%>
 <%-
-  display_facet ||= @display_facet
-  field_name    ||= display_facet.name
-
+  field = display_facet.name
 -%>
 <ul class="facet-values list-unstyled blacklight-advanced-facet-select">
   <%- display_facet.items.each do |item| -%>
     <%- value    = item.value -%>
-    <%- check_id = "f_inclusive[#{field_name}][]" -%>
-    <%- checked  = facet_value_checked?(field_name, value) -%>
-    <%- field_id = "f_inclusive_#{field_name}_#{value.parameterize}" -%>
+    <%- check_id = "f_inclusive[#{field}][]" -%>
+    <%- checked  = facet_value_checked?(field, value) -%>
+    <%- field_id = "f_inclusive_#{field}_#{value.parameterize}" -%>
     <li>
       <span class="facet-checkbox">
         <%= check_box_tag(check_id, value.to_sym, checked, id: field_id) %>
       </span>
       <span class="label-and-count">
         <%= label_tag(field_id) do %>
-          <%= render_facet_value(field_name, item, suppress_link: true) %>
+          <%= render_facet_value(field, item, suppress_link: true) %>
         <%- end -%>
       </span>
     </li>
