@@ -1,8 +1,13 @@
-# NOTE: Added to override the one defined in the Blacklight Advanced Search gem
+# app/controllers/advanced_controller.rb
+#
+# frozen_string_literal: true
+# warn_indent:           true
+
+__loading_begin(__FILE__)
 
 class AdvancedController < BlacklightAdvancedSearch::AdvancedController
-=begin
-  blacklight_config.configure do |config|
+
+  copy_blacklight_config_from(CatalogController).configure do |config|
     # name of Solr request handler, leave unset to use the same one your Blacklight
     # is ordinarily using (recommended if possible)
     # config.advanced_search.qt = 'advanced'
@@ -13,56 +18,95 @@ class AdvancedController < BlacklightAdvancedSearch::AdvancedController
     # by the Solr request handler in use. However, you can use
     # this config option to have it request other facet params than
     # default in the Solr request handler, in desired.
-    config.advanced_search.form_solr_parameters = {}
+    config.advanced_search.form_solr_parameters ||= {}
+    config.advanced_search.form_solr_parameters[:'facet.limit'] = -1
 
-    # name of key in Blacklight URL, no reason to change usually.
-    config.advanced_search.url_key = 'advanced'
+    # Narrow the set of facets to display.
+    ignored_facets = %w(
+      location_f
+      shadowed_location_f
+      author_f
+      subject_f
+      subject_era_f
+      topic_form_genre_f
+      oclc_f
+      barcode_f
+      date_indexed_f
+      example_pivot_field
+      example_query_facet_field
+    )
+    config.facet_fields
+      .delete_if { |field, _| ignored_facets.include?(field) }
+      .each_pair { |_, field_config| field_config.limit = -1 }
 
-    # We are going to completely override the inherited search fields
+    # We are going to completely override the inherited search fields.
     config.search_fields.clear
 
-    config.add_search_field 'author' do |field|
-      field.solr_local_parameters = {
-        :pf => "$pf_author",
-        :qf => "$qf_author"
+    # TODO: "author_qf/author_pf" definitions incorrect in select_edismax.xml
+    config.add_search_field('author') do |field|
+      field.solr_parameters = {
+        qf: '${author_qf}',
+        pf: '${author_pf}'
       }
     end
 
-    config.add_search_field 'title' do |field|
-      field.solr_local_parameters = {
-        :pf => "$pf_title",
-        :qf => "$qf_title"
+    # TODO: "title_qf/title_pf" definitions incorrect in select_edismax.xml
+    config.add_search_field('title') do |field|
+      field.solr_parameters = {
+        qf: '${title_qf}',
+        pf: '${title_pf}'
       }
     end
 
-    config.add_search_field 'subject' do |field|
-      field.solr_local_parameters = {
-        :pf => "$pf_subject",
-        :qf => "$qf_subject"
+    # TODO: "subject_qf/subject_pf" definitions incorrect in select_edismax.xml
+    config.add_search_field('subject') do |field|
+      field.solr_parameters = {
+        qf: '${subject_qf}',
+        pf: '${subject_pf}'
       }
     end
 
-    config.add_search_field 'keyword' do |field|
-      field.solr_local_parameters = {
-        :pf => "$pf_keyword",
-        :qf => "$qf_keyword"
+    # TODO: Should there be "keyword_qf/keyword_pf" in select_edismax.xml?
+    config.add_search_field('all_fields') do |field|
+      field.label = 'Keyword'
+      field.solr_parameters = {
+        qf: '${qf}',
+        pf: '${pf}'
       }
     end
 
-    config.add_search_field 'number' do |field|
-      field.solr_local_parameters = {
-        :pf => "$pf_number",
-        :qf => "$qf_number"
+    # TODO: No "call_number_qf/call_number_pf" in select_edismax.xml
+    config.add_search_field('call_number') do |field|
+      field.solr_parameters = {
+        qf: '${call_number_qf}',
+        pf: '${call_number_pf}'
+      }
+    end
+
+    # TODO: No "isbn_issn_pf" in select_edismax.xml (does that matter?)
+    config.add_search_field('isbn_issn') do |field|
+      field.label = 'ISBN/ISSN'
+      field.solr_parameters = {
+        qf: '${isbn_issn_qf}',
+        pf: '${isbn_issn_pf}'
       }
     end
   end
-=end
+
+  # ===========================================================================
+  # :section: Blacklight 7 transition
+  # ===========================================================================
 
   protected
 
-  # Created to override the method defined in Blacklight Advanced Search.
+  # get_advanced_search_facets
   #
-  # @see BlacklightAdvancedSearch::AdvancedController
+  # @return [Blacklight::Solr::Response]
+  #
+  # @see BlacklightAdvancedSearch::AdvancedController#get_advanced_search_facets
+  #
+  # NOTE: Added for blacklight_advanced_search
+  # TODO: Re-evaluate after the gem is compatible with Blacklight 7
   #
   def get_advanced_search_facets
     response, _ =
@@ -75,3 +119,5 @@ class AdvancedController < BlacklightAdvancedSearch::AdvancedController
   end
 
 end
+
+__loading_end(__FILE__)

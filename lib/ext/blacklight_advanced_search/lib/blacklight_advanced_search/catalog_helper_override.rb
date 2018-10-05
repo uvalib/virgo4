@@ -21,7 +21,8 @@ override BlacklightAdvancedSearch::CatalogHelperOverride do
   def remove_advanced_facet_param(field, value, my_params = nil)
     field = field.to_sym
     my_params ||= params
-    result = self.search_state_class.new(my_params, blacklight_config)
+    #result = Blacklight::SearchStateExt.new(my_params, blacklight_config).to_h
+    result = Blacklight::SearchState.new(my_params, blacklight_config)
     result = result.to_hash.deep_symbolize_keys
     if result.dig(:f_inclusive, field)&.include?(value)
       result[:f_inclusive] = result[:f_inclusive].dup

@@ -1,3 +1,8 @@
+# config/environments/development.rb
+#
+# frozen_string_literal: true
+# warn_indent:           true
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -58,4 +63,8 @@ Rails.application.configure do
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+
+  # Allow Web Console on all internal networks.
+  config.web_console.whitelisted_ips +=
+    ActionDispatch::RemoteIp::TRUSTED_PROXIES
 end

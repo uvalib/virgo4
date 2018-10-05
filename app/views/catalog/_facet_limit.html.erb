@@ -12,7 +12,7 @@
     <%- t_opt = { scope: 'blacklight.search.facets', default: :more_html } -%>
     <%- label = t("more_#{name}_html", t_opt) -%>
     <%- path  = search_facet_path(id: facet_field.key) -%>
-    <li class="more-facets">
+    <li class="more_facets">
       <%= link_to(label, path, data: { blacklight_modal: 'trigger' }) %>
     </li>
   <%- end -%>
