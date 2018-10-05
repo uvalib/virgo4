@@ -78,10 +78,8 @@ if TRACE_LOADING
   $stderr.puts("TRACE_LOADING = #{TRACE_LOADING.inspect}")
 
   # Indentation for #__loading_level.
-  @load_level = 0
-
-  # For checking that each module is entered and exited exactly once.
-  @load_table = {}
+  # (This file's invocation will increment the value to zero.)
+  @load_level = -1
 
   # Loading level and indentation.
   #
@@ -119,14 +117,8 @@ if TRACE_LOADING
   # Place as the first non-comment line of a Ruby source file.
   #
   def __loading_begin(file)
-    level, still_open = @load_table[file]
-    warning = [nil]
-    warning << "REPEATED - last at level #{level}" if level
-    warning << 'UNCLOSED' if still_open
-    warning = warning.join(' <<<<<<<<<< ')
     @load_level += 1
-    @load_table[file] = [@load_level, true]
-    $stderr.puts("====-> #{__loading_level}#{file}#{warning}")
+    $stderr.puts("====-> #{__loading_level}#{file}")
   end
 
   # Display console output to indicate the end of a file that is being loaded.
@@ -139,16 +131,8 @@ if TRACE_LOADING
   # Place as the last non-comment line of a Ruby source file.
   #
   def __loading_end(file)
-    expected, still_open = @load_table[file]
-    unbalanced = (@load_level != expected)
-    warning = [nil]
-    warning << "UNBALANCED - expected level #{expected}" if unbalanced
-    warning << 'ALREADY CLOSED' unless still_open
-    warning = warning.join(' <<<<<<<<<< ')
-    $stderr.puts("<-==== #{__loading_level}#{file}#{warning}")
-    @load_table[file] = [@load_level, !still_open]
+    $stderr.puts("<-==== #{__loading_level}#{file}")
     @load_level -= 1
-    @load_table.clear if @load_level.zero?
   end
 
 else

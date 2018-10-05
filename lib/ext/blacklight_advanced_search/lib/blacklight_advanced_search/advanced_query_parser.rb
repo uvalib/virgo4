@@ -9,51 +9,31 @@ require 'blacklight_advanced_search/advanced_query_parser'
 
 override BlacklightAdvancedSearch::QueryParser do
 
-  # ===========================================================================
-  # :section: BlacklightAdvancedSearch::QueryParser overrides
-  # ===========================================================================
-
-  public
-
-  # Initialize a new instance
-  #
-  # @param [Hash]                      params
-  # @param [Blacklight::Configuration] config
-  #
-  def initialize(params, config)
-    @params = Blacklight::Lens::SearchState.new(params, config).to_h
-    @config = config
-  end
-
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
-  # Gives a mapping of all filters that behave as exclusive ("and"-ed)
-  # selections, including singleton inclusive facet selections.
+=begin
+  # Extracts advanced-type filters from query params, including singleton
+  # normal filters.
   #
   # @return [Hash{Symbol=>Array<String>}]
   #
-  # Compare with:
+  # This method overrides:
   # @see BlacklightAdvancedSearch::QueryParser#filters
   #
-  def exclusive_filters
-    @exclusive_filters ||=
+  def filters
+    @filters ||=
       {}.tap do |result|
-        # First any normal (AND'ed) facet selections.
-        (@params[:f] || {}).each_pair do |field, value_array|
+        # Include advanced (OR'd) facet selections.
+        (@params[:f_inclusive] || {}).each_pair do |field, value_array|
           result[field] = value_array.dup
         end
-        # Next any singleton advanced (OR'ed) facet selections.
-        (@params[:f_inclusive] || {}).each_pair do |field, value_array|
-          next unless value_array.size == 1
-          result[field] ||= []
-          result[field] << value_array.first
+        # Include any normal (AND'ed) facet selections for facets that do not
+        # also have an advanced (OR'd) set of choices and that do not have
+        # multiple selections (which are, by definition, AND'ed together).
+        (@params[:f] || {}).each_pair do |field, value_array|
+          result[field] ||= value_array.dup if value_array.size == 1
         end
       end
   end
+=end
 
 end
 

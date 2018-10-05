@@ -1,11 +1,16 @@
+# app/controllers/catalog_controller.rb
+#
 # frozen_string_literal: true
+# warn_indent:           true
+
+__loading_begin(__FILE__)
+
 class CatalogController < ApplicationController
-  include BlacklightAdvancedSearch::Controller
 
   include Blacklight::Catalog
   include Blacklight::DefaultComponentConfiguration
   include Blacklight::Marc::Catalog
-
+  include BlacklightAdvancedSearch::Controller
 
   configure_blacklight do |config|
     # default advanced config values
@@ -13,9 +18,7 @@ class CatalogController < ApplicationController
     # config.advanced_search[:qt] ||= 'advanced'
     config.advanced_search[:url_key] ||= 'advanced'
     config.advanced_search[:query_parser] ||= 'dismax'
-    config.advanced_search[:form_solr_parameters] ||= {
-      'facet.limit': -1
-    }
+    config.advanced_search[:form_solr_parameters] ||= {}
 
     ## Class for sending and receiving requests from a search index
     # config.repository_class = Blacklight::Solr::Repository
@@ -87,19 +90,7 @@ class CatalogController < ApplicationController
     #  (useful when user clicks "more" on a large facet and wants to navigate alphabetically across a large set of results)
     # :index_range can be an array or range of prefixes that will be used to create the navigation (note: It is case sensitive when searching values)
 
-=begin
-    config.add_facet_field 'format', label: 'Format'
-    config.add_facet_field 'pub_date_ssim', label: 'Publication Year', single: true
-    config.add_facet_field 'subject_ssim', label: 'Topic', limit: 20, index_range: 'A'..'Z'
-    config.add_facet_field 'language_ssim', label: 'Language', limit: true
-    config.add_facet_field 'lc_1letter_ssim', label: 'Call Number'
-    config.add_facet_field 'subject_geo_ssim', label: 'Region'
-    config.add_facet_field 'subject_era_ssim', label: 'Era'
-=end
     config.add_facet_field 'library_f',                 label: 'Library',                             index_range: 'A'..'Z'
-    config.add_facet_field 'location_f',                label: 'Current Location',                    index_range: 'A'..'Z',  show: false
-    config.add_facet_field 'location2_f',               label: 'Location',                limit: 10,  index_range: 'A'..'Z'
-    config.add_facet_field 'shadowed_location_f',       label: 'Shadowing',                                                   show: false
     config.add_facet_field 'format_f',                  label: 'Format',                  limit: 10
     config.add_facet_field 'call_number_broad_f',       label: 'Call Number',                         index_range: 'A'..'Z'
     config.add_facet_field 'call_number_narrow_f',      label: 'Call Number Range',       limit: 10,  index_range: 'A'..'Z'
@@ -112,10 +103,20 @@ class CatalogController < ApplicationController
     config.add_facet_field 'composition_era_f',         label: 'Musical Composition Era', limit: 10
     config.add_facet_field 'instrument_f',              label: 'Musical Instrument',      limit: 10
     config.add_facet_field 'music_composition_form_f',  label: 'Musical Composition',     limit: 10
-    config.add_facet_field 'oclc_f',                    label: 'OCLC',                    limit: 10,                          show: false
-    config.add_facet_field 'barcode_f',                 label: 'Barcode',                 limit: 10,                          show: false
-    config.add_facet_field 'date_indexed_f',            label: 'Date Indexed',            limit: 10,                          show: false
     config.add_facet_field 'source_f',                  label: 'Source',                  limit: 10
+    config.add_facet_field 'location2_f',               label: 'Shelf Location',          limit: 10,  index_range: 'A'..'Z'
+
+    # === Unused facets
+    # config.add_facet_field 'author_director_f',       label: 'Director',
+    # config.add_facet_field 'barcode_f',               label: 'Barcode',                 limit: 10
+    config.add_facet_field 'date_first_indexed_facet',  label: 'Date First Indexed',      limit: 10
+    # config.add_facet_field 'date_indexed_f',          label: 'Date Indexed',            limit: 10
+    config.add_facet_field 'date_received_facet',       label: 'Date Received',           limit: 10
+    config.add_facet_field 'fund_code_facet',           label: 'Fund Code',               limit: 10
+    # config.add_facet_field 'issn_f',                  label: 'ISSN',                    limit: 10
+    # config.add_facet_field 'location_f',              label: 'Location',                            index_range: 'A'..'Z'
+    # config.add_facet_field 'oclc_f',                  label: 'OCLC',                    limit: 10
+    # config.add_facet_field 'shadowed_location_f',     label: 'Shadowing'
 
     config.add_facet_field 'example_pivot_field', label: 'Pivot Field', pivot: %w(format_f language_f)
 
@@ -132,48 +133,25 @@ class CatalogController < ApplicationController
 
     # solr fields to be displayed in the index (search results) view
     #   The ordering of the field names is the order of the display
-=begin
-    config.add_index_field 'title_tsim', label: 'Title'
-    config.add_index_field 'title_vern_ssim', label: 'Title'
-    config.add_index_field 'author_tsim', label: 'Author'
-    config.add_index_field 'author_vern_ssim', label: 'Author'
-    config.add_index_field 'format', label: 'Format'
-    config.add_index_field 'language_ssim', label: 'Language'
-    config.add_index_field 'published_ssim', label: 'Published'
-    config.add_index_field 'published_vern_ssim', label: 'Published'
-    config.add_index_field 'lc_callnum_ssim', label: 'Call number'
-=end
     #config.add_index_field 'title_a',      label: 'Title'
     #config.add_index_field 'title_vern_a', label: 'Title'
     config.add_index_field 'author_a',      label: 'Author'
     config.add_index_field 'author_vern_a', label: 'Author'
     config.add_index_field 'format_a',      label: 'Format'
-    config.add_index_field 'language_a',    label: 'Language'
     config.add_index_field 'call_number_a', label: 'Call Number'
+    config.add_index_field 'language_a',    label: 'Language'
     config.add_index_field 'library_a',     label: 'Library'
     config.add_index_field 'location_a',    label: 'Location'
-    config.add_index_field 'score',         label: 'Score'
+    # config.add_index_field 'score',       label: 'Score' # TODO: ?
 
     # solr fields to be displayed in the show (single result) view
     #   The ordering of the field names is the order of the display
-=begin
-    config.add_show_field 'title_tsim', label: 'Title'
-    config.add_show_field 'title_vern_ssim', label: 'Title'
-    config.add_show_field 'subtitle_tsim', label: 'Subtitle'
-    config.add_show_field 'subtitle_vern_ssim', label: 'Subtitle'
-    config.add_show_field 'author_tsim', label: 'Author'
-    config.add_show_field 'author_vern_ssim', label: 'Author'
-    config.add_show_field 'format', label: 'Format'
-    config.add_show_field 'url_fulltext_ssim', label: 'URL'
-    config.add_show_field 'url_suppl_ssim', label: 'More Information'
-    config.add_show_field 'language_ssim', label: 'Language'
-    config.add_show_field 'published_ssim', label: 'Published'
-    config.add_show_field 'published_vern_ssim', label: 'Published'
-    config.add_show_field 'lc_callnum_ssim', label: 'Call number'
-    config.add_show_field 'isbn_ssim', label: 'ISBN'
-=end
+    config.add_show_field 'subtitle_a',               label: 'Subtitle'
     config.add_show_field 'author_a',                 label: 'Author'
     config.add_show_field 'author_vern_a',            label: 'Author'
+    config.add_show_field 'author_added_entry_a',     label: 'Creator'
+    config.add_show_field 'author_director_a',        label: 'Director'
+    config.add_show_field 'video_director_a',         label: 'Director'
     config.add_show_field 'format_a',                 label: 'Format'
     config.add_show_field 'title_vern_a',             label: 'Title'
     config.add_show_field 'title_uniform_a',          label: 'Uniform Title'
@@ -181,10 +159,11 @@ class CatalogController < ApplicationController
     config.add_show_field 'title_added_entry_a',      label: 'Additional Title'
     config.add_show_field 'title_alternate_a',        label: 'Alternate Title'
     config.add_show_field 'published_date',           label: 'Publication Date'
+    config.add_show_field 'date_bulk_coverage_a',     label: 'Date(s)'
     config.add_show_field 'composition_era_a',        label: 'Musical Composition Era'
+    config.add_show_field 'form_a',                   label: 'Form'
     config.add_show_field 'instrument_a',             label: 'Musical Instrument'
-    #config.add_show_field 'instrument_raw_a',        label: 'Instrument (raw)'
-    config.add_show_field 'isbn_isbn_a',              label: 'ISBN'
+    # config.add_show_field 'instrument_raw_a',       label: 'Instrument (raw)'
     config.add_show_field 'journal_title_a',          label: 'Journal'
     config.add_show_field 'journal_addnl_title_a',    label: 'Journal Title'
     config.add_show_field 'language_a',               label: 'Language'
@@ -192,11 +171,16 @@ class CatalogController < ApplicationController
     config.add_show_field 'call_number_a',            label: 'Call Number'
     config.add_show_field 'call_number_broad_a',      label: 'Call Number Section'
     config.add_show_field 'call_number_narrow_a',     label: 'Call Number Range'
-    config.add_show_field 'library_a',                label: 'Library'
-    config.add_show_field 'location_a',               label: 'Current Location'
-    config.add_show_field 'location2_a',              label: 'Location'
-    config.add_show_field 'shadowed_location_a',      label: 'Shadowing'
     config.add_show_field 'music_composition_form_a', label: 'Musical Composition'
+    config.add_show_field 'video_genre_a',            label: 'Genre'
+    config.add_show_field 'video_rating_a',           label: 'Rating'
+    config.add_show_field 'video_run_time_a',         label: 'Running Time'
+    config.add_show_field 'video_target_audience_a',  label: 'MPAA Rating'
+    config.add_show_field 'release_a'
+    config.add_show_field 'isbn_a',                   label: 'ISBN'
+    config.add_show_field 'isbn_isbn_a'
+    config.add_show_field 'issn_a',                   label: 'ISSN'
+    config.add_show_field 'lccn_a',                   label: 'LCCN'
     config.add_show_field 'oclc_t',                   label: 'OCLC'
     config.add_show_field 'region_a',                 label: 'Region'
     config.add_show_field 'subject_a',                label: 'Subject'
@@ -207,11 +191,15 @@ class CatalogController < ApplicationController
     config.add_show_field 'local_notes_a',            label: 'Local Notes'
     config.add_show_field 'url_a',                    label: 'Online Version'
     config.add_show_field 'url_supp_a',               label: 'Related Resource'
+    config.add_show_field 'library_a',                label: 'Library'
+    config.add_show_field 'location_a',               label: 'Location'
+    config.add_show_field 'location2_a',              label: 'Shelf Location'
     config.add_show_field 'pda_catkey_a'
     config.add_show_field 'pda_coutts_library_a'
     config.add_show_field 'pda_isbn_a'
-    config.add_show_field 'summary_holdings_a',       label: 'Holdings'
     config.add_show_field 'barcode_e',                label: 'Barcode'
+    config.add_show_field 'summary_holdings_a',       label: 'Holdings'
+    config.add_show_field 'shadowed_location_a',      label: 'Shadowing'
     config.add_show_field 'shelfkey'
     config.add_show_field 'reverse_shelfkey'
     config.add_show_field 'marc_error_a',             label: 'MARC Errors'
@@ -279,10 +267,28 @@ class CatalogController < ApplicationController
     # label in pulldown is followed by the name of the SOLR field to sort by and
     # whether the sort is ascending or descending (it must be asc or desc
     # except in the relevancy case).
-    config.add_sort_field 'score desc, published_date desc, title_sort asc', label: 'Relevance'
-    config.add_sort_field 'published_date desc, title_sort asc',             label: 'Date'
-    config.add_sort_field 'author_sort asc, title_sort asc',                 label: 'Author'
-    config.add_sort_field 'title_sort asc, published_date desc',             label: 'Title'
+    BY_NEWEST          = 'published_date desc'
+    BY_OLDEST          = 'published_date asc'
+    BY_AUTHOR          = 'author_sort asc'
+    BY_AUTHOR_REV      = 'author_sort desc'
+    BY_TITLE           = 'title_sort asc'
+    BY_TITLE_REV       = 'title_sort desc'
+    BY_CALL_NUMBER     = 'call_number_sort asc'
+    BY_CALL_NUMBER_REV = 'call_number_sort desc'
+    sort_menu = {
+      'Relevance'         => ['score desc',       BY_NEWEST, BY_TITLE],
+      'Date'              => [BY_NEWEST,          BY_TITLE],
+      'Date (rev)'        => [BY_OLDEST,          BY_TITLE],
+      'Author'            => [BY_AUTHOR,          BY_TITLE],
+      'Author (rev)'      => [BY_AUTHOR_REV,      BY_TITLE],
+      'Title'             => [BY_TITLE,           BY_NEWEST],
+      'Title (rev)'       => [BY_TITLE_REV,       BY_NEWEST],
+      'Call Number'       => [BY_CALL_NUMBER,     BY_NEWEST],
+      'Call Number (rev)' => [BY_CALL_NUMBER_REV, BY_NEWEST]
+    }
+    sort_menu.each_pair do |label, order|
+      config.add_sort_field order.join(', '), label: label
+    end
 
     # If there are more than this many search results, no spelling ("did you
     # mean") suggestion is offered.
@@ -297,22 +303,29 @@ class CatalogController < ApplicationController
     # config.autocomplete_suggester = 'mySuggester'
   end
 
+  # ===========================================================================
+  # :section: Blacklight 7 transition
+  # ===========================================================================
+
   protected
 
-  # NOTE: Added for blacklight-marc
-  #
   # Retrieve a document, given the doc id.
   #
   # @param [String, Array<String>] id
-  # @param [Hash, nil]             extra_controller_params
+  # @param [Hash, nil]             extra_params
   #
   # @return [Blacklight::Solr::Response, Blacklight::SolrDocument]
   #
   # @see Blacklight::SearchService#fetch
   #
-  def fetch(id, extra_controller_params = nil)
-    extra_controller_params ||= {}
-    search_service.fetch(id, extra_controller_params)
+  # NOTE: Added for blacklight-marc
+  # TODO: Re-evaluate after the gem is compatible with Blacklight 7
+  #
+  def fetch(id, extra_params = nil)
+    extra_params ||= {}
+    search_service.fetch(id, extra_params)
   end
 
 end
+
+__loading_end(__FILE__)

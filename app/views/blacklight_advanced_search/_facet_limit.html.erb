@@ -1,30 +1,27 @@
 <%# app/views/blacklight_advanced_search/_facet_limit.html.erb -%>
 <%-
-  facet = display_facet ||= nil
-  return unless facet.present?
-
-  field    = facet.name
-  partial  = advanced_search_facet_partial_name(facet)
+  field    = display_facet.name
+  partial  = advanced_search_facet_partial_name(display_facet)
   advanced = (params[:controller].to_s == 'advanced')
   if advanced
     partial = 'advanced/facet_limit' if partial == 'catalog/facet_limit'
     remove_path =
       proc { |value|
-        path_params = remove_advanced_facet_param(field, value, params)
-        advanced_search_path(path_params)
+        p = remove_advanced_facet_param(field, value, params)
+        blacklight_advanced_search_engine.advanced_search_path(p)
       }
   else
     partial = 'catalog/facet_limit' if partial == 'advanced/facet_limit'
     remove_path =
       proc { |value|
-        path_params = remove_advanced_facet_param(field, value, params)
-        search_catalog_path(path_params)
+        p = remove_advanced_facet_param(field, value, params)
+        search_catalog_path(p)
       }
   end
-
+  todo = true # TODO: ???
 -%>
 <div class="advanced_facet_limit">
-  <%- unless advanced -%>
+  <%- unless todo || advanced -%>
     <div class="inclusive_or well">
       <h4>Any of:</h4>
       <ul class="list-unstyled facet-values">
@@ -40,5 +37,5 @@
       </ul>
     </div>
   <%- end -%>
-  <%= render_facet_limit(facet, partial: partial, layout: nil) %>
+  <%= render_facet_limit(display_facet, layout: nil, partial: partial) %>
 </div>

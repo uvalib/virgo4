@@ -5,9 +5,7 @@
 #
 # This file is loaded from config/initializers/_extensions.rb.
 
-require '_trace' # Loader debugging.
-
-__loading_begin(__FILE__)
+require_relative '_trace' # Loader debugging.
 
 # =============================================================================
 # Constants
@@ -45,7 +43,7 @@ if IMPLEMENT_OVERRIDES
   #
   # @param [Class] mod                The class or module to override
   #
-  # @yield []
+  # @yield
   #
   # @return [void]
   #
@@ -81,6 +79,25 @@ end
 # Require all modules from the "lib/ext" directory
 # =============================================================================
 
-require_files(__FILE__, 'ext/*/ext.rb')
+__loading_begin(__FILE__)
+
+_LIB_EXT_LOADS ||=
+  begin
+    libext = File.join(File.dirname(__FILE__), File.basename(__FILE__, '.rb'))
+
+    # Kernel definition overrides.
+    Dir[File.join(libext, '*.rb')].each { |path| require(path) }
+
+    # Overrides must be brought in so that dependent classes/modules are
+    # overridden after overrides of any classes/modules on which they depend:
+    # - 'ext/blacklight' comes before other gem overrides
+    # - Within a gem override, 'ext/GEM/lib' comes before 'ext/GEM/app'
+    # - Within 'ext/GEM/app', 'helpers' comes before 'controllers'
+    # For the moment, these can be satisfied by requiring the paths in reverse
+    # order of full path length.
+    Dir[File.join(libext, '**', '*.rb')]
+      .sort_by { |path| path.size }
+      .each { |path| require(path) }
+  end
 
 __loading_end(__FILE__)
