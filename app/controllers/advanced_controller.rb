@@ -5,9 +5,16 @@
 
 __loading_begin(__FILE__)
 
+# AdvancedController
+#
+# @see BlacklightAdvancedSearch::AdvancedController
+#
 class AdvancedController < BlacklightAdvancedSearch::AdvancedController
 
-  copy_blacklight_config_from(CatalogController).configure do |config|
+  include AdvancedSearchConcern
+  include LensConcern
+
+  blacklight_config.configure do |config|
     # name of Solr request handler, leave unset to use the same one your Blacklight
     # is ordinarily using (recommended if possible)
     # config.advanced_search.qt = 'advanced'
@@ -42,19 +49,19 @@ class AdvancedController < BlacklightAdvancedSearch::AdvancedController
     # We are going to completely override the inherited search fields.
     config.search_fields.clear
 
-    # TODO: "author_qf/author_pf" definitions incorrect in select_edismax.xml
-    config.add_search_field('author') do |field|
-      field.solr_parameters = {
-        qf: '${author_qf}',
-        pf: '${author_pf}'
-      }
-    end
-
     # TODO: "title_qf/title_pf" definitions incorrect in select_edismax.xml
     config.add_search_field('title') do |field|
       field.solr_parameters = {
         qf: '${title_qf}',
         pf: '${title_pf}'
+      }
+    end
+
+    # TODO: "author_qf/author_pf" definitions incorrect in select_edismax.xml
+    config.add_search_field('author') do |field|
+      field.solr_parameters = {
+        qf: '${author_qf}',
+        pf: '${author_pf}'
       }
     end
 
@@ -91,31 +98,6 @@ class AdvancedController < BlacklightAdvancedSearch::AdvancedController
         pf: '${isbn_issn_pf}'
       }
     end
-  end
-
-  # ===========================================================================
-  # :section: Blacklight 7 transition
-  # ===========================================================================
-
-  protected
-
-  # get_advanced_search_facets
-  #
-  # @return [Blacklight::Solr::Response]
-  #
-  # @see BlacklightAdvancedSearch::AdvancedController#get_advanced_search_facets
-  #
-  # NOTE: Added for blacklight_advanced_search
-  # TODO: Re-evaluate after the gem is compatible with Blacklight 7
-  #
-  def get_advanced_search_facets
-    response, _ =
-      search_service.search_results do |search_builder|
-        search_builder
-          .except(:add_advanced_search_to_solr)
-          .append(:facets_for_advanced_search_form)
-      end
-    response
   end
 
 end
