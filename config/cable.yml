@@ -1,3 +1,5 @@
+# config/cable.yml
+
 development:
   adapter: async
 
@@ -7,4 +9,4 @@ test:
 production:
   adapter: redis
   url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
-  channel_prefix: bl7_production
+  channel_prefix: virgo_production

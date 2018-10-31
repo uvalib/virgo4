@@ -2,6 +2,7 @@
 <%-
   display_facet ||= @display_facet
   field_name    ||= display_facet.name
+
 -%>
 <ul class="facet-values list-unstyled blacklight-advanced-facet-select">
   <%- display_facet.items.each do |item| -%>

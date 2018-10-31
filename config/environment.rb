@@ -1,3 +1,8 @@
+# config/environment.rb
+#
+# frozen_string_literal: true
+# warn_indent:           true
+
 # Load the Rails application.
 require_relative 'application'
 
