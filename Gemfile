@@ -3,14 +3,14 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '~> 2.5.1'
+ruby '2.5.1'
 
 # =============================================================================
 # :section: Rails
 # =============================================================================
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.2.0'
+gem 'rails', '~> 5.2.1'
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
 # Use Puma as the app server
@@ -44,6 +44,37 @@ gem 'bootsnap', '>= 1.1.0', require: false
 gem 'tzinfo-data', platforms: %i(mingw mswin x64_mingw jruby)
 
 # =============================================================================
+# :section: Testing and development
+# =============================================================================
+
+group :development, :test do
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger
+  # console.
+  gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  # Code coverage
+  gem 'simplecov', require: false
+end
+
+group :development do
+  # Access an interactive console on exception pages or by calling 'console' anywhere in the code.
+  gem 'web-console', '>= 3.3.0'
+  gem 'listen', '>= 3.0.5', '< 3.2'
+  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
+  gem 'spring'
+  gem 'spring-watcher-listen', '~> 2.0.0'
+  # Use Capistrano for deployment
+  # gem 'capistrano-rails'
+end
+
+group :test do
+  # Adds support for Capybara system testing and selenium driver
+  gem 'capybara', '>= 2.15'
+  gem 'selenium-webdriver'
+  # Easy installation and use of chromedriver to run system tests with Chrome
+  gem 'chromedriver-helper'
+end
+
+# =============================================================================
 # :section: Blacklight with ebsco-eds
 #
 # Via `rails generate blacklight:install --devise --marc --solr_version=latest`
@@ -54,53 +85,31 @@ gem 'tzinfo-data', platforms: %i(mingw mswin x64_mingw jruby)
 # @see https://github.com/ebsco/edsapi-ruby/wiki/Quick-Start
 # =============================================================================
 
-gem 'blacklight', '>= 6.1'
+# Blacklight and supporting gems.
+gem 'blacklight', github: 'projectblacklight/blacklight', branch: :master
 gem 'rsolr', '>= 1.0', '< 3'
+gem 'bootstrap', '~> 4.0'
 gem 'jquery-rails'
+gem 'popper_js'
+gem 'twitter-typeahead-rails', '0.11.1.pre.corejavascript'
 gem 'devise'
 gem 'devise-guests', '~> 0.6'
+
+# Blacklight Marc gem.
 gem 'blacklight-marc', '~> 6.1'
-gem 'blacklight_advanced_search'
-gem 'unicode'
+
+# Blacklight Advanced Search gem.
+#gem 'blacklight_advanced_search', '>= 6.4'
+gem 'blacklight_advanced_search', '~> 6.4', github: 'RayLubinsky/blacklight_advanced_search'
+
+# EBSCO EDS gem for articles search.
 gem 'ebsco-eds'
 
 # =============================================================================
-# :section: Testing and development
+# :section: Blacklight testing and development
 # =============================================================================
 
 group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger
-  # console.
-  gem 'byebug', platforms: %i(mri mingw x64_mingw)
-
-  # Adds support for Capybara system testing and selenium driver.
-  gem 'capybara', '>= 2.15', '< 4.0'
-  gem 'selenium-webdriver'
-
-  # For testing Blacklight with a local Solr instance.
-  gem 'solr_wrapper', '>= 0.3'
-end
-
-group :development do
-  # Support RubyMine built-in debugger.
-  gem 'ruby-debug-ide'
-  gem 'debase'
-
-  # Use Capistrano for deployment
-  # gem 'capistrano-rails'
-
-  # Access an interactive console on exception pages or by calling 'console'
-  # anywhere in the code.
-  gem 'web-console', '>= 3.3.0'
-  gem 'listen', '>= 3.0.5', '< 3.2'
-
-  # Spring speeds up development by keeping your application running in the
-  # background. Read more: https://github.com/rails/spring
-  gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
-end
-
-group :test do
-  # Easy installation and use of chromedriver to run system tests with Chrome.
-  gem 'chromedriver-helper'
+  # Only useful if running a local Solr instance.
+  gem 'solr_wrapper', '>= 0.3', require: false
 end

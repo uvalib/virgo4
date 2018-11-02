@@ -9,54 +9,13 @@ require_relative 'catalog'
 
 module Config
 
-  # Default Blacklight Lens for controllers based on this configuration.
-  MUSIC_LENS = :music
-
-  MUSIC_CONFIG =
-    Config::Catalog.new.deep_copy.tap do |config|
-
-      include Config::Common
-      extend  Config::Common
-
-      # Specify the lens key for this configuration.
-      config.lens_key = MUSIC_LENS
-
-      # === Facet fields ===
-
-      config.add_facet_field :recording_format_facet
-      config.add_facet_field :instrument_facet
-      config.add_facet_field :music_composition_era_facet
-      config.add_facet_field :recordings_and_scores_facet
-
-      # === Index (results page) metadata fields ===
-
-      config.add_index_field :recording_format_facet
-
-      # === Item details (show page) metadata fields ===
-
-      config.add_show_field :instrument_facet
-      config.add_show_field :music_composition_era_facet
-      config.add_show_field :recordings_and_scores_facet
-
-      # === Search fields ===
-
-      # Hide selected catalog lens search fields.
-      config.search_fields.each_pair do |key, field|
-        next unless %w(journal issn).include?(key)
-        field.include_in_advanced_search = false
-      end
-
-      # === Localization ===
-
-      finalize_configuration(config)
-
-    end
-
   # Config::Music
   #
   class Music
 
-    include Config::Base
+    include ::Config::Common
+    extend  ::Config::Common
+    include ::Config::Base
 
     # =========================================================================
     # :section:
@@ -64,21 +23,68 @@ module Config
 
     public
 
-    # Initialize a self instance.
+    # Create a configuration object to associate with a controller.
+    #
+    # @param [Blacklight::Controller] controller
+    #
+    # @return [::Config::Base]
+    #
+    def self.build(controller)
+      ::Config::Solr.new(controller).deep_copy(self).tap do |config|
+
+        config.klass = controller.is_a?(Class) ? controller : controller.class
+
+        # Specify the lens key for this configuration.
+        config.lens_key = :music
+
+        # === Facet fields ===
+
+        remove_facets!(config, Solr::CATALOG_TYPES, Solr::VIDEO_TYPES)
+
+        # === Index (results page) metadata fields ===
+
+        #config.add_index_field 'recording_format_f'     # TODO: not in index
+
+        # === Item details (show page) metadata fields ===
+
+        #config.add_show_field 'instrument_f'
+        #config.add_show_field 'composition_era_f'
+        #config.add_show_field 'recordings_and_scores_f' # TODO: not in index
+
+        # === Search fields ===
+
+        # Hide selected catalog lens search fields.
+        config.search_fields.each_pair do |key, field|
+          next unless %w(journal issn).include?(key)
+          field.include_in_advanced_search = false
+        end
+
+        # === Localization ===
+
+        finalize_configuration!(config)
+
+      end
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    public
+
+    # Initialize a new instance.
+    #
+    # @param [Blacklight::Controller, nil] controller
     #
     # @see Config::Catalog#instance
     #
-    def initialize
-      super(MUSIC_CONFIG)
+    def initialize(controller = nil)
+      controller ||= MusicController
+      config_base  = self.class.build(controller)
+      register(config_base)
     end
 
   end
-
-  # Assign class lens key.
-  Music.key = MUSIC_CONFIG.lens_key
-
-  # Sanity check.
-  Blacklight::Lens.validate_key(Music)
 
 end
 

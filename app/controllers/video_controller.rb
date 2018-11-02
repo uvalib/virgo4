@@ -5,14 +5,29 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-
-# Replaces the Blacklight class of the same name.
+# Controller for the Video Lens.
 #
 class VideoController < ApplicationController
+
   include VideoConcern
-  include Blacklight::CatalogExt
-  include BlacklightAdvancedSearch::ControllerExt
+  include LensConcern
+
+  self.blacklight_config = ::Config::Video.new(self).blacklight_config
+
+  # ===========================================================================
+  # :section: Blacklight::Controller overrides
+  # ===========================================================================
+
+  public
+
+  # The default controller for searches.
+  #
+  # @return [Class]
+  #
+  def default_catalog_controller
+    self
+  end
+
 end
 
 __loading_end(__FILE__)

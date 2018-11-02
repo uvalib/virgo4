@@ -1,0 +1,53 @@
+<%# app/views/catalog/_email_form.html.erb -%>
+<%-
+  documents ||= Array.wrap(@document || @documents || @document_list)
+
+  form_path = url_for(controller: controller_name, action: 'email')
+  form_opt  = {
+    method: :post,
+    id:     'email_form',
+    class:  'modal_form',
+    data:   { blacklight_modal: 'trigger' }
+  }
+
+  hidden_fields = documents.map { |doc| ['id[]', doc.id] }
+  hidden_fields += params.slice(:sort, :per_page).to_unsafe_h.to_a
+  hidden_fields.map! { |k, v| hidden_field_tag(k, v, id: nil) }
+  hidden_fields = safe_join(hidden_fields, "\n")
+
+  submit_label = t('blacklight.email.form.submit')
+
+-%>
+<%= form_tag(form_path, form_opt) do %>
+
+  <div class="modal-body">
+
+    <%= render 'shared/flash_msg' %>
+
+    <div class="form-group row">
+      <label class="control-label col-sm-2" for="to">
+        <%= t('blacklight.email.form.to') %>
+      </label>
+      <div class="col-sm-10">
+        <%= email_field_tag :to, params[:to], class: 'form-control' %>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="control-label col-sm-2" for="message">
+        <%= t('blacklight.email.form.message') %>
+      </label>
+      <div class="col-sm-10">
+        <%= text_area_tag :message, params[:message], class: 'form-control' %>
+      </div>
+    </div>
+
+    <%= hidden_fields %>
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary"><%= submit_label %></button>
+  </div>
+
+<%- end -%>

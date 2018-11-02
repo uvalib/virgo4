@@ -1,0 +1,22 @@
+<%# app/views/catalog/librarian_view.html.erb -%>
+<%-
+  # Metadata view modal dialog.
+
+  doc = document ||= @document
+  title ||= t('blacklight.search.librarian_view.title', default: 'Metadata')
+
+  metadata =
+    if doc.has_marc?
+      render('marc_view', document: doc)
+    else
+      # TODO: Alternate metadata views for other types of metadata?
+      t('blacklight.search.librarian_view.empty')
+    end
+-%>
+<div class="marc-modal">
+  <div class="modal-header">
+    <h3 class="modal-title"><%= title -%></h3>
+    <%= modal_close %>
+  </div>
+  <%= metadata %>
+</div>

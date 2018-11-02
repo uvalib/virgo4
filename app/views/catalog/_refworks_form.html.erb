@@ -1,0 +1,26 @@
+<%# app/views/catalog/_refworks_form.html.erb -%>
+<%-
+  docs = documents ||= Array.wrap(@document || @documents)
+  return unless docs.present?
+
+  form_path = refworks_export_url
+  form_opt  = {
+    id:     'refworks-form',
+    name:   'refworks',
+    role:   'button',
+    method: :post,
+    target: '_blank'
+  }
+
+  export_data  = render_refworks_texts(docs)
+  user_id      = encrypt_user_id(current_or_guest_user.id)
+
+  submit_label = document_action_label(:refworks)
+  submit_opt   = { class: 'nav-link' }
+
+-%>
+<%= form_tag form_path, form_opt do -%>
+  <%= hidden_field_tag 'ImportData', export_data %>
+  <%= hidden_field_tag 'encrypted_user_id', user_id %>
+  <%= submit_tag submit_label, submit_opt %>
+<%= end -%>

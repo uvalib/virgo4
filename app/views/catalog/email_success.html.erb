@@ -1,0 +1,17 @@
+<%# app/views/catalog/email_success.html.erb -%>
+<%-
+  # Email response modal dialog.
+  title ||= t('blacklight.email.form.title', default: 'Email')
+-%>
+<div data-blacklight-modal="container">
+  <div class="email-response-modal">
+    <div class="modal-header">
+      <h1 class="modal-title"><%= title -%></h1>
+      <%= modal_close %>
+    </div>
+    <div class="modal-body">
+      <%= render 'shared/flash_msg' %>
+      <span data-blacklight-modal="close"></span>
+    </div>
+  </div>
+</div>

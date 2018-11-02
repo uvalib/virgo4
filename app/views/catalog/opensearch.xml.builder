@@ -1,12 +1,15 @@
 # app/views/catalog/opensearch.xml.builder
+#
+# frozen_string_literal: true
+# warn_indent:           true
 
 name       = application_name
 lens       = current_lens_key.to_s
 lens_name  = lens.capitalize
 favicon    = asset_url('favicon.ico')
-url_opt    = { controller: lens, only_path: false }
-search_url = url_for(url_opt)
-json_url   = url_for(url_opt.merge(action: 'opensearch', format: 'json'))
+search     = { controller: lens, only_path: false }
+search_url = url_for(search)
+json_url   = url_for(search.merge(action: 'opensearch', format: 'json'))
 query      = 'q={searchTerms}'
 page       = 'page={startPage?}'
 
@@ -17,6 +20,7 @@ search_types = {
 }
 
 xml.instruct! :xml, version: '1.0'
+
 xml.OpenSearchDescription(xmlns: 'http://a9.com/-/spec/opensearch/1.1/') do
   xml.ShortName   name
   xml.Description "#{name} #{lens_name} Search"

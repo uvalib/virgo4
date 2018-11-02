@@ -1,0 +1,33 @@
+<%# app/views/catalog/_constraints_element.html.erb -%>
+<%-
+  label   ||= nil
+  value   ||= nil
+  options ||= {}
+
+  classes = Array.wrap(options[:classes]).compact.join(' ')
+
+  label &&= content_tag(:span, label, class: 'filter-name')
+  value &&= content_tag(:span, value, class: 'filter-value', title: value)
+
+  remove_link =
+    if options[:remove].present?
+      remove_label =
+        if label
+          t('blacklight.search.filters.remove.value', value: value)
+        else
+          t('blacklight.search.filters.remove.label_value', label: label, value: value)
+        end
+      remove_label = content_tag(:span, remove_label, class: 'sr-only')
+      remove_icon  = content_tag(:span, '✖', class: 'remove-icon')
+      link_to(options[:remove], class: 'btn btn-outline-secondary remove') {
+        remove_label + remove_icon
+      }
+    end
+-%>
+<span class="btn-group applied-filter constraint <%= classes -%>">
+  <span class="constraint-value btn btn-outline-secondary disabled">
+    <%= label %>
+    <%= value %>
+  </span>
+  <%= remove_link %>
+</span>

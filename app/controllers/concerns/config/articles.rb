@@ -10,13 +10,13 @@ require_relative '_eds'
 
 module Config
 
-  ARTICLES_CONFIG = Config::Eds.instance
-
   # Config::Articles
   #
   class Articles
 
-    include Config::Base
+    include ::Config::Common
+    extend  ::Config::Common
+    include ::Config::Base
 
     # =========================================================================
     # :section:
@@ -24,21 +24,35 @@ module Config
 
     public
 
-    # Initialize a self instance.
+    # Create a configuration object to associate with a controller.
+    #
+    # @param [Blacklight::Controller] controller
+    #
+    # @return [::Config::Base]
+    #
+    def self.build(controller)
+      ::Config::Eds.new(controller)
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    public
+
+    # Initialize a new instance.
+    #
+    # @param [Blacklight::Controller, nil] controller
     #
     # @see Config::Eds#instance
     #
-    def initialize
-      super(ARTICLES_CONFIG)
+    def initialize(controller = nil)
+      controller ||= ArticlesController
+      config_base  = self.class.build(controller)
+      register(config_base)
     end
 
   end
-
-  # Assign class lens key.
-  Articles.key = ARTICLES_CONFIG.lens_key
-
-  # Sanity check.
-  Blacklight::Lens.validate_key(Articles)
 
 end
 

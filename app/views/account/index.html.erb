@@ -8,11 +8,14 @@
   content_for(:page_title) {
     t('blacklight.account.page_title', default: title) # TODO: I18n
   }
+
 -%>
 <div id="content">
 
   <h2 class='page-heading'><%= title %></h2>
 
   TODO...
+  current_user = <%= current_user.pretty_inspect -%>
+  self = <%= self.pretty_inspect -%>
 
 </div>

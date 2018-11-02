@@ -6,7 +6,6 @@
 __loading_begin(__FILE__)
 
 require 'blacklight/lens'
-require 'uva'
 
 module Config
 
@@ -44,10 +43,12 @@ module Config
 
       # Make a deep copy of the Blacklight configuration.
       #
+      # @param [Blacklight::Controller] other_controller
+      #
       # @return [Blacklight::Configuration]
       #
-      def deep_copy
-        blacklight_config.deep_copy
+      def deep_copy(other_controller)
+        blacklight_config.inheritable_copy(other_controller)
       end
 
       # Set key.
@@ -61,6 +62,18 @@ module Config
         @key = lens_key
       end
 
+      # Remove facet fields from a configuration.
+      #
+      # @param [Blacklight::Configuration] config
+      # @param [Array<String>]             names
+      #
+      # @return [void]
+      #
+      def remove_facets!(config, *names)
+        names = names.flatten.flat_map { |type| %W(#{type} #{type}_f) }.uniq
+        config.facet_fields.extract!(*names)
+      end
+
     end
 
     # Define these as instance methods as well as class methods.
@@ -72,16 +85,16 @@ module Config
 
     public
 
-    # Initialize a self instance.
+    # Initialize a new Config::Base-derivative instance by adding its
+    # Blacklight::Configuration to the Blacklight::Lens table.
     #
-    # @param [Blacklight::Configuration] config
-    # @param [Symbol, nil]               lens_key
+    # @param [::Config::Base, Blacklight::Configuration] cfg
     #
-    def initialize(config, lens_key = nil)
-      lens_key ||= config.lens_key
-      @key       = lens_key
-      self.key ||= lens_key
-      Blacklight::Lens.add_new(@key, config)
+    def register(cfg)
+      cfg  = cfg.blacklight_config if cfg.respond_to?(:blacklight_config)
+      @key = cfg.lens_key
+      self.class.key = @key
+      Blacklight::Lens.add_new(@key, cfg)
     end
 
   end

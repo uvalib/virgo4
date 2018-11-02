@@ -1,4 +1,4 @@
-# app/models/bookmark.rb
+# app/models/search.rb
 #
 # frozen_string_literal: true
 # warn_indent:           true
@@ -10,15 +10,11 @@ require 'blacklight/lens'
 # This extends the model defined in the Blacklight gem to add a method for
 # extracted relevant query parameters.
 #
-# == Implementation Notes
-# The methods that refer to "self" had to be copied to this file.
-#
-class Search < ActiveRecord::Base
+class Search < ApplicationRecord
 
-  include LensHelper
+  belongs_to :user, optional: true, polymorphic: true
 
-  # This needs to be repeated here for some reason:
-  serialize :query_params, Hash
+  serialize  :query_params
 
   # ===========================================================================
   # :section: Replacement methods
@@ -29,7 +25,7 @@ class Search < ActiveRecord::Base
   # A Search instance is considered a saved search if it has a user_id.
   #
   def saved?
-    self.user_id?
+    user_id.present?
   end
 
   # Delete old, unsaved searches.
@@ -58,7 +54,7 @@ class Search < ActiveRecord::Base
   #
   def sorted_query
     fields = query_params || {}
-    fields.sort_by { |k, v| "#{k}/#{sorted(v)}" }.to_h.with_indifferent_access
+    fields.sort_by { |k, v| "#{k} #{sorted(v)}" }.to_h.with_indifferent_access
   end
 
   # ===========================================================================
@@ -73,7 +69,7 @@ class Search < ActiveRecord::Base
   #
   def sorted(item)
     case item
-      when Hash  then item.sort_by { |k, v| "#{k}/#{sorted(v)}" }
+      when Hash  then item.sort_by { |k, v| "#{k} #{sorted(v)}" }
       when Array then item.map { |i| sorted(i) }.join('/')
       else            item
     end

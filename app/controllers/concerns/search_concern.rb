@@ -5,13 +5,9 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-
-# Determine by context whether searches for IDs and/or search terms should go
-# to a single or multiple derivatives of Blacklight::AbstractRepository.
-#
-# @see Blacklight::SearchHelperExt
-# @see Blacklight::SearchHelper
+# This module encapsulates the creation of a SearchService derivative that
+# includes contextual information (in particular, the nature of the user who is
+# preforming the search).
 #
 module SearchConcern
 
@@ -20,91 +16,83 @@ module SearchConcern
   # Needed for RubyMine to indicate overrides.
   include Blacklight::Catalog unless ONLY_FOR_DOCUMENTATION
 
-  include Blacklight::SearchHelperExt
+  include LensConcern
 
-  # Code to be added to the controller class including this module.
   included do |base|
-
     __included(base, 'SearchConcern')
-
-    include RescueConcern
-    include LensConcern
-
   end
 
   # ===========================================================================
-  # :section: Blacklight::SearchHelper overrides
+  # :section: Blacklight::Catalog overrides
   # ===========================================================================
 
-  protected
+  public
 
-  # Get an item using the appropriate mechanism.
+  # A memoized instance of the parameter state.
   #
-  # @param [String, Array<String>] ids  One or more document IDs.
-  # @param [Hash]                  *    Ignored.
+  # This includes a pointer to the session, current user, and other information
+  # that may be needed by the various search services.
   #
-  # @return [Array<(Blacklight::Solr::Response, Blacklight::Document)>]
+  # @param [Array] args
+  #
+  # @overload search_service
+  #
+  # @overload search_service(usr_params)
+  #
+  # @overload search_service(usr_params, context)
+  #
+  # @overload search_service(usr_params, req)
+  #
+  # @overload search_service(usr_params, req, context)
+  #
+  # @overload search_service(usr_params, user)
+  #
+  # @overload search_service(usr_params, user, context)
+  #
+  # @return [Blacklight::Lens::SearchService]
   #
   # This method overrides:
-  # @see Blacklight::SearchHelper#fetch
+  # @see Blacklight::Catalog#search_state
   #
-  def fetch(ids, *)
-    ids.is_a?(Array) ? fetch_many(ids) : fetch_one(ids)
-  end
+  def search_service(*args)
+    # The first argument are the search terms ("user parameters").  Additional
+    # ("service parameters") may be the last argument.
+    usr_params =
+      case args.first
+        when Hash                         then args.shift.dup
+        when ActionController::Parameters then args.shift.to_unsafe_h
+        else                                   {}
+      end
+    context = args.last.is_a?(Hash) ? args.pop.dup : {}
 
-  # ===========================================================================
-  # :section: Blacklight::SearchHelper overrides
-  # ===========================================================================
+    # Handle any any other arguments.
+    args.each do |arg|
+      case arg
+        when User                         then context[:user]           = arg
+        when Hash                         then context[:service_params] = arg
+        when ActionDispatch::Request      then context[:request]        = arg
+        when ActionController::Parameters then usr_params.reverse_merge!(arg)
+      end
+    end
+    context[:user] ||= current_user # TODO: keep?
+    usr_params = search_state.to_h unless usr_params.present?
+    srv_params = context[:service_params] ||= {}
 
-  private
-
-  # Get many items from the appropriate repositor(ies).
-  #
-  # @param [Array<String>] ids
-  # @param [Hash]          *          Ignored.
-  #
-  # @return [Array<(Blacklight::Solr::Response, Array<Blacklight::Document>)>]
-  #
-  # This method overrides:
-  # @see Blacklight::SearchHelperExt#fetch_many
-  #
-  def fetch_many(ids, *)
-    # Get each item from its appropriate repository one-at-a-time rather than
-    # as a batch (search) request.  This is for two reasons:
-    # 1. Ensure that each failed item is indicated with a *nil* value.
-    # 2. To better support cache management.
-    response_hash = {}
-    response_docs = {}
-    Array.wrap(ids).each do |id|
-      next if response_hash[id] && response_docs[id]
-      response, document = fetch_one(id)
-      response &&= response['response']
-      response &&= response['doc'] || response['docs']
-      response_hash[id] = Array.wrap(response).first || document&.to_h
-      response_docs[id] = document
+    # Look for context values needed by Blacklight::Eds::SearchService.
+    Blacklight::Eds::EDS_PARAMS.each do |k|
+      srv_params[k] = context.delete(k) || srv_params[k]
     end
 
-    # Manufacture a response from the sets of document hash values.
-    response_params = Blacklight::Parameters.sanitize(params)
-    response = Blacklight::Solr::Response.new({}, response_params)
-    response['response'] ||= {}
-    response['response']['docs'] = response_hash.values
-    return response, response_docs.values
-  end
+    # Values used by Blacklight::Eds::SearchService (@see #EDS_SESSION_PARAMS).
+    srv_params[:authenticated] ||= !current_or_guest_user.guest
+    srv_params[:session]       ||= session
 
-  # Get an item using the appropriate mechanism.
-  #
-  # @param [String] id
-  # @param [Hash]   *                 Ignored.
-  #
-  # @return [Array<(Blacklight::Solr::Response, Blacklight::Document)>]
-  #
-  # This method overrides:
-  # @see Blacklight::SearchHelperExt#fetch_one
-  #
-  def fetch_one(id, *)
-    controller_instance = lens_for(id).instance(@response, request)
-    controller_instance.instance_exec(id) { |id| fetch(id) }
+    # Values used by EBSCO EDS API (@see #EDS_API_PARAMS).
+    srv_params[:guest]         ||= session[:guest]
+    srv_params[:session_token] ||= session[:eds_session_token]
+
+    # Create the search service with search parameters and context info.
+    search_service_class.new(blacklight_config, usr_params, context)
   end
 
 end

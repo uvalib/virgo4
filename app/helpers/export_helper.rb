@@ -14,7 +14,13 @@ require 'blacklight/lens'
 #
 module ExportHelper
 
-  include BlacklightHelper
+  include BlacklightMarcHelper
+  include LensHelper
+  include Blacklight::Lens::Export
+
+  def self.included(base)
+    __included(base, '[ExportHelper]')
+  end
 
   # ===========================================================================
   # :section:
@@ -32,24 +38,46 @@ module ExportHelper
 
   # refworks_export_url
   #
-  # @param [Hash] url_params
+  # @param [Hash, nil] opt
   #
-  # @options url_params [String] :url       Required path to document.
-  # @options url_params [String] :vendor    Default: `application_name`.
-  # @options url_params [String] :filter    Default: 'RefWorks Tagged Format'
+  # @options opt [String] :vendor     Default: `application_name`.
+  # @options opt [String] :filter     Default: 'RefWorks Tagged Format'
+  # @options opt [String] :url        The Virgo path that yields import data.
   #
   # @return [String]
   #
-  # Compare with:
+  # @overload refworks_export_url
+  #   This is used as the form destination path when posting to RefWorks; the
+  #   document reference(s) to export must be passed through a form field with
+  #   name="ImportData" which contains the output from #export_as_refworks.
+  #
+  # @overload refworks_export_url(url: fullpath)
+  #   This is used when initiating a RefWorks import by providing a callback
+  #   URL, which outputs the results of #export_as_refworks.
+  #
+  # This method overrides:
   # @see BlacklightMarcHelper#refworks_export_url
   #
-  def refworks_export_url(url_params = nil)
-    opt = { vendor: application_name, filter: 'RefWorks Tagged Format' }
-    case url_params
-      when Hash   then opt.merge!(url_params)
-      when String then opt[:url] = url_params
-    end
-    url_params = opt.map { |k, v| "#{k}=" + CGI.escape(v.to_s) }.join('&')
+  # == Implementation Notes
+  # The current Blacklight version of this method generates a serialized form
+  # of MARC data for use with the RefWorks 'MARC Format' input filter.  The
+  # Virgo 3 implementation generates 'RefWorks Tagged Format'; when that code
+  # is copied into Virgo 4, this filter value here must be updated to reflect
+  # the change.
+  #
+  # @see https://www.refworks.com/DirectExport.htm
+  # @see https://www.refworks.com/content/products/import_filter.asp
+  # @see https://www.refworks.com/refworks/help/Refworks.htm#RefWorks_Tagged_Format.htm
+  #
+  def refworks_export_url(opt = nil)
+    url_opt = {
+      vendor:   application_name,
+      filter:   'MARC Format', # TODO: filter:   'RefWorks Tagged Format',
+      encoding: '65001'
+    }
+    url_opt.merge!(opt) if opt.present?
+    url_opt[:url] = url_for(url_opt) if url_opt[:url].is_a?(Hash)
+    url_params = url_opt.map { |k, v| "#{k}=" + CGI.escape(v.to_s) }.join('&')
     "#{REFWORKS_URL}?#{url_params}"
   end
 
@@ -61,11 +89,14 @@ module ExportHelper
   #
   # @return [String, nil]
   #
-  # Compare with:
+  # This method overrides:
   # @see BlacklightMarcHelper#refworks_solr_document_path
   #
+  # == Usage Notes
+  # This is here for consistency but is not used within Virgo.
+  #
   def refworks_solr_document_path(options = nil)
-    refworks_document_path(options)
+    refworks_export_url(url: refworks_document_path(options))
   end
 
   # For exporting a single document in EndNote format.
@@ -76,8 +107,11 @@ module ExportHelper
   #
   # @return [String, nil]
   #
-  # Compare with:
+  # This method overrides:
   # @see BlacklightMarcHelper#single_endnote_catalog_path
+  #
+  # == Usage Notes
+  # This is here for consistency but is not used within Virgo.
   #
   def single_endnote_catalog_path(options = nil)
     endnote_document_path(options)
@@ -89,13 +123,11 @@ module ExportHelper
   #
   # @return [String]
   #
-  # Compare with:
+  # This method overrides:
   # @see BlacklightMarcHelper#render_refworks_texts
   #
   def render_refworks_texts(documents)
-    documents.map { |doc|
-      doc.export_as(:refworks_marc_txt) if doc.exports_as?(:refworks_marc_txt)
-    }.compact.join("\n")
+    render_exports(:refworks, documents)
   end
 
   # Combines a set of document references into one EndNote export string.
@@ -104,28 +136,11 @@ module ExportHelper
   #
   # @return [String]
   #
-  # Compare with:
+  # This method overrides:
   # @see BlacklightMarcHelper#render_endnote_texts
   #
   def render_endnote_texts(documents)
-    documents.map { |doc|
-      doc.export_as(:endnote) if doc.exports_as?(:endnote)
-    }.compact.join("\n")
-  end
-
-  # Combines a set of document references into one Zotero RIS export string.
-  #
-  # @param [Blacklight::Document, Array<Blacklight::Document>] documents
-  #
-  # @return [String]
-  #
-  # @see BlacklightMarcHelper#render_refworks_texts
-  # @see BlacklightMarcHelper#render_endnote_texts
-  #
-  def render_ris_texts(documents)
-    documents.map { |doc|
-      doc.export_as(:ris) if doc.exports_as?(:ris)
-    }.compact.join("\n")
+    render_exports(:endnote, documents)
   end
 
   # ===========================================================================
@@ -134,55 +149,118 @@ module ExportHelper
 
   public
 
-  # refworks_document_path
+  # Combines a set of document references into one Zotero RIS export string.
   #
-  # @param [Hash] args
+  # @param [Blacklight::Document, Array<Blacklight::Document>] documents
   #
-  # @options args [String] :id        Required: Document ID.
+  # @return [String]
+  #
+  def render_zotero_texts(documents)
+    render_exports(:zotero, documents)
+  end
+
+  # For exporting a single document to RefWorks.
+  #
+  # @param [Array] args
+  #
+  # args[0]  [String, nil]            Document ID
+  # args[-1] [Hash, nil]              Options
+  #
+  # @options args[-1] [String] :id    Document ID
   #
   # @return [String, nil]
   #
   def refworks_document_path(*args)
-    opt = { action: 'show', format: :refworks_marc_txt, only_path: false }
-    opt.merge!(args.pop) if args.last.is_a?(Hash)
-    opt[:id] = args.first if args.first.present?
-    return unless opt[:id].present?
-    opt[:controller] ||= current_lens_key
-    refworks_export_url(url_for(opt))
+    opt = { caller: __method__, only_path: false }
+    args << (args.last.is_a?(Hash) ? args.pop.merge(opt) : opt)
+    export_document_path(*args)
   end
 
   # For exporting a single document in EndNote format.
   #
-  # @param [Hash] args
+  # @param [Array] args
   #
-  # @options args [String] :id        Required: Document ID.
+  # args[0]  [String, nil]            Document ID
+  # args[-1] [Hash, nil]              Options
+  #
+  # @options args[-1] [String] :id    Document ID
   #
   # @return [String, nil]
   #
   def endnote_document_path(*args)
-    opt = { action: 'show', format: :endnote, only_path: true }
-    opt.merge!(args.pop) if args.last.is_a?(Hash)
-    opt[:id] = args.first if args.first.present?
-    return unless opt[:id].present?
-    opt[:controller] ||= current_lens_key
-    url_for(opt)
+    opt = { caller: __method__ }
+    args << (args.last.is_a?(Hash) ? args.pop.merge(opt) : opt)
+    export_document_path(*args)
   end
 
   # For exporting a single document in Zotero RIS format.
   #
-  # @param [Hash] args
+  # @param [Array] args
   #
-  # @options args [String] :id        Required: Document ID.
+  # args[0]  [String, nil]            Document ID
+  # args[-1] [Hash, nil]              Options
+  #
+  # @options args[-1] [String] :id    Document ID
   #
   # @return [String, nil]
   #
-  def ris_document_path(*args)
-    opt = { action: 'show', format: :ris, only_path: true }
-    opt.merge!(args.pop) if args.last.is_a?(Hash)
-    opt[:id] = args.first if args.first.is_a?(String)
-    return unless opt[:id].present?
-    opt[:controller] ||= current_lens_key
-    url_for(opt)
+  def zotero_document_path(*args)
+    opt = { caller: __method__ }
+    args << (args.last.is_a?(Hash) ? args.pop.merge(opt) : opt)
+    export_document_path(*args)
+  end
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  protected
+
+  # Combines a set of document references into a string in the format specified
+  # by the caller.
+  #
+  # @param [Symbol] format
+  # @param [Blacklight::Document, Array<Blacklight::Document>] documents
+  #
+  # @return [String]
+  #
+  def render_exports(format, documents)
+    format = export_format[format] || format
+    Array.wrap(documents).map { |doc|
+      doc.export_as(format) if doc.exports_as?(format)
+    }.compact.join("\n")
+  end
+
+  # URL which generates an export for a single document in the format specified
+  # by the caller.
+  #
+  # @param [Array] args
+  #
+  # args[0]  [String, nil]            Document ID (here or in options)
+  # args[-1] [Hash, nil]              Options
+  #
+  # @options args[-1] [String] :format      Export format (required).
+  # @options args[-1] [String] :id          Document ID (required).
+  # @options args[-1] [String] :caller      For error reporting.
+  # @options args[-1] [String] :controller  Default: `current_lens_key`.
+  # @options args[-1] [String] :action      Default: 'show'.
+  #
+  # @return [String, nil]
+  #
+  def export_document_path(*args)
+    opt = args.last.is_a?(Hash) ? args.pop.dup : {}
+    method = opt.delete(:caller)
+    format = opt[:format] || method&.to_s&.sub(/_.*/, '')
+    if format.blank?
+      method ||= __method__
+      Rails.logger.error { "ERROR: #{method}: no format specified" }
+    else
+      opt[:id]     = args.first if args.first.present?
+      opt[:format] = export_format[format] || format
+      opt[:action]     ||= opt[:id] ? :show : :index
+      opt[:controller] ||= current_lens_key
+      url_for(opt)
+    end
   end
 
 end

@@ -7,10 +7,11 @@
   # @see app/views/saved_searches/index.html.erb
   # @see app/views/search_history/index.html.erb
 
-  docs = document_list ||= @document_list
+  docs = document_list ||= @response&.documents
 
-  title ||= t('blacklight.bookmarks.title')
-  width ||= 'col-md-12'
+  title      ||= t('blacklight.bookmarks.title')
+  width      ||= 'col-md-12'
+  list_title ||= t('blacklight.bookmarks.list_title')
 
   # Page name for browser history and browser tabs.
   content_for(:page_title) {
@@ -24,16 +25,19 @@
       t('blacklight.bookmarks.no_bookmarks')
     end
 
-  template_opts = { document_list: docs }
+  disabled_tools = { show: %i(bookmark email sms citation) }
+  template_opts  = { document_list: docs, disabled_tools: disabled_tools }
 
 -%>
 <div id="content" class="<%= width -%>">
-  <h2 class='page-heading'><%= title %></h2>
+  <h1 class='page-heading'><%= title %></h1>
   <%- if error -%>
-    <h3 class='section-heading'><%= error %></h3>
+    <h2 class='section-heading'><%= error %></h2>
   <%- else -%>
     <%= render 'sort_and_per_page' %>
-    <%= render 'tools', template_opts %>
+    <%# render 'tools', template_opts %>
+    <%= render 'marc_tools', template_opts %>
+    <h2 class='section-heading sr-only'><%= list_title %></h2>
     <%= render 'document_list', template_opts %>
     <%= render 'results_pagination' %>
   <%- end -%>

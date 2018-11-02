@@ -1,14 +1,13 @@
 <%# app/views/catalog/_home.html.erb -%>
 <%-
   # Site "home page" or lens "main page" content.
-
   home_page ||= (request.path == root_path)
-
 -%>
 <%- if home_page -%>
   <%= render 'root/home' %>
 <%- else -%>
   <%= render 'shared/home_heading' %>
+  <%= render 'home_tip' %>
   <%= render 'announcements' %>
   <%= render 'featured' %>
 <%- end -%>

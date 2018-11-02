@@ -5,14 +5,32 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-
-# Replaces the Blacklight class of the same name.
+# Access index items via Solr.
+#
+# Compare with:
+# @see CatalogController
 #
 class CatalogController < ApplicationController
+
   include CatalogConcern
-  include Blacklight::CatalogExt
-  include BlacklightAdvancedSearch::ControllerExt
+  include LensConcern
+
+  self.blacklight_config = ::Config::Catalog.new(self).blacklight_config
+
+  # ===========================================================================
+  # :section: Blacklight::Controller overrides
+  # ===========================================================================
+
+  protected
+
+  # The default controller for searches.
+  #
+  # @return [Class]
+  #
+  def default_catalog_controller
+    self
+  end
+
 end
 
 __loading_end(__FILE__)

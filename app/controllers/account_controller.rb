@@ -5,8 +5,6 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-
 # User account controller.
 #
 # TODO: Need to determine how this plays with Devise

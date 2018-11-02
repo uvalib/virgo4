@@ -5,14 +5,12 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-require 'uva'
-
+# RescueConcern
+#
 module RescueConcern
 
   extend ActiveSupport::Concern
 
-  # Code to be added to the controller class including this module.
   included do |base|
 
     __included(base, 'RescueConcern')
@@ -129,7 +127,7 @@ module RescueConcern
   #
   def handle_generic_error(exception, flash_notice, redirect_path)
     if flash[:notice] == flash_notice
-      Log.error(__method__, 'is looping')
+      Log.error(__method__, 'request is looping', flash_notice)
       raise exception
     elsif request.xhr?
       # TODO: not clear if this is actually the desired behavior in this case

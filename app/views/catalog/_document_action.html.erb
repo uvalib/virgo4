@@ -1,0 +1,20 @@
+<%# app/views/catalog/_document_action.html.erb -%>
+<%-
+  doc = document ||= Array.wrap(@document || @documents).first
+  cfg = document_action_config ||= nil
+  disabled_tools ||= []
+  disabled_tools = disabled_tools[:show] if disabled_tools.is_a?(Hash)
+  return unless doc && cfg && !Array.wrap(disabled_tools).include?(cfg.key)
+
+  url_opts ||= {}
+
+  modal = !cfg.modal.is_a?(FalseClass)
+
+  link_label = document_action_label(cfg.key, cfg)
+  link_path  = document_action_path(cfg, url_opts.merge(id: doc.id))
+  link_id    = cfg.id || "#{cfg.key}Link"
+  link_opts  = { id: link_id, class: 'nav-link' }
+  link_opts[:data] = { blacklight_modal: 'trigger' } if modal
+
+-%>
+<%= link_to(link_label, link_path, link_opts) %>

@@ -5,24 +5,20 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-
+# User
+#
+# @see Blacklight::User
+# @see Devise::Models
+#
 class User < ApplicationRecord
 
-  # Connects this user object to Blacklight bookmarks.
+  # Connects this user object to bookmarks and searches.
   include Blacklight::User
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
-
-  # Method added by Blacklight; Blacklight uses #to_s on your
-  # user class to get a user-displayable login/identifier for
-  # the account.
-  def to_s
-    email
-  end
 
   # ===========================================================================
   # :section: Blacklight::User overrides
@@ -34,7 +30,7 @@ class User < ApplicationRecord
   # of the first of *docs* as a database query criterion.  This method just
   # uses the document IDs for the database query.
   #
-  # @param [Array<Blacklight::Document>] docs
+  # @param [Array<Blacklight::Document>, nil] docs
   #
   # @return [Array<ActiveRecord>]
   #
@@ -42,7 +38,38 @@ class User < ApplicationRecord
   # @see Blacklight::User#bookmarks_for_documents
   #
   def bookmarks_for_documents(docs = nil)
-    ids = docs&.compact&.map(&:id)&.presence
+    bookmarks_for(docs)
+  end
+
+  # ===========================================================================
+  # :section: Object overrides
+  # ===========================================================================
+
+  public
+
+  # Method added by Blacklight; Blacklight uses #to_s on your user class to get
+  # a user-displayable login/identifier for the account.
+  #
+  # @return [String]
+  #
+  def to_s
+    email
+  end
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  public
+
+  # Return the user's bookmarks for the given item(s).
+  #
+  # @param [Array<Blacklight::Document>] docs
+  #
+  # @return [Array<ActiveRecord>]
+  #
+  def bookmarks_for(*docs)
+    ids = docs.flatten.compact.map(&:id).presence
     ids ? bookmarks.where(document_id: ids) : []
   end
 

@@ -1,13 +1,1 @@
-# robots.txt
-#
-User-Agent: *
-#
-# Skip pages from controllers that do not provide indexed data or site
-# information.
-#
-Disallow: /account
-Disallow: /account_requests
-Disallow: /feedback
-Disallow: /maps
-Disallow: /pda
-Disallow: /reserves
+# See http://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file

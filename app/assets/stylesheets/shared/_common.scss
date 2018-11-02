@@ -15,6 +15,23 @@
 // Common settings.
 //=============================================================================
 
+// Prevent horizontal scrollbar from showing up.
+// NOTE: It might be better to find out what element is causing the overflow...
+body {
+    overflow-x: hidden;
+}
+
+// Make focus outline more easily seen.
+:focus {
+    outline:        2px solid rgba(77, 144, 254, 0.5);
+    outline-offset: 2px;
+}
+
+// Convenience definition for Bootstrap "hidden on all" class.
+.hidden {
+    @extend .d-none;
+}
+
 // Prevent pages with little content (like empty bookmarks or saved searches)
 // from allowing the footer to hike up to the middle of the screen on a desktop
 // display.
@@ -23,11 +40,12 @@
 }
 
 .page-header {
-    margin-top: 0;
+    margin:  1rem 0;
+    padding: 0.5rem 0;
 }
 
 .page-heading {
-    margin-top: 0.25em;
+    margin: auto 0;
 }
 
 .facets-heading {
@@ -35,25 +53,43 @@
     margin-bottom: 7px;
 }
 
-.facet_select {
-    @include hyphens(none);
-}
-
 .top-panel-heading {
     padding-top: 0;
 }
 
 // Search constraints
-.filterName {
+
+.filter-name {
+
     font-variant: all-small-caps;
+
+    // Put some separation between the name and the value.
+    &:after { content: " "; }
 }
-.filterValue {
+
+.filter-separator {
+    font-variant: all-petite-caps;
+}
+
+.filter-value {
 
     color: #3c763d;
 
     .constraint-connector {
         margin-left:  0.25em;
         margin-right: 0.25em;
+    }
+}
+
+.applied-filter {
+    // Fix Blacklight definitions.
+    .constraint-value {
+        &:hover, &:active {
+            background-color: transparent;
+        }
+    }
+    .filter-name:after {
+        color: inherit;
     }
 }
 
@@ -71,4 +107,9 @@
 .tt-selectable {
     cursor: pointer;
     &:hover { background-color: whitesmoke; }
+}
+
+.nav-link.disabled {
+    cursor:         pointer;
+    pointer-events: none;
 }

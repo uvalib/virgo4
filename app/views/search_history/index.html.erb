@@ -10,7 +10,7 @@
   searches ||= @searches
 
   title ||= t('blacklight.search_history.title')
-  width ||= 'col-md-9'
+  width ||= 'col-md-12'
 
   # Page name for browser history and browser tabs.
   content_for(:page_title) {
@@ -34,11 +34,12 @@
         clear_list_path,
         method: :delete,
         data:   { confirm: clear_confirmation },
-        class:  'btn btn-danger pull-right'
+        class:  'btn btn-danger float-md-right'
       )
     delete_label = t('blacklight.search_history.forget')
     save_label   = t('blacklight.search_history.save')
   end
+
 -%>
 <div id="content" class="<%= width -%>">
 
@@ -53,17 +54,17 @@
     <%= clear_list_button %>
     <h3 class='section-heading'><%= list_title %></h3>
 
-    <table class="table table-striped search_history">
+    <table class="table table-striped search-history">
       <%- index  = 0  -%>
       <%- ctrlrs = {} -%>
       <%- searches.each do |search| -%>
         <%- query = search.sorted_query -%>
         <%- next unless query_has_constraints?(query) -%>
         <%- type = lens_key_for(query[:controller]) -%>
-        <%- ctrlrs[type] ||= lens_for(type).instance(@response, request) -%>
+        <%- ctrlrs[type] ||= lens_entry(type).instance(@response, request) -%>
         <%- index += 1 -%>
         <tr id="<%= "document_#{index}" -%>">
-          <td class="search-type">
+          <td class="lens-type">
             <%= search_type_label(type) %>
           </td>
           <td class="query">
@@ -77,10 +78,10 @@
               <%- id = search.id -%>
               <%- not_saved = !(current_or_guest_user && search.saved?) -%>
               <%- label = not_saved ? save_label : delete_label -%>
-              <%- path  = blacklight.forget_search_path(id) -%>
-              <%- path  = blacklight.save_search_path(id) if not_saved -%>
+              <%- path  = forget_saved_search_path(id) -%>
+              <%- path  = save_saved_search_path(id) if not_saved -%>
               <%- opt   = { class: 'btn btn-' } -%>
-              <%- opt[:class] += (not_saved ? 'default' : 'danger') -%>
+              <%- opt[:class] += (not_saved ? 'secondary' : 'danger') -%>
               <%- opt[:method] = :put if not_saved -%>
               <%= button_to(label, path, opt) -%>
             </td>

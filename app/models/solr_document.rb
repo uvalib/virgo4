@@ -5,22 +5,16 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-
-# Ensure that MARC::XMLReader uses Nokogiri or other XML parser instead of the
-# default (REXML).
-require 'marc'
-MARC::XMLReader.best_available!
-
 # A Blacklight::Document for items acquired from the Solr index service.
 #
-# @see Blacklight::Solr::DocumentExt
 # @see Blacklight::Solr::Document
-# @see Blacklight::Document
+# @see LensDocument
 #
-class SolrDocument
+class SolrDocument < LensDocument
 
-  include Blacklight::Solr::DocumentExt
+  include Blacklight::Solr::Document
+  include Blacklight::Solr::Document::Export
+  include Blacklight::Solr::Document::SchemaOrg
 
   # ===========================================================================
   # :section: Extensions
@@ -59,7 +53,7 @@ class SolrDocument
   # @example http://.../catalog/:id?format=endnote            Endnote import
   # @example http://.../catalog/:id?format=openurl_ctx_kev    OpenURL fragment
   #
-  extension_parameters[:marc_source_field] = :marc_display
+  extension_parameters[:marc_source_field] = 'fullrecord'
   extension_parameters[:marc_format_type]  = :marcxml
   use_extension(Blacklight::Solr::Document::Marc) do |this_document|
     this_document.key?(extension_parameters[:marc_source_field])
@@ -73,25 +67,79 @@ class SolrDocument
   # text message.
   use_extension(Blacklight::Document::Sms)
 
+  # ===========================================================================
+  # :section: Semantic fields
+  # ===========================================================================
+
+  public
+
   field_semantics.merge!(
-    title:       :title_display, # TODO: :main_title_display || :title_display
-    author:      :author_display,
-    language:    :language_facet,
-    format:      :format,
+    title:        'title_a',     # TODO: 'title_vern_a' || 'title_a'
+    author:       'author_a',
+    language:     'language_a',
+    format:       'format_a',
     # === For DublinCore ===
-    #contributor: :xxx,
-    #coverage:    :xxx,
-    creator:     :author_display,
-    date:        :pub_date,
-    #description: :material_type_display,
-    identifier:  :id,
-    #publisher:   :published_display,
-    #relation:    :xxx,
-    #rights:      :xxx,
-    #source:      :xxx,
-    subject:     :subject_t,
-    #type:        :xxx,
+    #contributor: 'xxx',
+    #coverage:    'xxx',
+    creator:      'author_a',
+    date:         'published_date',
+    #description: 'material_type_display',
+    identifier:   'id',
+    #publisher:   'published_display',
+    #relation:    'xxx',
+    #rights:      'xxx',
+    #source:      'xxx',
+    subject:      'subject_a',
+    #type:        'xxx',
   )
+
+  # ===========================================================================
+  # :section: Blacklight::Document overrides
+  # ===========================================================================
+
+  public
+
+  # Initialize a new instance.
+  #
+  # @param [Hash, nil]                    source_doc
+  # @param [RSolr::HashWithResponse, nil] response
+  # @param [Symbol, nil]                  lens
+  #
+  # This method overrides:
+  # @see Blacklight::Document#initialize
+  #
+  def initialize(source_doc = nil, response = nil, lens = nil)
+    super(source_doc, response, lens)
+  end
+
+  # =========================================================================
+  # :section: Blacklight::Document::Base overrides
+  # =========================================================================
+
+  public
+
+  # Indicate whether this document is shadowed (that is, not viewable and not
+  # discoverable).
+  #
+  # This method overrides:
+  # @see Blacklight::Document::Base#hidden?
+  #
+  def hidden?
+    super # TODO: Awaiting Solr field...
+  end
+
+  # Indicate whether this document can be discovered by user search.
+  #
+  # Such records, even if not independently discoverable can be linked to and
+  # accessed directly.  This is useful in the case of records that are
+  # "part of" a discoverable collection.
+  #
+  # This method overrides:
+  # @see Blacklight::Document::Base#discoverable?
+  #
+  def discoverable?
+    super # TODO: Awaiting Solr field...
+  end
 
 end
 

@@ -1,11 +1,14 @@
 # config/application.rb
+#
+# frozen_string_literal: true
+# warn_indent:           true
 
 require_relative 'boot'
 
 require 'rails/all'
 
-# Pre-load the gems listed in Gemfile, including any gems limited to :test,
-# :development, or :production.
+# Require the gems listed in Gemfile, including any gems
+# you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
 require_relative 'deployments'
@@ -16,9 +19,7 @@ module Virgo
 
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    rails_version = Gem.latest_version_for('rails').to_s.presence
-    rails_version &&= rails_version.sub(/(\d+\.\d+).*$/, '\1')
-    config.load_defaults(rails_version || '5.2')
+    config.load_defaults 5.2
 
     # Permitted parameters.
     # NOTE: Needs work.

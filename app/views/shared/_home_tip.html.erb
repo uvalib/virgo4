@@ -1,0 +1,11 @@
+<%# app/views/shared/_home_tip.html.erb -%>
+<%-
+  # A tip for how to start on a lens home.
+  type ||= 'items'
+  text ||= 'enter search terms above or select a search limiter to the left'
+
+-%>
+<div class="alert alert-info">
+  To search for <%= type -%>, <%= text %>.
+  <a class="close" data-dismiss="alert" href="#">&times;</a>
+</div>

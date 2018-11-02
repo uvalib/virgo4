@@ -30,7 +30,8 @@
   coins &&= content_tag(:span, '', class: 'Z3988', title: h(coins))
 
   partials = index_view_config(doc).partials
-  locals   = { document_counter: counter }
+  disabled_tools ||= []
+  locals   = { document_counter: counter, disabled_tools: disabled_tools }
 
 -%>
 <div id="<%= doc_id -%>" class="<%= css_class -%>" <%= data %> <%= itemtype %>>

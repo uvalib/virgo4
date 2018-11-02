@@ -2,7 +2,7 @@
 <%-
   # List bookmarked documents by rendering each according to its own presenter.
 
-  docs = document_list ||= @document_list
+  docs = document_list ||= @response&.documents
   return unless docs.present?
 
   # The caller may provide additional CSS classes via the :css_class option.
@@ -10,13 +10,15 @@
     css_classes(css_class ||= nil) { |classes|
       classes << "documents-#{document_index_view_type}"
     }
+
 -%>
 <div id="documents" class="<%= css_class -%>">
   <%- controller = {} -%>
   <%- docs.each_with_index do |doc, counter| -%>
-    <%- opt = { document: doc, document_counter: counter, dataset: '' } -%>
     <%- key = lens_key_for(doc) -%>
-    <%- controller[key] ||= lens_for(key).instance(@response, request) -%>
+    <%- doc = doc.as(key) -%>
+    <%- opt = { document: doc, document_counter: counter, dataset: '' } -%>
+    <%- controller[key] ||= lens_entry(key).instance(@response, request) -%>
     <%= controller[key].instance_exec(opt) do |locals| -%>
       <%- view_context.render('document', locals) -%>
     <%- end -%>

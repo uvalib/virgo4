@@ -9,8 +9,18 @@ require 'blacklight/lens'
 
 # VideoHelper
 #
+# @see CatalogHelper
+#
 module VideoHelper
+
   include CatalogHelper
+
+  def self.included(base)
+    __included(base, '[VideoHelper]')
+  end
+
+  # TODO: ???
+
 end
 
 __loading_end(__FILE__)

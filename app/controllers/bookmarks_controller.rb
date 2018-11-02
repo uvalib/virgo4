@@ -5,29 +5,39 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-require 'concerns/blacklight/bookmarks_ext'
-
-# Replaces the Blacklight class of the same name for Blacklight::Document
-# support.
+# BookmarksController
 #
-class BookmarksController < ApplicationController
+# @see BookmarksConcern
+#
+class BookmarksController < CatalogController
 
-  include Blacklight::BookmarksExt
-  include BlacklightAdvancedSearch::ControllerExt
-  include LensConcern
+  include BookmarksConcern
 
   # ===========================================================================
   # :section:
   # ===========================================================================
 
-  protected
+  public
 
-  # Special handling to avoid LensConcern in this one case.
+  # Initialize controller instance and set the Blacklight configuration from
+  # the class.
   #
   def initialize
     @blacklight_config = self.class.blacklight_config
-    super
+  end
+
+  # ===========================================================================
+  # :section: Blacklight::Controller overrides
+  # ===========================================================================
+
+  protected
+
+  # The default controller for searches.
+  #
+  # @return [Class]
+  #
+  def default_catalog_controller
+    CatalogController
   end
 
 end

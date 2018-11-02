@@ -1,0 +1,23 @@
+<%# app/views/advanced/_advanced_search_facets.html.erb -%>
+<%-
+  # From the original template:
+  #
+  # Used to render facets with checkboxes on advanced search form, we pretty
+  # much just use the built-in blacklight render_facet_partials helper.
+  #
+  # But we've provided a local override of the _facet_limit partial in our own
+  # `views/advanced/_facet_limit.html.erb`, that is written to include
+  # checkboxes for form selection.
+  #
+  # This is the default display of facets, but you can also choose to use
+  # _advanced_search_facets_as_select, for a chosen.js-compatible multi-select.
+
+  fields        ||= facet_field_names_for_advanced_search
+  suppress_link ||= true
+  template_opt = {}
+  template_opt[:suppress_link] = suppress_link if suppress_link
+
+-%>
+<div class="advanced-facet-limits panel-group">
+  <%= render_facet_partials(fields, template_opt) %>
+</div>

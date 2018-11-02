@@ -7,7 +7,6 @@
 __loading_begin(__FILE__)
 
 require 'blacklight/eds'
-require 'uva'
 
 # Common concerns of controllers that work with articles (EdsDocument).
 #
@@ -15,21 +14,22 @@ module EdsConcern
 
   extend ActiveSupport::Concern
 
-  include Blacklight::Eds::BaseEds
+  include Blacklight::Lens::Base
+  include ExportConcern
+  include MailConcern
+  include SearchConcern
 
-  # Code to be added to the controller class including this module.
   included do |base|
 
     __included(base, 'EdsConcern')
 
     include RescueConcern
-    include LensConcern
 
     # =========================================================================
     # :section: Helpers
     # =========================================================================
 
-    helper_method :default_catalog_controller if defined?(helper_method)
+    helper_method :default_catalog_controller if respond_to?(:helper_method)
 
     # =========================================================================
     # :section: Controller exception handling
@@ -43,28 +43,6 @@ module EdsConcern
 
     # Handle EBSCO EDS communication failures.
     rescue_from EBSCO::EDS::Error, with: :handle_ebsco_eds_error
-
-    # =========================================================================
-    # :section:
-    # =========================================================================
-
-    public
-
-    # The default controller for searches.
-    #
-    # @return [Class]
-    #
-    def default_catalog_controller
-      ArticlesController
-    end
-
-    # The default controller for searches.
-    #
-    # @return [Class]
-    #
-    def self.default_catalog_controller
-      ArticlesController
-    end
 
   end
 

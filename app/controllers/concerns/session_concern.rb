@@ -5,13 +5,14 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-
+# SessionConcern
+#
 module SessionConcern
 
   extend ActiveSupport::Concern
 
-  # Code to be added to the controller class including this module.
+  include BlacklightConfigurationHelper
+
   included do |base|
 
     __included(base, 'SessionConcern')
@@ -197,6 +198,7 @@ module SessionConcern
   # @see self#will_redirect
   #
   def conditional_redirect
+    return unless request.get?
     path = session.delete(:redirect)
     path = params     if path.is_a?(TrueClass)
     redirect_to(path) if path.present?

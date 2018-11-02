@@ -4,31 +4,78 @@
 // Page layout - header
 //=============================================================================
 
-#header-navbar {
-    // Make "Virgo" logo text visible.
-    .navbar-brand {
+// Make "Virgo" logo text visible.
+.navbar-brand {
 
-        width:           auto;
-        text-indent:     0.75em;
-        text-decoration: none;
-        font-size:       xx-large;
-        font-weight:     bold;
-        font-variant:    small-caps;
-        color:           whitesmoke;
+    display:         block;
+    width:           auto;
+    text-indent:     0;
+    text-decoration: none;
+    font-size:       xx-large;
+    font-weight:     bold;
+    font-variant:    small-caps;
+    color:           whitesmoke;
+    flex:            0 0 auto;
 
-        // Make the current lens less prominent than the application name.
-        .navbar-lens {
-            font-size:    smaller;
-            font-variant: none;
-        }
+    @if $logo-image {
+        background: transparent $logo-image no-repeat top left;
+    } @else {
+        background: transparent;
+    }
 
-        a {
-            color: inherit;
+    // Make the current lens less prominent than the application name.
+    .navbar-lens {
+        font-size:    smaller;
+        font-variant: none;
+    }
 
-            &:hover {
-                color:           #337ab7;
-                text-decoration: none;
-            }
+    a {
+        color: inherit;
+
+        &:hover {
+            color:           #337ab7;
+            text-decoration: none;
         }
     }
+}
+
+// Search bar below the top header.
+.navbar-search {
+
+    $x-separation: $grid-gutter-width / 2;
+
+    .search-query-form {
+
+        margin-right: $x-separation;
+        padding:      0;
+        flex:         3 1 auto;
+
+        // Search type drop-down menu.
+        .search_field {
+            flex: 1 1 auto;
+        }
+
+        // Search input box.
+        .twitter-typeahead {
+            flex: 3 1 auto;
+        }
+
+        // Search submit button.
+        .input-group-append {
+            flex: 0 0 auto;
+        }
+    }
+
+    .navbar-form {
+        margin: 2px $x-separation 2px 0;
+        flex:   1 1 auto;
+    }
+
+    .lens-menu {
+        margin:     0.5rem 0 -0.5rem;
+        flex-wrap:  nowrap;
+        flex:       1 1 auto;
+        align-self: flex-end;
+    }
+
 }

@@ -6,8 +6,8 @@ en:
 
     tools:
       librarian_view:   'Librarian view'
-      endnote:          'Export to EndNote'
       refworks:         'Export to RefWorks'
+      endnote:          'Export to EndNote'
       zotero:           'Export to Zotero RIS'
 
 
@@ -15,4 +15,10 @@ en:
       librarian_view:
         title:          'Librarian View'
         empty:          'No MARC metadata for this item.'
-        leader:         'LEADER %{leader}'
+        leader:         'LEADER'
+
+    bookmarks:
+      tools:
+        refworks:       'RefWorks'
+        endnote:        'EndNote'
+        zotero:         'Zotero'

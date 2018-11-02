@@ -5,8 +5,6 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-
 # Support for the "lens" concept.
 #
 # @see LensHelper
@@ -17,24 +15,15 @@ module LensConcern
 
   include LensHelper
 
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
-  # Code to be added to the controller class including this module.
   included do |base|
 
     __included(base, 'LensConcern')
-
-    include Blacklight::ConfigurableExt
 
     # =========================================================================
     # :section: Helpers
     # =========================================================================
 
-    helper_method :lens_key if defined?(helper_method)
+    helper_method :lens_key if respond_to?(:helper_method)
 
     # =========================================================================
     # :section: Controller methods

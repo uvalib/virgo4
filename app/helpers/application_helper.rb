@@ -5,15 +5,16 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-require 'config/_common'
-
 # Common helper methods.
 #
 module ApplicationHelper
 
   include UVA::Constants
   include UVA::Networks
+
+  def self.included(base)
+    __included(base, '[ApplicationHelper]')
+  end
 
   # Displayed only if a method is set up to avoid returning *nil*.
   NO_LINK_DISPLAY = I18n.t('blacklight.no_link').html_safe.freeze
@@ -70,15 +71,47 @@ module ApplicationHelper
     end
   end
 
+  # A close button for modal dialogs.
+  #
+  # @param [Hash, nil] opt            Button options.
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def modal_close(opt = nil)
+    html_opt = {
+      class:          'blacklight-modal-close close',
+      'data-dismiss': 'modal'
+    }
+    html_opt.merge!(opt) if opt.present?
+    icon = html_opt.delete(:icon) || '&times;'.html_safe
+    icon = content_tag(:span, icon, aria_hidden: true)
+    tip  = t('blacklight.modal.close', default: nil)
+    html_opt[:title]        ||= tip if tip
+    html_opt[:'aria-label'] ||= tip || 'Close'
+    content_tag(:button, icon, html_opt)
+  end
+
   # ===========================================================================
   # :section: Blacklight configuration "helper_methods"
   # ===========================================================================
 
   public
 
+  # Render a field as hidden.
+  #
+  # @param [Hash] options             Supplied by the presenter.
+  #
+  # @return [String, Array]
+  #
+  def raw_value(options = nil)
+    values = (options[:value] if options.is_a?(Hash))
+    values = Array.wrap(values).reject(&:blank?)
+    (values.size > 1) ? values : values.first
+  end
+
   # url_link
   #
-  # @param [Hash]      value        Supplied by Blacklight::FieldPresenter.
+  # @param [Hash]      value        Supplied by the presenter.
   # @param [Hash, nil] opt          Supplied internally to join multiple items.
   #
   # @option value [Hash]   :html_options        See below.
@@ -95,6 +128,7 @@ module ApplicationHelper
   # @see ActionView::Helper::OutputSafetyHelper#to_sentence
   #
   def url_link(value, opt = nil)
+    return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(value, opt)
     separator = opt.delete(:separator) || ' '
     result =
@@ -109,7 +143,7 @@ module ApplicationHelper
 
   # doi_link
   #
-  # @param [Hash]      value        Supplied by Blacklight::FieldPresenter.
+  # @param [Hash]      value        Supplied by the presenter.
   # @param [Hash, nil] opt          Supplied internally to join multiple items.
   #
   # @option value [Hash]   :html_options        See below.
@@ -122,6 +156,7 @@ module ApplicationHelper
   # @return [nil]                                 If no URLs were present.
   #
   def doi_link(value, opt = nil)
+    return raw_value(options) unless request.format.html?
     value, opt = extract_config_value(value, opt)
     separator = opt.delete(:separator)
     result =
@@ -165,7 +200,7 @@ module ApplicationHelper
       when Array
         opt   = opt.merge(separator: HTML_NEW_LINE) unless opt.key?(:separator)
     end
-    return value, opt
+    [value, opt]
   end
 
   # extract_config_options

@@ -11,40 +11,43 @@
       ' &ndash; '.html_safe << link_to(label, path, class: 'navbar-lens')
     end
 
-  # The caller may provide additional CSS classes via the :css_class or
-  # :navbar_css options.
-  css_class =
-    css_classes(css_class ||= nil) { |classes|
-      classes << 'navbar navbar-inverse navbar-static-top'
+  # The caller may provide additional CSS classes via the :header_css or
+  # :search_bar_css options.
+  header_css =
+    css_classes(header_css ||= nil) { |classes|
+      classes << 'navbar navbar-expand-md navbar-dark bg-dark topbar'
     }
-  navbar_css =
-    css_classes(navbar_css ||= nil) { |classes|
-      classes << 'navbar navbar-default navbar-static-top'
+  search_bar_css =
+    css_classes(search_bar_css ||= nil) { |classes|
+      classes << 'navbar navbar-expand-md navbar-light bg-light navbar-search'
+      classes << 'invisible' if params[:controller].to_s.include?('advanced')
     }
+
+  toggle_id   = 'user-util-collapse'
+  toggle_opts = { label: 'Toggle navigation', target: toggle_id }
+
 -%>
 
-<div id="header-navbar" class="<%= css_class -%>" role="navigation">
-  <div class="<%= container_classes %>">
-    <div class="navbar-header">
-      <button type="button"
-              class="navbar-toggle btn collapsed"
-              data-toggle="collapse"
-              data-target="#user-util-collapse">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <span class="navbar-brand"><%= logo -%><%= lens -%></span>
+<%# Application header -%>
+<nav class="<%= header_css -%>" role="navigation">
+  <div class="<%= container_classes -%>">
+
+    <%# Logo icon and current lens -%>
+    <span class="mb-0 navbar-brand"><%= logo -%><%= lens -%></span>
+
+    <%# "Hamburger" menu (visible for mobile) -%>
+    <%= render 'shared/navbar_toggle', toggle_opts %>
+
+    <%# Navbar menu -%>
+    <div id="<%= toggle_id -%>" class="collapse navbar-collapse justify-content-md-end">
+      <%= render 'shared/user_util_links' %>
     </div>
 
-    <div class="collapse navbar-collapse" id="user-util-collapse">
-      <%= render '/user_util_links' %>
-    </div>
   </div>
-</div>
+</nav>
 
-<div id="search-navbar" class="<%= navbar_css -%>" role="navigation">
+<%# Search bar -%>
+<div class="<%= search_bar_css -%>" role="navigation">
   <div class="<%= container_classes -%>">
     <%= render_search_bar %>
   </div>

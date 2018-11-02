@@ -5,7 +5,8 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/solr/search_builder_behavior_ext'
+require 'blacklight/search_builder'
+require 'blacklight/lens/search_builder_behavior'
 
 # SearchBuilder
 #
@@ -15,11 +16,15 @@ require 'blacklight/solr/search_builder_behavior_ext'
 #   def add_custom_data_to_query(solr_parameters)
 #     solr_parameters[:custom] = blacklight_params[:user_value]
 #   end
-#   
+#
+# @see Blacklight::SearchBuilder
+# @see Blacklight::Lens::SearchBuilderBehavior
+#
 class SearchBuilder < Blacklight::SearchBuilder
-  include Blacklight::Solr::SearchBuilderBehaviorExt
-  include BlacklightAdvancedSearch::AdvancedSearchBuilderExt
-  self.default_processor_chain += SB_ADV_SEARCH_FILTERS
+  include Blacklight::Lens::SearchBuilderBehavior
+  include BlacklightAdvancedSearch::AdvancedSearchBuilder
+  self.default_processor_chain += [:add_advanced_parse_q_to_solr, :add_advanced_search_to_solr]
 end
 
 __loading_end(__FILE__)
+

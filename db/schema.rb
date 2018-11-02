@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_05_25_002908) do
+ActiveRecord::Schema.define(version: 2018_10_06_195825) do
 
   create_table "bookmarks", force: :cascade do |t|
     t.integer "user_id", null: false
@@ -20,7 +20,7 @@ ActiveRecord::Schema.define(version: 2018_05_25_002908) do
     t.binary "title"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "search_lens"
+    t.string "lens"
     t.index ["document_id"], name: "index_bookmarks_on_document_id"
     t.index ["user_id"], name: "index_bookmarks_on_user_id"
   end

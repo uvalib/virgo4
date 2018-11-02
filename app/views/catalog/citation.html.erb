@@ -1,0 +1,15 @@
+<%# app/views/catalog/citation.html.erb -%>
+<%-
+  # Bibliographic citations modal dialog.
+  docs = documents ||= Array.wrap(@document || @documents)
+  title ||= t('blacklight.tools.citation', default: 'Bibliographic Citations')
+-%>
+<div class="citations-modal">
+  <div class="modal-header">
+    <h1 class="modal-title"><%= title -%></h1>
+    <%= modal_close %>
+  </div>
+  <div class="modal-body">
+    <%= render 'citation', documents: docs %>
+  </div>
+</div>

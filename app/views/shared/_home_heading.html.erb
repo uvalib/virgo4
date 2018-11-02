@@ -12,27 +12,13 @@
     }
   end
 
-  path       = request.fullpath
   total_cols = 12
-  head_cols  = 7
+  head_cols  = 5
   nav_cols   = total_cols - head_cols
-
-  lens_links = {
-    all:      root_path,
-    catalog:  search_catalog_path,
-    articles: search_articles_path,
-    video:    search_video_path,
-    music:    search_music_path,
-  }.map { |label, url|
-    next unless url
-    at_lens_home = (url == root_path) ? (path == url) : path.start_with?(url)
-    link = link_to(label.to_s.capitalize, url)
-    opt  = at_lens_home ? { class: 'disabled' } : {}
-    content_tag(:li, link, opt)
-  }.compact.join("\n").html_safe
+  lens_css   = "nav-pills nav-fill col-md-#{nav_cols}"
 
 -%>
-<div class="page-header row">
-  <h2 class="col-md-<%= head_cols %> page-heading"><%= heading %></h2>
-  <ul class="nav nav-pills col-md-<%= nav_cols %>"><%= lens_links %></ul>
+<div class="page-header row bg-light">
+  <h4 class="page-heading col-md-<%= head_cols %>"><%= heading %></h4>
+  <%= render 'shared/lens_menu', css: lens_css %>
 </div>

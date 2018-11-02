@@ -13,12 +13,7 @@
 __loading_begin(__FILE__)
 
 require 'faraday'
-
-# Load files from this subdirectory.
-_LIB_EXT_FARADAY_LOADS ||=
-  Dir[File.join(File.dirname(__FILE__), '**', '*.rb')].each do |path|
-    require(path) unless path == __FILE__
-  end
+require_subdir(__FILE__)
 
 Faraday::Middleware.register_middleware(
   eds_caching_middleware:    Faraday::EdsCachingMiddleware,

@@ -3,16 +3,47 @@
 # frozen_string_literal: true
 # warn_indent:           true
 #
-# Support for actively redefining objects defined in the EBSCO EDS gem.
+# Extensions for the EBSCO EDS gem.
 
 __loading_begin(__FILE__)
 
-require File.join(Rails.root, 'app/models/blacklight/eds')
+require 'ebsco/eds'
 
-# Load files from this subdirectory.
-_LIB_EXT_EBSCO_EDS_LOADS ||=
-  Dir[File.join(File.dirname(__FILE__), '**', '*.rb')].each do |path|
-    require(path) unless path == __FILE__
-  end
+module EBSCO::EDS
+
+  SOLR_SEARCH_TO_EBSCO_FIELD_CODE = {
+    author:          'AU',
+    subject:         'SU',
+    title:           'TI',
+    text:            'TX',
+    abstract:        'AB',
+    source:          'SO',
+    issn:            'IS',
+    isbn:            'IB',
+    descriptor:      'DE', # NOTE: not in EBSCO::EDS:Info
+    series:          'SE', # NOTE: not in EBSCO::EDS:Info
+    subject_heading: 'SH', # NOTE: not in EBSCO::EDS:Info
+    keywords:        'KW', # NOTE: not in EBSCO::EDS:Info
+  }.stringify_keys.freeze
+
+  # NOTE: without :eds_search_limiters_facet, :eds_publication_year_range_facet
+  SOLR_FACET_TO_EBSCO_FACET = {
+    eds_language_facet:             'Language',
+    eds_subject_topic_facet:        'SubjectEDS',
+    eds_subjects_geographic_facet:  'SubjectGeographic',
+    eds_publisher_facet:            'Publisher',
+    eds_journal_facet:              'Journal',
+    eds_category_facet:             'Category',
+    eds_library_location_facet:     'LocationLibrary',
+    eds_library_collection_facet:   'CollectionLibrary',
+    eds_author_university_facet:    'AuthorUniversity',
+    eds_publication_year_facet:     'PublicationYear',
+    eds_publication_type_facet:     'SourceType',
+    eds_content_provider_facet:     'ContentProvider',
+  }.stringify_keys.freeze
+
+end
+
+require_subdir(__FILE__)
 
 __loading_end(__FILE__)

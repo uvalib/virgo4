@@ -1,9 +1,9 @@
 <%# app/views/bookmarks/_tools.html.erb -%>
 <%-
-  # Tools that operate on multiple bookmarks.
-  # TODO: bookmark tools
+  # Tools for each individual bookmarked item.
+  # NOTE: Not currently used.
 
-  docs = document_list ||= @document_list
+  docs = document_list ||= @response&.documents
   return unless docs.present?
 
   # The caller may provide additional CSS classes via the :css_class option.
@@ -13,9 +13,20 @@
       classes << 'nav nav-pills'
     }
 
-  tools = nil # TODO: for now...
+  disabled_tools ||= []
+  template_opts = {
+    url_opts:       Blacklight::Parameters.sanitize(params.to_unsafe_h),
+    disabled_tools: disabled_tools
+  }
+  disabled_tools = disabled_tools[:show] if disabled_tools.is_a?(Hash)
+  disabled_tools = Array.wrap(disabled_tools)
 
 -%>
 <ul class="<%= css_class -%>">
-  <%= tools %>
+  <%- docs.each do |doc| -%>
+    <%= render_show_doc_actions(doc, template_opts) do |config, inner| %>
+      <%- next if disabled_tools.include?(config.key) -%>
+      <li class="nav-item"><%= inner %></li>
+    <%- end -%>
+  <%- end -%>
 </ul>

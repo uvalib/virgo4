@@ -1,0 +1,21 @@
+<%# app/views/shared/_navbar_toggle.html.erb -%>
+<%-
+  # "Hamburger" menu (visible for mobile)
+  css_classes ||= 'navbar-toggler navbar-toggler-right'
+  target      ||= 'user-util-collapse'
+  label       ||= 'Toggle navigation'
+  expanded    ||= false
+  options = {
+    type:             'button',
+    class:            css_classes,
+    'data-toggle':    'collapse',
+    'data-target':    "##{target}",
+    'aria-label':     label,
+    'aria-controls':  target,
+    'aria-expanded':  expanded
+  }
+
+-%>
+<%= content_tag(:button, options) do -%>
+  <span class="navbar-toggler-icon"></span>
+<%- end -%>

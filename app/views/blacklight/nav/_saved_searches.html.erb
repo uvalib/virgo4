@@ -1,0 +1,7 @@
+<%# app/views/blacklight/nav/_saved_searches.html.erb -%>
+<%-
+  label ||= t('blacklight.header_links.saved_searches')
+  url   ||= saved_searches_path
+
+-%>
+<%= link_to(label, url, class: 'nav-link') %>

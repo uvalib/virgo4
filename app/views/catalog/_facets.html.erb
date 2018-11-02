@@ -1,0 +1,19 @@
+<%# app/views/catalog/_facets.html.erb -%>
+<%-
+  return unless has_facet_values?
+  title     ||= t('blacklight.search.facets.title')
+  label     ||= t('blacklight.search.facets.toggle.label')
+  toggle_id ||= 'facet-panel-collapse'
+-%>
+<div id="facets" class="facets sidenav facets-toggleable-sm">
+
+  <div class="navbar">
+    <h2 class="facets-heading"><%= title -%></h2>
+    <%= render 'shared/navbar_toggle', label: label, target: toggle_id %>
+  </div>
+
+  <div id="<%= toggle_id -%>" class="facets-collapse collapse">
+    <%= render_facet_partials %>
+  </div>
+
+</div>

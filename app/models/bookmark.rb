@@ -5,21 +5,28 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-
 # This extends the model defined in the Blacklight gem to include the added
-# :search_lens column.
+# :lens column.
 #
-class Bookmark < ActiveRecord::Base
+class Bookmark < ApplicationRecord
 
-  include LensHelper
+  belongs_to :user,     polymorphic: true
+  belongs_to :document, polymorphic: true
 
-  # The search lens associated with this bookmark instance.
-  #
-  # @return [Symbol]
-  #
-  def lens
-    search_lens.to_s.to_sym.presence || current_lens_key
+  validates  :user_id,  presence: true
+
+  def document
+    document_type.new(document_type.unique_key => document_id)
+  end
+
+  def document_type
+    value = super if defined?(super)
+    value &&= value.constantize
+    value ||= default_document_type
+  end
+
+  def default_document_type
+    SolrDocument
   end
 
 end

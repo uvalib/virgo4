@@ -5,7 +5,7 @@
 
 __loading_begin(__FILE__)
 
-require 'ext/blacklight/marc/routes_override'
+require 'blacklight/lens'
 
 module Blacklight::Lens
 
@@ -13,7 +13,7 @@ module Blacklight::Lens
   #
   class Routes
 
-    include Blacklight::Lens::Config
+    DEFAULT_ROUTE_SETS = Blacklight::Lens::Configuration::Keys.lens_keys
 
     # =========================================================================
     # :section:
@@ -50,7 +50,7 @@ module Blacklight::Lens
     # @return [Array<Symbol>]
     #
     def default_route_sets
-      LENS_KEYS
+      DEFAULT_ROUTE_SETS
     end
 
     # route_sets
@@ -79,21 +79,19 @@ module Blacklight::Lens
 
     module RouteSets
 
-      include Blacklight::Lens::Config
-
-      LENS_KEYS.each do |lens|
-        show_opt = +", to: '#{lens}#show'"
-        case lens
-          when :catalog  then show_opt << ", as: 'show_solr_document'"
-          when :articles then show_opt << ", as: 'show_eds_document'"
-        end
+      DEFAULT_ROUTE_SETS.each do |lens|
         eval <<-EOS
           def #{lens}
             add_routes do
               get '#{lens}/home',       to: redirect('/#{lens}')
-              get '#{lens}/index',      to: redirect('/#{lens}?q=*'), as: '#{lens}_all'
-              get '#{lens}/show'        #{show_opt}
-              get '#{lens}/advanced',   to: '#{lens}_advanced#index', as: '#{lens}_advanced_search'
+
+              get '#{lens}/index',      to: redirect('/#{lens}?q=*'),
+                                        as: '#{lens}_all'
+
+              get '#{lens}/advanced',   to: '#{lens}_advanced#index',
+                                        as: '#{lens}_advanced_search',
+                                        controller: '#{lens}_advanced'
+
               get '#{lens}/opensearch', to: '#{lens}#opensearch'
             end
           end

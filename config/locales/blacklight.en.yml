@@ -5,7 +5,7 @@ en:
   blacklight:
 
     application_name:   'Virgo'
-    welcome:            'Welcome!'
+    welcome:            'Welcome to Virgo 4'
 
     back_to_bookmarks:  'Back to Bookmarks'
     back_to_search:     'Back to search'          # was: 'Back to Search'
@@ -99,7 +99,7 @@ en:
         language:       'Language: %{value}'
         url:            'URL:      %{url}'
 
-      success:          'Email Sent'
+      success:          'Email sent'
       errors:
         to:
           invalid:      'You must enter a valid email address.'
@@ -123,7 +123,7 @@ en:
         author:         ' by %{value}'
         url:            '%{url}'                  # was: 'Link: %{url}'
 
-      success:          'SMS Sent'
+      success:          'SMS text message sent'
       errors:
         to:
           invalid:      'You must enter a valid 10-digit phone number.'
@@ -351,6 +351,9 @@ en:
           count:            'Numerical Sort'
           index:            'A-Z Sort'
 
+        toggle:
+          label:            'Toggle facets'
+
       group:
         more:               'more »'
 
@@ -391,4 +394,3 @@ en:
 
       view:
         list:               'List'
-

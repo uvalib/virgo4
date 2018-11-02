@@ -1,0 +1,12 @@
+<%# app/views/bookmarks/_zotero.html.erb -%>
+<%-
+  zotero = export_format[:zotero]
+  docs = document_list ||= @document_list
+  return unless docs&.any? { |doc| doc.exports_as?(zotero) }
+  label ||= t('blacklight.bookmarks.tools.zotero')
+  path  ||= bookmarks_path(zotero, search_state.params_for_search)
+  opt   ||= { id: 'zoteroLink', class: 'btn btn-default' }
+-%>
+<li class="zotero">
+  <%= link_to(label, path, opt) %>
+</li>

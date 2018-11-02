@@ -5,9 +5,6 @@
 
 __loading_begin(__FILE__)
 
-require 'i18n'
-require 'uva'
-
 module Config
 
   # Config::Common
@@ -24,57 +21,52 @@ module Config
       words_connector
       two_words_connector
       last_word_connector
-    ).map { |k| [k, HTML_NEW_LINE] }.to_h.deep_freeze
+    ).map { |k| [k, ''] }.to_h.deep_freeze
 
     # =========================================================================
     # :section:
     # =========================================================================
 
-    # Shortcut to `I18n.translate`.
-    #
-    # @param [Array] args
-    #
-    # @return [String, nil]
-    #
-    def t(*args)
-      I18n.translate(*args)
-    end
+    public
 
-    # Attempt to find a localized string based on a succession of I18n keys
-    # and/or literal strings.
+    # Add tools to the configuration.
     #
-    # @param [Array<Symbol,String>] *i18n_keys
+    # This method allows each repository-specific configuration to insert a
+    # consistent set of definitions for tools and their setup.
     #
-    # @return [String]
+    # Certain show tools cause methods to be inserted into the controller via
+    # ActionBuilder.  Tools that include the `define_method: false` option must
+    # be defined manually.
     #
-    def try_translate(*i18n_keys)
-      options = i18n_keys.last.is_a?(Hash) ? i18n_keys.pop.dup : {}
-      primary_key, *other_keys = i18n_keys.compact
-      options[:default] = other_keys + Array.wrap(options[:default])
-      I18n.translate(primary_key, options)
-    end
+    # @param [Blacklight::Configuration] config
+    #
+    # @return [Blacklight::Configuration]   The modified configuration.
+    #
+    # @see Blacklight::ActionBuilder#build
+    #
+    def add_tools!(config)
+      # rubocop:disable Metrics/LineLength
 
-    # Lookup a localized label for the given configuration field.
-    #
-    # @param [Blacklight::Configuration::Field] field
-    # @param [Symbol, String, nil]              field_type
-    # @param [Symbol, String, nil]              lens
-    #
-    # @return [String]
-    #
-    def field_label(field, field_type = nil, lens = nil)
-      name = field.key.to_s.sub(/^eds_/, '').sub(/_(facet|display)$/, '')
-      type = field_type.to_s.presence
-      type = "#{type}_field" if type && !type.end_with?('_field')
-      lens = Blacklight::Lens.key_for(lens, false)
-      keys = []
-      keys << :"blacklight.#{lens}.#{type}.#{name}" if lens && type
-      keys << :"blacklight.#{lens}.field.#{name}"   if lens
-      keys << :"blacklight.#{type}.#{name}"         if type
-      keys << :"blacklight.field.#{name}"
-      keys << name.humanize
-      keys.delete_if(&:blank?)
-      try_translate(*keys)
+      config.add_nav_action :bookmark,                partial: 'blacklight/nav/bookmark',                                 if: :render_bookmarks_control?
+      config.add_nav_action :saved_searches,          partial: 'blacklight/nav/saved_searches',                           if: :render_saved_searches?
+      config.add_nav_action :search_history,          partial: 'blacklight/nav/search_history',                           if: :render_search_history?
+
+      config.add_show_tools_partial :bookmark,        partial: 'bookmark_control',                                        if: :render_bookmark_action?
+      config.add_show_tools_partial :email,           callback: :email_action, validator: :validate_email_params,         if: :render_email_action?
+      config.add_show_tools_partial :sms,             callback: :sms_action,   validator: :validate_sms_params,           if: :render_sms_action?
+      config.add_show_tools_partial :citation,                                                                            if: :render_citation_action?
+      config.add_show_tools_partial :librarian_view,                                               define_method: false,  if: :render_librarian_view_control?
+      config.add_show_tools_partial :refworks,        modal: false, path: :refworks_solr_document_path, define_method: false,  if: :render_refworks_action?
+      config.add_show_tools_partial :endnote,         modal: false,                                define_method: false,  if: :render_endnote_action?
+      config.add_show_tools_partial :zotero,          modal: false,                                define_method: false,  if: :render_zotero_action?
+
+      config.add_results_document_tool :bookmark,     partial: 'bookmark_control',                                        if: :render_bookmarks_control?
+
+      config.add_results_collection_tool :sort_widget,                                                                    if: :render_sort_widget?
+      config.add_results_collection_tool :per_page_widget,                                                                if: :render_per_page_widget?
+      config.add_results_collection_tool :view_type_group,                                                                if: :render_view_type_group?
+
+      # rubocop:enable Metrics/LineLength
     end
 
     # Get field labels from I18n, including labels specific to this lens and
@@ -82,17 +74,18 @@ module Config
     # regardless of the lens.
     #
     # @param [Blacklight::Configuration] config
-    # @param [Symbol, String, nil]       lens_key
     #
-    def finalize_configuration(config, lens_key = nil)
+    # @return [Blacklight::Configuration]   The modified configuration.
+    #
+    def finalize_configuration!(config)
 
-      lens_key ||= config.lens_key
+      lens_key = config.lens_key
 
       # === Facet fields ===
 
       # Set facet field labels for this lens.
       config.facet_fields.each_pair do |_, field|
-        field.label = field_label(field, 'facet_field', lens_key)
+        field.label = field.display_label(:facet, lens_key)
       end
 
       # Have Blacklight send all facet field names to Solr.
@@ -103,7 +96,7 @@ module Config
 
       # Set index field labels for this lens.
       config.index_fields.each_pair do |_, field|
-        field.label = field_label(field, 'index_field', lens_key)
+        field.label = field.display_label(:index, lens_key)
       end
 
       # === Item details (show page) metadata fields ===
@@ -111,7 +104,7 @@ module Config
       # Set show field labels for this lens and supply options that apply to
       # multiple field configurations.
       config.show_fields.each_pair do |_, field|
-        field.label = field_label(field, 'show_field', lens_key)
+        field.label = field.display_label(:show, lens_key)
         field.separator_options ||= HTML_LINES
       end
 
@@ -119,15 +112,17 @@ module Config
 
       # Set search field labels for this lens.
       config.search_fields.each_pair do |_, field|
-        field.label = field_label(field, 'search_field', lens_key)
+        field.label = field.display_label(:search, lens_key)
       end
 
       # === Sort fields ===
 
       # Set sort field labels for this lens.
       config.sort_fields.each_pair do |_, field|
-        field.label = field_label(field, 'sort_field', lens_key)
+        field.label = field.display_label(:sort, lens_key)
       end
+
+      config
 
     end
 

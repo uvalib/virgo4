@@ -8,8 +8,8 @@ Devise.setup do |config|
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
-  # config.secret_key = '4aa54515582470ba8fe30096ad7a74346df3307e559cf60e8c7ad59e4a80ff85534788e47755348f837dbf8e4341b47689328b436ab234c73d3cc861159f34d4'
-  
+  # config.secret_key = '047ce6ac5f92e3219be410646516eb216175ab50aff7a50fcd36e6804e4909fb77f70ae4fa1695273afef26e396acffba80d612291019147baa435fce4cae11b'
+
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.
   # config.parent_controller = 'DeviseController'
@@ -114,7 +114,7 @@ Devise.setup do |config|
   config.stretches = Rails.env.test? ? 1 : 11
 
   # Set up a pepper to generate the hashed password.
-  # config.pepper = '5768aa4b8f520c50ef7dbb764811e8864d429f24fae8ac9b4882949733ec48bdaff9fcf9e840950d9415e76e2e38df6f91e59ed965f6f6f8b61a03966289afbb'
+  # config.pepper = 'af675023b2ecdb0fbdb99c4fea5a987051f51e4ce93259f4b30dfcf32f93131fc5d64ea6d3a4a6e4480bbf1e90b90b8fb9ea037adc060bc035d0b655f8f26a79'
 
   # Send a notification to the original email when the user's email is changed.
   # config.send_email_changed_notification = false
@@ -280,4 +280,11 @@ Devise.setup do |config|
   # When using OmniAuth, Devise cannot automatically set OmniAuth path,
   # so you need to do it manually. For the users scope, it would be:
   # config.omniauth_path_prefix = '/my_engine/users/auth'
+
+  # ==> Turbolinks configuration
+  # If your app is using Turbolinks, Turbolinks::Controller needs to be
+  # included to make redirection work correctly:
+  ActiveSupport.on_load(:devise_failure_app) do
+    include Turbolinks::Controller
+  end
 end

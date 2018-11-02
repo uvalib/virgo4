@@ -5,17 +5,14 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-require 'blacklight_advanced_search/advanced_controller_solr'
-
 # Overrides the Blacklight Advanced Search class of the same name.
 #
-# Compare with:
-# @see AdvancedController
+# @see BlacklightAdvancedSearch::AdvancedController
 #
-class CatalogAdvancedController < BlacklightAdvancedSearch::AdvancedControllerSolr
+class CatalogAdvancedController < BlacklightAdvancedSearch::AdvancedController
+  include AdvancedSearchConcern
   include CatalogConcern
-  include BlacklightAdvancedSearch::ControllerExt
+  include LensConcern
 end
 
 __loading_end(__FILE__)

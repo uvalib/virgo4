@@ -13,7 +13,7 @@
     'Music search "home" page'        => music_home_path,
     'Music advanced search'           => music_advanced_search_path,
     'User-selected bookmarked items'  => bookmarks_path,
-    'User-selected saved searches'    => blacklight.saved_searches_path,
+    'User-selected saved searches'    => saved_searches_path,
     'Searches for current session'    => blacklight.search_history_path,
   }.map { |td, th|
     content_tag(:tr) do
@@ -23,17 +23,26 @@
 
 -%>
 
-<div>
-  <h3 class='section-heading'>Welcome</h3>
-  <p>
-    This is a demonstration of Blacklight 6 with "Blacklight Lens"
+<div class="jumbotron text-center">
+  <h1 class="jumbotron-heading"><%= t('blacklight.welcome') -%></h1>
+  <p class="lead">
+    Now with Blacklight 7
+  </p>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    This is a demonstration of Blacklight 7 with "Blacklight Lens"
     modifications &ndash; supporting retrieval from multiple index search
     providers (Solr for Catalog search; EBSCO Discovery Service [EDS] for
     Articles search) and tailored configurations to provide context-driven
     search experiences (e.g. Video and Music variations on Catalog search).
-  </p>
-  <%- if links.present? -%>
-    <p>Routes include:</p>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <h3 class="card-title">Routes include:</h3>
     <table style="width: 100%">
       <thead>
         <tr>
@@ -43,17 +52,17 @@
       </thead>
       <%= links %>
     </table>
-  <%- end -%>
+  </div>
 </div>
 
 <%# This is the same panel shown in the Rails welcome template -%>
-<div id="about">
-  <h3 class='section-heading'>
+<div id="about" class="card">
+  <h3 class='card-header collapsed collapse-toggle' data-toggle="collapse" data-target="#about-env-content">
     <a id="about-env" href="/rails/info/properties">
       About your application&rsquo;s environment
     </a>
   </h3>
-  <div id="about-env-content" class="well" style="display: none"></div>
+  <div id="about-env-content" class="card-body collapse"></div>
 </div>
 
 <script>

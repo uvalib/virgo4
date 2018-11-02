@@ -1,0 +1,17 @@
+<%# app/views/catalog/sms_success.html.erb -%>
+<%-
+  # SMS text message response modal dialog.
+  title ||= t('blacklight.sms.form.title', default: 'Text Message')
+-%>
+<div data-blacklight-modal="container">
+  <div class="sms-response-modal">
+    <div class="modal-header">
+      <h1 class="modal-title"><%= title -%></h1>
+      <%= modal_close %>
+    </div>
+    <div class="modal-body">
+      <%= render 'shared/flash_msg' %>
+      <span data-blacklight-modal="close"></span>
+    </div>
+  </div>
+</div>

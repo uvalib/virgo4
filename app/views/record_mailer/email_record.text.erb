@@ -1,0 +1,11 @@
+<%# app/views/record_mailer/email_record.text.erb -%>
+<%-
+  documents ||= Array.wrap(@document || @documents)
+  url_opt   ||= @url_gen_params || {}
+  message   ||= @message        || ''
+-%>
+<%- documents.each do |doc| -%>
+<%=   doc.to_email_text %>
+<%=   t('blacklight.email.text.url', url: full_url_for(url_for_document(doc, url_opt))) %>
+<%- end -%>
+<%= t('blacklight.email.text.message', message: message) %>

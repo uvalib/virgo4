@@ -2,40 +2,39 @@
 <%-
   # Facet popup pagination.
 
-  ss  = search_state.to_h
-  opt = { data: { ajax_modal: 'preserve' } }
+  search   = search_state.to_h
+  base_opt = { data: { blacklight_modal: 'preserve' } }
 
   prev_label = raw(t('views.pagination.previous'))
   next_label = raw(t('views.pagination.next'))
   prev_opt = next_opt =
-    opt.merge(
-      params:     ss,
-      param_name: blacklight_config.facet_paginator_class.request_keys[:page],
+    base_opt.merge(
       class:      'btn btn-link',
+      params:     search,
+      param_name: blacklight_config.facet_paginator_class.request_keys[:page],
     )
 
-  index_css = 'az btn btn-default'
-  count_css = 'numeric btn btn-default'
+  index_css = 'az btn btn-outline-secondary'
+  count_css = 'numeric btn btn-outline-secondary'
 
   current_page = @pagination.current_page
   current_sort = @pagination.sort
 
   index_sort_label = t('blacklight.search.facets.sort.index')
   count_sort_label = t('blacklight.search.facets.sort.count')
-  index_sort_path  = @pagination.params_for_resort_url('index', ss)
-  count_sort_path  = @pagination.params_for_resort_url('count', ss)
-  index_sort_opt   = opt.merge(class: "sort_change #{index_css}")
-  count_sort_opt   = opt.merge(class: "sort_change #{count_css}")
-
+  index_sort_path  = @pagination.params_for_resort_url('index', search)
+  count_sort_path  = @pagination.params_for_resort_url('count', search)
+  index_sort_opt   = base_opt.merge(class: "sort_change #{index_css}")
+  count_sort_opt   = base_opt.merge(class: "sort_change #{count_css}")
 -%>
 
-<div class="prev_next_links btn-group">
+<div class="prev-next-links btn-group">
   <%= link_to_previous_page(@pagination, prev_label, prev_opt) do -%>
-    <span class="disabled btn btn-disabled"><%= prev_label %></span>
+    <span class="btn disabled"><%= prev_label %></span>
   <%- end -%>
 
   <%= link_to_next_page(@pagination, next_label, next_opt) do -%>
-    <span class="disabled btn btn-disabled"><%= next_label %></span>
+    <span class="btn disabled"><%= next_label %></span>
   <%- end -%>
 </div>
 

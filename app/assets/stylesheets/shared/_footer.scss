@@ -18,14 +18,14 @@
         margin-top:    1em;
         margin-bottom: 1em;
         padding:       0;
-        color:         $navbar-inverse-color;
+        color:         $navbar-dark-color;
 
         // Restore link colors // TODO: why?
         a {
-                         color: $navbar-inverse-link-color;
-            &:active   { color: $navbar-inverse-link-active-color;   }
-            &:hover    { color: $navbar-inverse-link-hover-color;    }
-            &:disabled { color: $navbar-inverse-link-disabled-color; }
+                         color: $navbar-dark-color;
+            &:active   { color: $navbar-dark-active-color; }
+            &:hover    { color: $navbar-dark-hover-color; }
+            &:disabled { color: $navbar-dark-disabled-color; }
         }
 
         .address {

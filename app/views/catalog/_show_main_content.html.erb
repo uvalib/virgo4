@@ -39,9 +39,8 @@
   coins = doc.export_as_openurl_ctx_kev(document_partial_name(doc))
   coins &&= content_tag(:span, '', class: 'Z3988', title: h(coins))
 
-  partials = blacklight_config(doc).view_config(:show).partials
+  partials = blacklight_config_for(doc).view_config(:show).partials
   locals   = { document_counter: counter }
-
 -%>
 
 <%= render 'previous_next_doc' %>

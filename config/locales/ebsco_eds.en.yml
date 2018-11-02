@@ -49,4 +49,7 @@ en:
         icon:   'Custom Link Icon'
 
     bib_publication_date:
-      format:   '%04d-%02d-%02d'
+      width:
+        year:   4
+        month:  2
+        day:    2

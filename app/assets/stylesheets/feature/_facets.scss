@@ -1,0 +1,254 @@
+// app/assets/stylesheets/shared/_facets.scss
+
+//=============================================================================
+// Facet sidebar
+//=============================================================================
+
+.facets-heading {
+    margin-right: -1rem;
+}
+
+.facets-collapse {
+
+    .facet-limit {
+
+        margin-bottom: $spacer / 2;
+
+        .facet-field-heading {
+            padding: 0.75rem 1rem;
+        }
+
+        .facet-content {
+
+            padding-top: 0.66rem;
+
+            // Normal facets
+            > .facet-values {
+
+                display:        flex;
+                flex-direction: column;
+                margin-bottom:  0;
+
+                li {
+
+                    display:         flex;
+                    justify-content: space-between;
+                    margin:          0;
+                    border-bottom:   1px solid #eeeeee;
+
+                    &:last-of-type {
+                        border-bottom: none;
+                    }
+
+                    &.more-facets {
+                        margin-top:    0.66rem;
+                        font-weight:   bold;
+                        font-variant:  small-caps;
+                        border-bottom: none;
+                    }
+                }
+
+                .facet-label,
+                .facet-count {
+                    display:     block;
+                    margin:      0;
+                    padding:     0;
+                    text-indent: 0;
+                }
+
+                .facet-label {
+                    padding: 0.25rem 0;
+                    hyphens: none;
+                    flex:    1 1 auto;
+                }
+
+                .facet-count {
+                    margin: auto 0;
+                    flex:   1 1 5rem;
+                }
+            }
+
+            // Pivot facets
+            > .pivot-facet {
+
+                .facet-values {
+
+                    .facet-label {
+
+                    }
+
+                    .facet-count {
+
+                    }
+                }
+
+                .pivot-facet {
+
+                }
+            }
+        }
+    }
+
+}
+
+//=============================================================================
+// Advanced search form facets
+//=============================================================================
+
+.advanced-facet-limits {
+
+    .facet-values {
+
+        display:        flex;
+        flex-direction: column;
+
+        > li {
+
+            display: flex;
+
+            .facet-checkbox {
+                display:        flex;
+                margin:         auto 0.5rem auto 0;
+                padding-bottom: 0.25rem;
+                flex:           0 0 auto;
+            }
+
+            .label-and-count {
+
+                display:      flex;
+                padding-left: 0;
+                flex:         1 1 auto;
+
+                label {
+
+                    display:       flex;
+                    margin-bottom: 0;
+                    flex:          1 0 auto;
+
+                    .facet-label {
+                        display:       flex;
+                        padding-right: 0;
+                        flex:          1 0 auto;
+                    }
+
+                    .facet-count {
+                        display:  inline-block;
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+//=============================================================================
+// Facet modal dialog (@see app/views/catalog/facet.html.erb)
+//=============================================================================
+
+.facet-modal {
+
+    min-height: 98vh;
+    max-height: 98vh;
+
+    .modal-header {
+
+        flex:         0 0 auto;
+        justify-self: flex-start;
+
+        .modal-title {
+            line-height: 1;
+        }
+
+        .blacklight-modal-close {
+            //margin:  0;
+        }
+    }
+
+    .modal-body {
+
+        display:        flex;
+        flex-direction: column;
+        flex:           1 1 auto;
+        max-height:     72.5vh;
+
+        .alpha-filter {
+
+            flex: 0 0 auto;
+
+            // Make sure that filter selections with lots of choices don't
+            // extend beyond the edges of the modal dialog.
+            .pagination {
+                flex-wrap: wrap;
+            }
+        }
+
+        .facet-extended-list {
+
+            flex: 0 1 auto;
+
+            // When the pagination links are visible (for "A-Z Sort") make sure
+            // that items don't get pushed below the bottom of the display
+            // area.
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .facet-values {
+
+            display:        flex;
+            flex-direction: column;
+            margin-bottom:  0;
+
+            li {
+                display:        flex;
+                flex-direction: row;
+            }
+
+            .facet-label,
+            .facet-count {
+                display:     block;
+                padding:     0;
+                text-indent: 0;
+            }
+
+            .facet-label {
+                margin: 0.25rem 0;
+                flex:   3 1 auto;
+            }
+
+            .facet-count {
+                margin: 0 0.5rem 0 0;
+                flex:   1 1 5rem;
+            }
+        }
+    }
+
+    .modal-footer {
+        flex:         0 0 auto;
+        justify-self: flex-end;
+        padding-top:  0;
+    }
+
+    // To accomodate a centered page number, .float-md-left and .float-md-right
+    // have to be eliminated from the button groups within this element.
+    .facet-pagination.bottom {
+
+        display:         flex;
+        width:           100%;
+        margin-bottom:   -0.5rem;
+        padding-top:     1rem;
+        justify-content: space-between;
+
+        &:before, &:after { display: none; }
+
+        .current-page {
+            cursor: default;
+        }
+
+        .sort_options {
+            .active {
+                cursor: default;
+            }
+        }
+    }
+}

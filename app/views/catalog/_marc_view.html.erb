@@ -1,0 +1,39 @@
+<%# app/views/catalog/_marc_view.html.erb -%>
+<%-
+  doc = document ||= @document
+  marc_fields = doc&.to_marc
+  return unless marc_fields.present?
+  leader = t('blacklight.search.librarian_view.leader', default: 'LEADER')
+  valid  = '000'..'999'
+  blank  = '&nbsp'.html_safe
+-%>
+<div id="marc_view" class="modal-body">
+  <div class="leader field">
+    <div class="tag_ind"><%= leader -%></div>
+    <span class="control_field_values"><%= h(marc_fields.leader) -%></span>
+  </div>
+  <%- marc_fields.each do |field| -%>
+    <%- next unless valid.include?(field.tag) -%>
+    <div class="field">
+      <%- tag = content_tag(:span, field.tag, class: 'tag') -%>
+      <%- if field.is_a?(MARC::ControlField) -%>
+        <div class="tag_ind"><%= tag -%></div>
+        <span class="control_field_values"><%= h(field.value) -%></span>
+      <%- else -%>
+        <%- ind1 = field.indicator1.presence || blank -%>
+        <%- ind2 = field.indicator2.presence || blank -%>
+        <%- ind1 = content_tag(:span, ind1, class: 'ind1') -%>
+        <%- ind2 = content_tag(:span, ind2, class: 'ind2') -%>
+        <div class="tag_ind"><%= tag -%><%= ind1 -%><%= ind2 -%></div>
+        <div class="subfields">
+          <%- field.each do |subfield| -%>
+            <span class="subfield">
+              <span class="sub_code"><%= h(subfield.code) -%></span>|
+              <span class="sub_value"><%= h(subfield.value) -%></span>
+            </span>
+          <%- end -%>
+        </div>
+      <%- end -%>
+    </div>
+  <%- end -%>
+</div>

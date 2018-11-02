@@ -1,0 +1,59 @@
+// app/assets/stylesheets/shared/_lens.scss
+
+// Catalog lens colors.
+$color-catalog:  $orange;
+$color-articles: $blue;
+$color-music:    $indigo;
+$color-video:    $green;
+
+// Catalog lens background colors
+$bg-color-opacity:  0.3;
+$bg-color-catalog:  rgba($color-catalog,  $bg-color-opacity);
+$bg-color-articles: rgba($color-articles, $bg-color-opacity);
+$bg-color-music:    rgba($color-music,    $bg-color-opacity);
+$bg-color-video:    rgba($color-video,    $bg-color-opacity);
+
+// Catalog lens border colors
+$border-color-opacity:  0.9;
+$border-color-catalog:  rgba($color-catalog,  $border-color-opacity);
+$border-color-articles: rgba($color-articles, $border-color-opacity);
+$border-color-music:    rgba($color-music,    $border-color-opacity);
+$border-color-video:    rgba($color-video,    $border-color-opacity);
+
+//=============================================================================
+// Lens markers (search history, saved searches, etc.)
+//=============================================================================
+
+.lens-type {
+
+    .label {
+
+        padding:        0 0.2rem;
+        text-align:     center;
+        vertical-align: text-top;
+        background:     transparent;
+        border:         1px solid transparent;
+        border-radius:  4px;
+
+
+        &.catalog-search {
+            background-color: $bg-color-catalog;
+            border-color:     $border-color-catalog;
+        }
+
+        &.articles-search {
+            background-color: $bg-color-articles;
+            border-color:     $border-color-articles;
+        }
+
+        &.music-search {
+            background-color: $bg-color-music;
+            border-color:     $border-color-music;
+        }
+
+        &.video-search {
+            background-color: $bg-color-video;
+            border-color:     $border-color-video;
+        }
+    }
+}

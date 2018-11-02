@@ -6,50 +6,29 @@
 __loading_begin(__FILE__)
 
 require 'blacklight/eds'
+require 'blacklight/lens/response'
 
 # Blacklight::Eds::Response
 #
-# Derived from:
-# @see Blacklight::Solr::Response
+# @see Blacklight::Lens::Response
 #
-class Blacklight::Eds::Response < Blacklight::Solr::Response
+class Blacklight::Eds::Response < Blacklight::Lens::Response
 
-  require_dependency 'blacklight/eds/response/facets_eds'
-  include FacetsEds
+  require_relative 'response/facets'
+  include Blacklight::Eds::Response::Facets
 
   # ===========================================================================
   # :section: Blacklight::Solr::Response overrides
   # ===========================================================================
 
-  private
+  public
 
-  # force_to_utf8
+  # document_factory
   #
-  # @param [Hash, Array, String] value
+  # @return [Class] (Blacklight::Eds::DocumentFactory)
   #
-  # @return [Hash, Array, String]     Potentially modified value.
-  #
-  # This method overrides:
-  # @see Blacklight::Solr::Response#force_to_utf8
-  #
-  # NOTE: the original function doesn't appear to handle the String case right
-  #
-  def force_to_utf8(value)
-    case value
-      when Hash
-        value.each { |k, v| value[k] = force_to_utf8(v) }
-      when Array
-        value.each { |v| force_to_utf8(v) }
-      when String
-        unless value.encoding == Encoding::UTF_8
-          Log.warn {
-            "Found a non UTF-8 value in #{self.class} with encoding " \
-            "#{value.encoding} - #{value.inspect}"
-          }
-          value.force_encoding('UTF-8')
-        end
-    end
-    value
+  def document_factory
+    blacklight_config&.document_factory || Blacklight::Eds::DocumentFactory
   end
 
 end

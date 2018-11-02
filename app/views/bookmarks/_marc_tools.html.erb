@@ -1,0 +1,22 @@
+<%# app/views/bookmarks/_marc_tools.html.erb -%>
+<%-
+  # Tools for all bookmarked items in bulk.
+
+  docs = document_list ||= @response&.documents
+  return unless docs.present?
+
+  # The caller may provide additional CSS classes via the :css_class option.
+  css_class =
+    css_classes(css_class ||= nil) { |classes|
+      classes << "#{controller_name}Tools"
+      classes << 'nav nav-pills'
+    }
+
+  template_opts = { document_list: docs }
+
+-%>
+<ul class="<%= css_class -%>">
+  <%= render 'refworks', template_opts %>
+  <%= render 'endnote', template_opts %>
+  <%= render 'zotero', template_opts %>
+</ul>

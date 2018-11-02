@@ -1,0 +1,26 @@
+<%# app/views/catalog/_facet_pivot.html.erb -%>
+<%-
+  display_facet ||= []
+  field_name    ||= ''
+  return unless display_facet.present? && field_name.present?
+
+  suppress_link ||= false
+  template_opt = {}
+  template_opt[:suppress_link] = suppress_link if suppress_link
+-%>
+<ul class="pivot-facet list-unstyled">
+  <%- display_facet.items.each do |item| -%>
+    <li>
+      <span class="facet-values">
+        <%- if facet_in_params?(field_name, item) -%>
+          <%= render_selected_facet_value(field_name, item, template_opt) %>
+        <%- else -%>
+          <%= render_facet_value(field_name, item, template_opt) %>
+        <%- end -%>
+      </span>
+      <%- if item.items.present? -%>
+        <%= render 'facet_pivot', template_opt.merge(display_facet: item, field_name: field_name) %>
+      <%- end -%>
+    </li>
+  <%- end -%>
+</ul>

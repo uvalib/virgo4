@@ -5,18 +5,15 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/eds'
-require 'blacklight_advanced_search/advanced_controller_eds'
-
 # AdvancedController variant for articles.
 #
 # Compare with:
 # @see CatalogAdvancedController
 #
-class ArticlesAdvancedController < BlacklightAdvancedSearch::AdvancedControllerEds
+class ArticlesAdvancedController < BlacklightAdvancedSearch::AdvancedController
+  include AdvancedSearchConcern
   include ArticlesConcern
-  include Blacklight::Eds::CatalogEds
-  include BlacklightAdvancedSearch::ControllerExt
+  include LensConcern
 end
 
 __loading_end(__FILE__)

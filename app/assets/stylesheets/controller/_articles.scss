@@ -1,0 +1,385 @@
+// app/assets/stylesheets/controllers/_articles.scss
+
+//=============================================================================
+// Articles - Settings
+//=============================================================================
+
+// Control the width of the abstract:
+//
+//  *true*  = Use all available horizontal space to up the right edge of the
+//              display.
+//
+//  *false* = Constrain to the width of the metadata area so that text does not
+//              encroach on the area under the tools panel.
+//
+$article-abstract-full-width: false;
+
+// Control the width of the full-text viewer:
+//
+//  *true*  = Use all available horizontal space to up the right edge of the
+//              display.
+//
+//  *false* = Constrain to the width of the metadata area so that text does not
+//              encroach on the area under the tools panel.
+//
+$article-fulltext-full-width: true;
+
+//=============================================================================
+// Articles - EBSCO XML fields
+//=============================================================================
+
+// On search result entries for:
+//  :eds_composed_title ("Published in")
+//  :eds_authors_composed
+//  :eds_subjects
+//
+// @see Blacklight::Eds::Document#prepare
+//
+searchLink {
+    font-style: italic;
+}
+relatesTo {
+    &:before { content: "[" }
+    &:after  { content: "]" }
+}
+
+//=============================================================================
+// Articles - Definitions
+//=============================================================================
+
+// Articles panels
+%article-panel {
+    padding:       0.5em;
+    border-radius: 4px;
+    border:        1px solid #888;
+}
+
+// Span full width of content area.
+%article-full-width {
+    width:       100%;
+    margin-left: 0;
+}
+
+//=============================================================================
+// Articles - General
+//=============================================================================
+
+// Links
+dt.blacklight-eds_plink {
+    visibility: hidden;
+}
+
+//=============================================================================
+// Articles - Show pages
+//=============================================================================
+
+// Other (translated) titles.
+dd.blacklight-eds_other_titles {
+    font-weight: bold;
+}
+
+dd.blacklight-eds_publication_type_facet {
+    @extend %dd-item-format;
+}
+
+// Abstract.
+dt.blacklight-eds_abstract {
+    @if $article-abstract-full-width {
+        display: none;
+    }
+}
+dd.blacklight-eds_abstract {
+    //@extend %article-panel;
+    @if $article-abstract-full-width {
+        @extend %article-full-width;
+    }
+}
+
+// Embedded full text.
+dt.blacklight-eds_html_fulltext {
+    @if $article-fulltext-full-width {
+        @extend .sr-only;
+    }
+    @else {
+        visibility: hidden;
+    }
+}
+dd.blacklight-eds_html_fulltext {
+
+    // Undo .col-md-9 settings.
+    @if $article-fulltext-full-width {
+        flex:      unset;
+        max-width: unset;
+    }
+
+    > .anchor {
+        margin-top:    0;
+        margin-bottom: 0.75em;
+    }
+
+    > .scroller {
+
+        @extend %article-panel;
+        @if $article-fulltext-full-width {
+            @extend %article-full-width;
+        }
+
+        max-height: 97vh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        resize:     both;
+
+        //=====================================================================
+        // EBSCO full-text # TODO: Relocate to its own file
+        //=====================================================================
+
+        h1 {
+            margin-top: 0;
+            font-size:  x-large;
+        }
+
+        h2 {
+            font-size:  large;
+        }
+
+        // Treat each paragraph and other top-level element as a block.
+        > :not(br) {
+            display:       block;
+            margin-top:    0;
+            margin-bottom: 0.75em;
+        }
+
+        // === Leading content elements (usually seen once at the start)
+
+        // Article ID and other information (<anid> in the received data).
+        > anid {
+            word-break:   break-all;
+            font-variant: all-small-caps;
+            color:        gray;
+        }
+
+        // Journal section (<jsection> in the received data).
+        > jsection {
+            margin-top:   0.75em;
+            padding-left: 0.25em;
+            font-size:    larger;
+            font-weight:  bolder;
+            font-variant: all-small-caps;
+            border:       1px solid gray;
+        }
+
+        // Extended title? (<et> in the received data).
+        > et {
+            font-style: italic;
+        }
+
+        // Article title (<title> in the received data).
+        > atitle {
+            margin-top:  0.75em;
+            font-size:   large;
+            font-weight: bolder;
+        }
+
+        // Article subtitle or tagline (<sbt> in the received data).
+        > sbt {
+            margin-bottom: 1.5em;
+            font-style:    italic;
+        }
+
+        // Author by-line (<aug> in the received data).
+        //
+        // One or more of these elements may been seen in the initial parts of
+        // articles like book reviews where the title and author of the subject
+        // book is shown as part of the lines that precede the text of the
+        // article.
+        //
+        aug {
+            margin-top:    0.5em;
+            margin-bottom: 1em;
+            padding-left:  0.75em;
+            padding-right: 1em;
+            font-style:    italic;
+        }
+
+        // Author by-line and background (<aug> in the received data).
+        //
+        // For most received articles this is the final element, which serves
+        // as a "statement of responsibility" for the article itself -- usually
+        // one or more author names and affiliations/biographies.
+        //
+        aug:last-of-type {
+            margin-top:    1.5em;
+            margin-bottom: 0;
+            padding-left:  0;
+            padding-right: 0;
+        }
+
+        // Paragraphs within responsibility section.
+        aug * {
+            margin-top: 0.5em;
+            font-style: inherit;
+        }
+
+        // === Main content elements
+
+        // Top-level paragraphs and bibliographic entries are given a "reading"
+        // font. (Consequently, all other elements stand out as visual breaks
+        // in the natural flow of the text since they appear in the default
+        // [sans-serif] font.)
+        > p, bibtext {
+            font: medium "Times New Roman","Times",serif;
+        }
+
+        // Top-level paragraphs (<p> in the received data).
+        > p {
+            text-align: justify;
+            //@include hyphens(auto); // Compass @mixin
+        }
+
+        // Section heading (<hd> in the received data).
+        // Reference section title (<title> in the received data).
+        hd, ref atitle {
+            margin-top:  1.5em;
+            font-size:   larger;
+            font-weight: bolder;
+        }
+
+        // Sub-section heading (<hd1> in the received data).
+        hd1 {
+            margin-top:  1.25em;
+            font-weight: bolder;
+        }
+
+        // Image (<img> in the received data).
+        img {
+            display:   block;
+            max-width: 100%;
+            margin:    0.5em auto;
+        }
+
+        // Ordered list   (<olist> in the received data).
+        // Unordered list (<ulist> in the received data).
+        ol, ul {
+            margin: 1em 2em 1em;
+        }
+
+        // Bibliography list (<blist> in the received data).
+        blist {
+            margin: 1em 0;
+        }
+
+        // Ordered list item   (<item> in the received data).
+        // Unordered list item (<item> in the received data).
+        // Bibliography item   (<bibtext> in the received data).
+        ol li,
+        ul li,
+        blist bibtext {
+            margin-top:    0;
+            margin-bottom: 0.75em;
+        }
+
+        // Ordered list item (<item> in the received data).
+        ol li {
+            list-style:  decimal;
+            font-size:   110%;
+        }
+
+        // Unordered list item (<item> in the received data).
+        ul li {
+            list-style:  square;
+            font-size:   110%;
+        }
+
+        // Bibliography list item (<bibtext> in the received data).
+        blist bibtext {
+            list-style: none;
+            display:    list-item;
+        }
+
+        // Footnote reference (<reflink> in the received data).
+        // Footnote number    (<bibl> in the received data).
+        reflink, bibl {
+            vertical-align: top;
+            font:           caption;
+            background:     whitesmoke;
+        }
+
+        // Footnote reference (<reflink> in the received data).
+        reflink {
+            font-size: 75%;
+            opacity:   0.9;
+        }
+
+        // Footnote number (<bibl> in the received data).
+        bibl {
+            font-size: 100%;
+            display:   inline;
+        }
+
+        // Bibliography item following a footnote number goes on the same line.
+        bibl + bibtext {
+            display:   inline;
+            &:before { content: " "; }
+        }
+
+        // Erroneous footnote linkage (<nolink> in the received data).
+        nolink {
+            // TBD
+        }
+
+        // Constant-width table? (<ct> in the received data).
+        ct {
+            display:     block;
+            @include width-fit-content;
+            margin:      2% 4%;
+            padding:     2%;
+            white-space: pre;
+            font-family: monospace;
+            background:  whitesmoke;
+        }
+
+        // ? (<rj> in the received data).
+        rj {
+            // TBD
+        }
+
+        // Table elements.
+        table {
+            max-width:       100%;
+            border:          1px solid transparent;
+            border-collapse: collapse;
+        }
+        th {
+            font-weight: bold;
+        }
+        th, td {
+            padding: 0.5em;
+            border:  1px solid black;
+        }
+
+        // Links
+        a {
+            text-decoration: underline;
+        }
+        reflink a,
+        bibl    a {
+            text-decoration: none;
+        }
+
+        // Reference section (<ref> in the received data).
+        ref {
+            @include flex-box(column);
+        }
+        ref blist {
+            margin: 0.5em 0;
+        }
+    }
+}
+
+// Annotated authors and author affiliations.
+dd.blacklight-eds_authors_composed {
+    relatesTo:before { content: " ["; }
+}
+dd.blacklight-eds_author_affiliations {
+    relatesTo:after { content: "] "; }
+}

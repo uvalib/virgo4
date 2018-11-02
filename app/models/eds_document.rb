@@ -5,16 +5,14 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/eds'
-
 # A Blacklight::Document for items acquired from EBSCO Discovery Service.
 #
-# @see Blacklight::Eds::DocumentEds
-# @see Blacklight::Document
+# @see Blacklight::Eds::Document
+# @see LensDocument
 #
-class EdsDocument
+class EdsDocument < LensDocument
 
-  include Blacklight::Eds::DocumentEds
+  include Blacklight::Eds::Document
 
   # ===========================================================================
   # :section: Extensions
@@ -46,25 +44,50 @@ class EdsDocument
   # text message.
   use_extension(Blacklight::Document::Sms)
 
+  # ===========================================================================
+  # :section: Semantic fields
+  # ===========================================================================
+
+  public
+
   field_semantics.merge!(
-    title:       :eds_title,
-    author:      :eds_authors,
-    language:    :eds_languages,
-    format:      :eds_publication_type,
+    title:        'eds_title',
+    author:       'eds_authors',
+    language:     'eds_languages',
+    format:       'eds_publication_type',
     # === For DublinCore ===
-    #contributor: :xxx,
-    #coverage:    :xxx,
-    creator:     :eds_authors,
-    date:        :eds_publication_date,
-    #description: :eds_physical_description,
-    identifier:  :id,
-    #publisher:   :eds_publisher,
-    #relation:    :xxx,
-    #rights:      :xxx,
-    #source:      :eds_source_title,
-    subject:     :eds_subjects,
-    #type:        :eds_document_type,
+    #contributor: 'xxx',
+    #coverage:    'xxx',
+    creator:      'eds_authors',
+    date:         'eds_publication_date',
+    #description: 'eds_physical_description',
+    identifier:   'id',
+    #publisher:   'eds_publisher',
+    #relation:    'xxx',
+    #rights:      'xxx',
+    #source:      'eds_source_title',
+    subject:      'eds_subjects',
+    #type:        'eds_document_type',
   )
+
+  # ===========================================================================
+  # :section: Blacklight::Document overrides
+  # ===========================================================================
+
+  public
+
+  # Initialize a new instance.
+  #
+  # @param [Hash, nil]                    source_doc
+  # @param [RSolr::HashWithResponse, nil] response
+  # @param [Symbol, nil]                  lens
+  #
+  # This method overrides:
+  # @see Blacklight::Document#initialize
+  #
+  def initialize(source_doc = nil, response = nil, lens = nil)
+    super(prepare(source_doc), response, lens)
+  end
 
 end
 

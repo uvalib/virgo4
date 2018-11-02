@@ -6,18 +6,32 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/eds'
-require 'blacklight/eds/catalog_eds'
-
-# CatalogController variant for articles.
+# Access articles via EBSCO EDS.
 #
 # Compare with:
 # @see CatalogController
 #
 class ArticlesController < ApplicationController
+
   include ArticlesConcern
-  include Blacklight::Eds::CatalogEds
-  include BlacklightAdvancedSearch::ControllerExt
+  include LensConcern
+
+  self.blacklight_config = ::Config::Articles.new(self).blacklight_config
+
+  # ===========================================================================
+  # :section: Blacklight::Controller overrides
+  # ===========================================================================
+
+  protected
+
+  # The default controller for searches.
+  #
+  # @return [Class]
+  #
+  def default_catalog_controller
+    self
+  end
+
 end
 
 __loading_end(__FILE__)

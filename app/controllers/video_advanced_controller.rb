@@ -5,17 +5,15 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-require 'blacklight_advanced_search/advanced_controller_solr'
-
 # AdvancedController variant for video search.
 #
 # Compare with:
 # @see CatalogAdvancedController
 #
-class VideoAdvancedController < BlacklightAdvancedSearch::AdvancedControllerSolr
+class VideoAdvancedController < BlacklightAdvancedSearch::AdvancedController
+  include AdvancedSearchConcern
   include VideoConcern
-  include BlacklightAdvancedSearch::ControllerExt
+  include LensConcern
 end
 
 __loading_end(__FILE__)

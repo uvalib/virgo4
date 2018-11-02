@@ -1,0 +1,9 @@
+<%# app/views/record_mailer/sms_record.text.erb -%>
+<%-
+  documents ||= Array.wrap(@document || @documents)
+  url_opt   ||= @url_gen_params || {}
+-%>
+<%- documents.each do |doc| -%>
+<%=   doc.to_sms_text %>
+<%=   t('blacklight.sms.text.url', url: full_url_for(url_for_document(doc, url_opt))) %>
+<%- end -%>

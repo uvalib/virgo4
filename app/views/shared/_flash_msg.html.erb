@@ -1,0 +1,20 @@
+<%# app/views/shared/_flash_msg.html.erb -%>
+<%-
+  flashes = {
+    success: 'alert-success',
+    notice:  'alert-info',
+    alert:   'alert-warning',
+    error:   'alert-danger'
+  }
+-%>
+<div class="flash_messages">
+  <%- flashes.each_pair do |type, alert_class| -%>
+    <%- if flash[type].present? -%>
+      <%- alert_class ||= "alert-#{type}" -%>
+      <div class="alert <%= alert_class -%>">
+        <%= flash[type] %>
+        <a class="close" data-dismiss="alert" href="#">&times;</a>
+      </div>
+    <%- end -%>
+  <%- end -%>
+</div>

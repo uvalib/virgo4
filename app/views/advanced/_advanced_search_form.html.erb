@@ -1,66 +1,72 @@
-<%# app/views/advanced/_advanced_form.html.erb -%>
+<%# app/views/advanced/_advanced_search_form.html.erb -%>
 <%-
   # Advanced search form.
 
   lens ||= current_lens_key
+  bl_config = blacklight_config(lens)
 
-  search_context_str = render_search_to_s(advanced_search_context).presence
+  # === .constraints ===
+  within_search = t('blacklight_advanced_search.form.search_context')
+  classes = 'constraint-value btn btn-outline-secondary disabled'
+  search_ctx = advanced_search_context
+  search_ctx = render_search_to_s(search_ctx, element_class: classes).presence
 
-  search_path = search_path(lens)
-  search_opt  = { class: 'advanced form-horizontal', method: :get }
+  # === Form ===
+  search_path   = search_path(lens)
+  search_opt    = { class: 'advanced form-horizontal', method: :get }
+  hidden_fields = nil #search_state.params_for_search(advanced_search_context)
 
-  hidden_fields = search_state.params_for_search(advanced_search_context)
-
+  # === .query-criteria ===
   find_items_that_match_any_all = t(
     'blacklight_advanced_search.form.query_criteria_heading_html',
     select_menu: select_menu_for_field_operator # "any"/"all"
   )
+  form_field_partial = 'advanced_search_fields'
+
+  # === .limit-criteria ===
   and_that_have =
     t('blacklight_advanced_search.form.limit_criteria_heading_html')
+  form_facet_partial =
+    bl_config.advanced_search&.form_facet_partial || 'advanced_search_facets'
 
-  bl_config = blacklight_config(lens)
-  form_facet_partial = bl_config.advanced_search&.form_facet_partial
+  template_opt = { suppress_link: true }
 
 -%>
 
-<%- if search_context_str -%>
+<%- if search_ctx -%>
   <div class="constraints well search_history">
-    <h4><%= t('blacklight_advanced_search.form.search_context') %></h4>
-    <%= search_context_str %>
+    <h4><%= within_search %></h4>
+    <%= search_ctx %>
   </div>
 <%- end -%>
 
 <%= form_tag(search_path, search_opt) do -%>
 
-  <%= render_hash_as_hidden_fields(hidden_fields) %>
+  <%= render_hash_as_hidden_fields(hidden_fields) if hidden_fields.present? %>
 
   <div class="input-criteria">
 
-      <div class="query-criteria">
-        <h3 class="query-criteria-heading">
-          <%= find_items_that_match_any_all %>
-        </h3>
-        <div id="advanced_search">
-          <%= render 'advanced_search_fields' %>
-        </div>
+    <div class="query-criteria">
+      <h3 class="query-criteria-heading">
+        <%= find_items_that_match_any_all %>
+      </h3>
+      <div id="advanced_search">
+        <%= render form_field_partial, template_opt %>
       </div>
+    </div>
 
-      <div class="limit-criteria">
-        <h3 class="limit-criteria-heading">
-          <%= and_that_have %>
-        </h3>
-        <div id="advanced_search_facets" class="limit_input">
-          <%- if form_facet_partial -%>
-            <%= render form_facet_partial %>
-          <%- else -%>
-            <%= render 'advanced_search_facets' %>
-          <%- end -%>
-        </div>
+    <div class="limit-criteria">
+      <h3 class="limit-criteria-heading">
+        <%= and_that_have %>
+      </h3>
+      <div id="advanced_search_facets" class="limit_input">
+        <%= render form_facet_partial, template_opt %>
       </div>
+    </div>
 
   </div>
 
-  <hr>
+  <hr/>
 
   <div class="sort-submit-buttons clearfix">
     <%= render 'advanced_search_submit_btns' %>

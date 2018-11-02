@@ -1,23 +1,17 @@
 <%# app/views/catalog/_citation.html.erb -%>
 <%-
-  # Bibliographic citations for one or more documents.
-
-  docs = documents ||= @documents
+  docs = documents ||= nil
   return unless docs.present?
-
+  mla = t('blacklight.citation.mla',     default: 'MLA')
+  apa = t('blacklight.citation.apa',     default: 'APA')
+  cms = t('blacklight.citation.chicago', default: 'CMOS')
+  mla = content_tag(:h4, mla.html_safe, class: 'citation')
+  apa = content_tag(:h4, apa.html_safe, class: 'citation')
+  cms = content_tag(:h4, cms.html_safe, class: 'citation')
 -%>
-<h2 class="modal-title">Bibliographic Citations</h2>
 <%- docs.each do |doc| -%>
-
-  <h3 class="modal-title"><%= document_title(doc) %></h3>
-
-  <h4><%= t('blacklight.citation.mla') %></h4>
-  <%= doc.export_as_mla_citation_txt.html_safe %><br/><br/>
-
-  <h4><%= t('blacklight.citation.apa') %></h4>
-  <%= doc.export_as_apa_citation_txt.html_safe %><br/><br/>
-
-  <h4><%= t('blacklight.citation.chicago') %></h4>
-  <%= doc.export_as_chicago_citation_txt.html_safe %><br/><br/>
-
+  <h3 class="citation-title"><%= document_title(doc, format: true) -%></h3>
+  <%= mla %><%= doc.export_as_mla_citation_txt.html_safe %><br/><br/>
+  <%= apa %><%= doc.export_as_apa_citation_txt.html_safe %><br/><br/>
+  <%= cms %><%= doc.export_as_chicago_citation_txt.html_safe %><br/><br/>
 <%- end -%>

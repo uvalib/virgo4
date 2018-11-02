@@ -1,0 +1,29 @@
+<%# app/views/shared/_lens_menu.html.erb -%>
+<%-
+  # Links to switch the current lens.
+
+  css ||= 'nav-pills'
+
+  lens_links = {
+    all:      root_path,
+    catalog:  search_catalog_path,
+    articles: search_articles_path,
+    video:    search_video_path,
+    music:    search_music_path,
+  }.map { |lens, url|
+    next unless url
+    at_main_page = (url == root_path)
+    in_lens      = !at_main_page && request.path.start_with?(url)
+    at_lens_home = (url == (at_main_page ? request.fullpath : request.path))
+    content_tag(:li, class: 'nav-item') {
+      link_css  = %w(nav-link)
+      link_css << 'active'   if in_lens
+      link_css << 'disabled' if at_lens_home
+      link_css  = link_css.join(' ')
+      link_tip  = t("blacklight.#{lens}.tooltip")
+      link_to(lens.to_s.capitalize, url, class: link_css, title: link_tip)
+    }
+  }.compact.join("\n").html_safe
+
+-%>
+<ul class="nav <%= css -%> lens-menu"><%= lens_links %></ul>

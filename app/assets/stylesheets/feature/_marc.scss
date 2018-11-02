@@ -1,0 +1,71 @@
+// app/assets/stylesheets/feature/_marc.scss
+
+//=============================================================================
+// Librarian view modal dialog (@see app/views/catalog/librarian_view.html.erb)
+//=============================================================================
+
+.marc-modal, #marc_view {
+
+    $control-color: darkgreen;
+    $data-color:    black;
+
+    .field {
+        display:      flex;
+        color:        $text-muted;
+        border-color: $gray-400;
+    }
+
+    .leader {
+        color: $control-color;
+    }
+
+    .tag_ind {
+
+        flex:  0 0 5rem;
+        float: none;
+
+        .tag {
+            margin-right: 0.4rem;
+            color:        $control-color;
+        }
+
+        .ind1,
+        .ind2 {
+            padding: 0 0.4rem;
+            color:   $control-color;
+        }
+    }
+
+    .control_field_values {
+        flex:  1 1 auto;
+        color: $data-color;
+    }
+
+    .subfields {
+
+        $gap-unit: 0.0625rem;
+
+        flex:         1 1 auto;
+        margin-left:  1rem;
+        text-indent:  -1rem;
+        padding-left: 0;
+
+        .subfield {
+            //display:     inline-block;
+            margin-right: 4 * $gap-unit;
+            text-indent:  0;
+        }
+
+        .sub_code {
+            margin-right: 2 * $gap-unit;
+            color:        $control-color;
+            font-weight:  bold;
+        }
+
+        .sub_value {
+            margin-left: -(3 * $gap-unit);
+            color:       $data-color;
+            //&:after { white-space: pre; } // For one subfield per line
+        }
+    }
+}

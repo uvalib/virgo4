@@ -37,17 +37,72 @@ en:
     field:                              &METADATA_FIELD_LABELS
 
       # Solr metadata fields
+      author:                           'Author'
+      author_added_entry:               'Creator'
+      author_director:                  'Director'
+      author_vern:                      'Author' # in the original language
+      barcode:                          'Barcode'
+      call_number:                      'Call Number'
+      call_number_broad:                'Call Number'
+      call_number_narrow:               'Call Number Range'
+      composition_era:                  'Musical Composition Era'
+      date_bulk_coverage:               'Date(s)'
+      date_indexed:                     'Date Indexed'
+      form:                             'Form'
+      format:                           'Format'
+      instrument:                       'Musical Instrument'
+      isbn:                             'ISBN'
+      issn:                             'ISSN'
+      journal_addnl_title:              'Journal Title'
+      journal_title:                    'Journal'
+      language:                         'Language'
+      lc_call_number:                   'LC Call Number'
+      lccn:                             'LCCN'
+      library:                          'Library'
+      local_notes:                      'Local Notes'
+      location2:                        'Shelf Location'
+      location:                         'Location'
+      marc_error:                       'MARC Errors'
+      music_composition_form:           'Musical Composition'
+      oclc:                             'OCLC'
+      pda_catkey:                       'PDA Catkey'
+      pda_coutts_library:               'PDA Library'
+      pda_isbn:                         'PDA ISBN'
+      published_date:                   'Publication Era'
+      region:                           'Geographic Region'
+      release:                          'Release'
+      reverse_shelfkey:                 'Reverse Shelfkey'
+      shadowed_location:                'Shadowing'
+      shelfkey:                         'Shelfkey'
+      source:                           'Source'
+      subject:                          'Subject'
+      subject_era:                      'Subject Era'
+      subject_summary:                  'Summary'
+      subtitle:                         'Subtitle'
+      summary_holdings:                 'Holdings'
+      title:                            'Title'
+      title_added_entry:                'Additional Title'
+      title_alternate:                  'Alternate Title'
+      title_notes:                      'Title Notes'
+      title_series:                     'Series'
+      title_uniform:                    'Uniform Title'
+      title_vern:                       'Title' # in the original language
+      topic_form_genre:                 'Topic Form Genre'
+      url:                              'Access Online'
+      url_supp:                         'Related Resource'
+      video_director:                   'Director'
+      video_genre:                      'Film Genre'
+      video_rating:                     'Rating'
+      video_run_time:                   'Running Time'
+      video_target_audience:            'MPAA Rating'
+      # Solr metadata fields (future)
       abstract:                         'Abstract'
       accession:                        'Accession Number'
       admin_meta_file:                  '[admin_meta]'
       alternate_form_title:             'Other Title(s)'
       alternate_id:                     '[alternate_id_facet]'
-      author:                           'Author'
       avalon_url:                       '[avalon_url]'
-      barcode:                          '[barcode_facet]'
       breadcrumbs:                      '[breadcrumbs_display]'
-      call_number:                      'Call Number'
-      call_number_broad:                'Call Number Range'
       call_number_orig:                 '[call_number_orig]'
       call_number_sort:                 '[call_number_sort_facet]'
       category:                         'Category'
@@ -60,7 +115,6 @@ en:
       datafile_name:                    '[datafile_name]'
       date_coverage:                    'Date'
       date_first_indexed:               '[date_first_indexed]'
-      date_indexed:                     '[date_indexed_facet]'
       degree:                           'Degree'
       denomination:                     'Denomination'
       desc_meta_file:                   '[desc_meta]'
@@ -69,7 +123,6 @@ en:
       doc_type:                         '[doc_type_facet]'
       duration:                         'Duration'
       feature:                          '[feature_facet]'
-      format:                           'Format'
       full_hierarchy:                   '[full_hierarchy]'
       fund_code:                        '[fund_code_facet]'
       genre:                            'Genre'
@@ -79,21 +132,12 @@ en:
       id:                               '[id]'
       iiif_presentation_metadata:       '[iiif_presentation_metadata]'
       individual_call_number:           '[individual_call_number]'
-      instrument:                       'Musical Instrument'
-      isbn:                             'ISBN'
-      issn:                             'ISSN'
       issued_date:                      '[issued_date]'
-      journal_title:                    'Journal'
       langauge:                         'Language'
-      language:                         'Language'
-      lc_call_number:                   '[lc_call_number_display]'
-      library:                          'Library'
       license_class:                    'License'
       linked_author:                    'Author'
       linked_responsibility_statement:  'By'
       linked_title:                     'Title'
-      location2:                        'Shelf Location'
-      location:                         'Location'
       media_description:                'Media Description'
       media_resource_id:                'Type'
       media_retrieval_id:               'Media Retrieval ID'
@@ -103,9 +147,7 @@ en:
       music_catagory:                   'Music Category'
       music_category:                   'Music Category'
       music_composition_era:            'Music Composition Era'
-      music_composition_form:           'Composition Form'
       note:                             'Note'
-      oclc:                             'OCLC'
       part:                             'Part'
       part_duration:                    '[part_duration]'
       part_label:                       '[part_label]'
@@ -113,47 +155,26 @@ en:
       pbcore:                           '[pbcore_display]'
       pdf_url:                          '[pdf_url]'
       published:                        'Published'
-      published_date:                   'Publication Era'
       raw_ead:                          '[raw_ead_display]'
       recording_format:                 'Recording Format'
       recording_type:                   'Recording Type'
       recordings_and_scores:            '[recordings_and_scores_facet]'
-      region:                           'Geographic Region'
       release_date:                     'Release Date'
       repository_address:               '[repository_address]'
       responsibility_statement:         'By'
-      reverse_shelfkey:                 '[reverse_shelfkey]'
       rights_wrapper:                   '[rights_wrapper_display]'
       rights_wrapper_url:               '[rights_wrapper_url]'
       rs_uri:                           '[rs_uri]'
       scope_content:                    '[scope_content]'
       score:                            '[score]'
-      series_title:                     'Series'
-      shadowed_location:                '[shadowed_location]'
-      shelfkey:                         '[shelfkey]'
       signature:                        'Signature'
-      source:                           'Source'
-      subject:                          'Subject'
-      subject_era:                      'Subject Era'
-      subtitle:                         'Subtitle'
-      summary_holdings:                 '[summary_holdings]'
       terms_of_use:                     'Terms of Use'
       timestamp:                        '[timestamp]'
-      title:                            'Title'
-      title_added_entry:                'Contents'
       toc:                              'Table of Contents'
-      topic_form_genre:                 'Topic Form Genre'
       torchbearer:                      '[torchbearer_facet]'
-      uniform_title:                    'Uniform Title'
       unit:                             'Unit'
       upc:                              'UPC'
-      url:                              'Access Online'
-      url_supp:                         'Other Resources'
       use:                              'Permissions'
-      video_director:                   'Director'
-      video_genre:                      'Film Genre'
-      video_rating:                     'Rating'
-      video_run_time:                   'Running Time'
       year:                             'Date'
       year_multisort_i:                 'Year'
 
@@ -323,6 +344,11 @@ en:
     all:
 
       welcome:                'Catalog+Articles Search'
+      tooltip:                'Search for all types of items'
+
+      # -----------------------------------------------------------------------
+      # Field label variants for this lens
+      # -----------------------------------------------------------------------
 
       field:
         <<:                   *METADATA_FIELD_LABELS
@@ -349,8 +375,13 @@ en:
     catalog:
 
       welcome:                'Catalog Search'
+      tooltip:                'Search the library catalog and repositories'
       featured_items:
         title:                'Recent arrivals'
+
+      # -----------------------------------------------------------------------
+      # Field label variants for this lens
+      # -----------------------------------------------------------------------
 
       field:
         <<:                   *METADATA_FIELD_LABELS
@@ -377,8 +408,13 @@ en:
     articles:
 
       welcome:                'Articles Search'
+      tooltip:                'Search journals for individual articles'
       featured_items:
         title:                'Featured articles'
+
+      # -----------------------------------------------------------------------
+      # Field label variants for this lens
+      # -----------------------------------------------------------------------
 
       field:
         <<:                   *METADATA_FIELD_LABELS
@@ -415,8 +451,13 @@ en:
     video:
 
       welcome:                'Video Search'
+      tooltip:                'Search for DVDs, BluRays and online videos'
       featured_items:
         title:                'Featured videos'
+
+      # -----------------------------------------------------------------------
+      # Field label variants for this lens
+      # -----------------------------------------------------------------------
 
       field:
         <<:                   *METADATA_FIELD_LABELS
@@ -447,8 +488,13 @@ en:
     music:
 
       welcome:                'Music Search'
+      tooltip:                'Search for CDs, LPs and music library items'
       featured_items:
         title:                'Featured music'
+
+      # -----------------------------------------------------------------------
+      # Field label variants for this lens
+      # -----------------------------------------------------------------------
 
       field:
         <<:                   *METADATA_FIELD_LABELS

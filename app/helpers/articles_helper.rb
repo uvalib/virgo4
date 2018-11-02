@@ -21,7 +21,11 @@ require 'blacklight/eds'
 #
 module ArticlesHelper
 
-  include Blacklight::BlacklightHelperBehaviorExt
+  include BlacklightHelper
+
+  def self.included(base)
+    __included(base, '[ArticlesHelper]')
+  end
 
   # ===========================================================================
   # :section:
@@ -84,14 +88,14 @@ module ArticlesHelper
   EBSCO_XML_KEYS = Regexp.new(EBSCO_XML_TO_HTML.keys.join('|'))
 
   # ===========================================================================
-  # :section:
+  # :section: Blacklight configuration "helper_methods"
   # ===========================================================================
 
   public
 
   # eds_publication_type_label
   #
-  # @param [Hash] options             Supplied by Blacklight::FieldPresenter.
+  # @param [Hash] options             Supplied by the presenter.
   #
   # @return [ActiveSupport::SafeBuffer]
   # @return [nil]                                 If no URLs were present.
@@ -99,6 +103,7 @@ module ArticlesHelper
   # @see CatalogHelper#format_facet_label
   #
   def eds_publication_type_label(options = nil)
+    return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
     separator = opt.delete(:separator) || "&nbsp;\n"
     result =
@@ -113,7 +118,7 @@ module ArticlesHelper
   # The `options[:value]` will be :eds_composed_title but if it's blank, show
   # the :eds_publication_date instead.
   #
-  # @param [Hash] options             Supplied by Blacklight::FieldPresenter.
+  # @param [Hash] options             Supplied by the presenter.
   #
   # @return [ActiveSupport::SafeBuffer, nil]
   #
@@ -122,6 +127,7 @@ module ArticlesHelper
   # IndexPresenter.
   #
   def eds_index_publication_info(options = nil)
+    return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
     separator = opt.delete(:separator) || "<br/>\n"
     unless values.present?
@@ -138,9 +144,10 @@ module ArticlesHelper
   # @return [ActiveSupport::SafeBuffer]
   #
   def best_fulltext(options = nil)
+    return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
     values = (values.first.presence if values.is_a?(Hash))
-    array_of_hashes = (values['Links'] if values.is_a?(Hash))
+    array_of_hashes = (values['Links'].to_a if values.is_a?(Hash))
     result =
       if array_of_hashes.present?
         controller = 'articles' # TODO: generalize
@@ -171,6 +178,7 @@ module ArticlesHelper
   # @return [ActiveSupport::SafeBuffer]
   #
   def html_fulltext(options = nil)
+    return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
     separator = opt.delete(:separator) || "<br/>\n"
     text = Array.wrap(values).join(separator)
@@ -186,6 +194,7 @@ module ArticlesHelper
   # @return [ActiveSupport::SafeBuffer]
   #
   def fulltext_link(options = nil)
+    return raw_value(options) unless request.format.html?
     doc = options.is_a?(Hash) ? options[:document] : options
     return unless doc.is_a?(Blacklight::Document)
     return unless doc[:eds_html_fulltext_available]
@@ -210,6 +219,7 @@ module ArticlesHelper
   # @return [nil]                                 If no URLs were present.
   #
   def ebsco_eds_plink(options = nil)
+    return raw_value(options) unless request.format.html?
     values, _ = extract_config_value(options)
     url = Array.wrap(values).first
     outlink(EDS_PLINK_LABEL, url) if url.present?
@@ -236,14 +246,15 @@ module ArticlesHelper
   #
   # @param [String, Array<String>, Hash] options  Link value(s).
   # @param [Array]  types                         Default: all types.
-  # @param [String] separator                     Default: '<br/>'.
+  # @param [String] separator                     Default: "\n".
   #
   # @option options [String] :value
   #
   # @return [ActiveSupport::SafeBuffer]
   # @return [nil]                                 If no URLs were present.
   #
-  def all_eds_links(options = nil, types = nil, separator = '<br/>')
+  def all_eds_links(options = nil, types = nil, separator = "\n")
+    return raw_value(options) unless request.format.html?
     values =
       case options
         when Hash  then options[:value]
@@ -273,6 +284,7 @@ module ArticlesHelper
   # @return [ActiveSupport::SafeBuffer]
   #
   def eds_text(string, multiline = false)
+    return raw_value(options) unless request.format.html?
     CGI.unescapeHTML(string || '').tap { |result|
       result.gsub!(EBSCO_BREAK_BEFORE) { |s| '<br/>' + s } if multiline
       result.gsub!(EBSCO_XML_KEYS, EBSCO_XML_TO_HTML)

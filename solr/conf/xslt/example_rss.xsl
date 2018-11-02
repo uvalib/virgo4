@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
-<!--
+<!-- 
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,7 +17,7 @@
  * limitations under the License.
  -->
 
-<!--
+<!-- 
   Simple transform of Solr query results to RSS
  -->
 
@@ -32,7 +32,7 @@
   <xsl:template match='/'>
     <rss version="2.0">
        <channel>
-         <title>Example Solr RSS 2.0 Feed</title>
+	 <title>Example Solr RSS 2.0 Feed</title>
          <link>http://localhost:8983/solr</link>
          <description>
           This has been formatted by the sample "example_rss.xsl" transform -
@@ -44,7 +44,7 @@
        </channel>
     </rss>
   </xsl:template>
-
+  
   <!-- search results xslt -->
   <xsl:template match="doc">
     <xsl:variable name="id" select="str[@name='id']"/>

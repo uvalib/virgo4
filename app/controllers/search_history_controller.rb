@@ -10,7 +10,10 @@ require 'blacklight/lens'
 # Replaces the Blacklight class of the same name.
 #
 class SearchHistoryController < ApplicationController
-  include Blacklight::SearchHistoryExt
+  include Blacklight::Lens::Controller
+  include SearchHistoryConcern
+  include LensConcern
+  helper BlacklightAdvancedSearch::RenderConstraintsOverride
 end
 
 __loading_end(__FILE__)

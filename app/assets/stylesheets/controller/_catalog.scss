@@ -1,0 +1,27 @@
+// app/assets/stylesheets/controllers/_catalog.scss
+
+//=============================================================================
+// Catalog - Show pages
+//=============================================================================
+
+.document-metadata {
+
+    dt {
+        word-break: break-all;
+    }
+
+    dd ul {
+
+        display:        flex;
+        flex-direction: column;
+        margin-bottom:  -0.5rem;
+
+        > * {
+            margin-bottom: 0.5rem;
+        }
+    }
+}
+
+dd.blacklight-format_facet {
+    @extend %dd-item-format;
+}

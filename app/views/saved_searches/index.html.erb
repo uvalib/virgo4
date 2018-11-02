@@ -10,7 +10,7 @@
   searches ||= @searches
 
   title ||= t('blacklight.saved_searches.title')
-  width ||= 'col-md-9'
+  width ||= 'col-md-12'
 
   # Page name for browser history and browser tabs.
   content_for(:page_title) {
@@ -29,17 +29,18 @@
     list_title         = t('blacklight.saved_searches.list_title')
     clear_list_title   = t('blacklight.saved_searches.clear.action_title')
     clear_confirmation = t('blacklight.saved_searches.clear.action_confirm')
-    clear_list_path    = blacklight.clear_saved_searches_path
+    clear_list_path    = clear_saved_searches_path
     clear_list_button  =
       link_to(
         clear_list_title,
         clear_list_path,
         method: :delete,
         data:   { confirm: clear_confirmation },
-        class:  'btn btn-danger pull-right'
+        class:  'btn btn-danger float-md-right'
       )
     delete_label = t('blacklight.saved_searches.delete')
   end
+
 -%>
 <div id="content" class="<%= width -%>">
 
@@ -54,16 +55,16 @@
     <%= clear_list_button %>
     <h3 class='section-heading'><%= list_title %></h3>
 
-    <table class="table table-striped search_history">
+    <table class="table table-striped search-history">
       <%- index  = 0  -%>
       <%- ctrlrs = {} -%>
       <%- searches.each do |search| -%>
         <%- query = search.sorted_query -%>
         <%- type = lens_key_for(query[:controller]) -%>
-        <%- ctrlrs[type] ||= lens_for(type).instance(@response, request) -%>
+        <%- ctrlrs[type] ||= lens_entry(type).instance(@response, request) -%>
         <%- index += 1 -%>
         <tr id="<%= "document_#{index}" -%>">
-          <td class="search-type">
+          <td class="lens-type">
             <%= search_type_label(type) %>
           </td>
           <td class="query">
@@ -74,7 +75,7 @@
           </td>
           <td class="actions">
             <%- label = delete_label -%>
-            <%- path  = blacklight.forget_search_path(search.id) -%>
+            <%- path  = forget_saved_search_path(search.id) -%>
             <%- opt   = { class: 'btn btn-danger' } -%>
             <%= button_to(label, path, opt) %>
           </td>

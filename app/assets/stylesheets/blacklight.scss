@@ -1,7 +1,5 @@
-@import 'bootstrap-sprockets';
-
-@import 'bootstrap';
+// app/assets/stylesheets/blacklight.scss
 
 @import 'blacklight/blacklight';
 @import 'blacklight_marc';
-
+@import 'blacklight_advanced_search';

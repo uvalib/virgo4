@@ -5,24 +5,21 @@
 
 __loading_begin(__FILE__)
 
-require 'blacklight/lens'
-require 'blacklight_advanced_search/_ext'
-
 # Replaces the Blacklight class of the same name.
 #
 class ApplicationController < ActionController::Base
 
-  include Blacklight::ControllerExt
-  include SessionConcern
-
   # Needed for RubyMine to indicate overrides.
   include Devise::Controllers::Helpers unless ONLY_FOR_DOCUMENTATION
+
+  include Blacklight::Lens::Controller
+  include LensConcern
+  include RescueConcern
+  include SessionConcern
 
   protect_from_forgery with: :exception
 
   add_flash_types :error, :success
-
-  layout 'application'
 
   # ===========================================================================
   # :section: Devise::Controllers::Helpers overrides

@@ -1,0 +1,11 @@
+<%# app/views/bookmarks/_endnote.html.erb -%>
+<%-
+  docs = document_list ||= @document_list
+  return unless docs&.any? { |doc| doc.exports_as?(:endnote) }
+  label ||= t('blacklight.bookmarks.tools.endnote')
+  path  ||= bookmarks_path(:endnote, search_state.params_for_search)
+  opt   ||= { id: 'endnoteLink', class: 'btn btn-default' }
+-%>
+<li class="endnote">
+  <%= link_to(label, path, opt) %>
+</li>
