@@ -7,6 +7,11 @@ __loading_begin(__FILE__)
 
 require 'blacklight/lens'
 
+# Extensions to Blacklight to support Blacklight Lens.
+#
+# Compare with:
+# @see Blacklight::Catalog
+#
 module Blacklight::Lens::Catalog
 
   extend ActiveSupport::Concern
@@ -123,11 +128,11 @@ module Blacklight::Lens::Catalog
   # ===========================================================================
   # :section: Fall-back tool actions
   #
-  # Certain show tools defined in Config::Common#add_tools! cause methods to be
+  # Certain show tools defined in Config::Base#add_tools! cause methods to be
   # inserted into the controller via ActionBuilder.  Tools that include the
   # `define_method: false` option must be defined manually here.
   #
-  # @see Config::Common#add_tools!
+  # @see Config::Base#add_tools!
   # @see Blacklight::ActionBuilder#build
   # ===========================================================================
 
@@ -292,14 +297,29 @@ module Blacklight::Lens::Catalog
   #
   # @param [Hash] options
   #
+  # @option options [Symbol]  :lens       Specify the controlling lens; default
+  #                                         is `current_lens_key`.
+  #
+  # @option options [Boolean] :canonical  If *true* return the path for the
+  #                                         canonical controller related to
+  #                                         the current controller or to :lens.
+  #
   # @return [String]
   #
   # This method overrides:
   # @see Blacklight::Catalog#search_action_url
   #
+  # TODO: super is not Blacklight::Lens::Controller#search_action_url
+  # @see AdvancedSearchConcern#search_action_url
+  # @see Blacklight::Lens::Controller#search_action_url
+  # @see Blacklight::Lens::Bookmarks#search_action_url
+  #
   def search_action_url(options = nil)
-    opt = { controller: current_lens_key, action: 'index' }
-    opt.reverse_merge!(options) if options.is_a?(Hash)
+    opt = (options || {}).merge(action: 'index')
+    lens = opt.delete(:lens) || current_lens_key
+    canonical = opt.delete(:canonical)
+    canonical &&= Blacklight::Lens.canonical_for(lens)
+    opt[:controller] = canonical || lens
     url_for(opt)
   end
 

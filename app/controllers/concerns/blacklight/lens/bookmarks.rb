@@ -7,7 +7,7 @@ __loading_begin(__FILE__)
 
 require 'blacklight/lens'
 
-# A replacement for Blacklight::Bookmarks.
+# Bookmarks across all Blacklight Lens types.
 #
 # Note that while this is mostly restful routing, the #update and #destroy
 # actions take :id as the document ID and NOT the ID of the actual Bookmark
@@ -52,7 +52,7 @@ module Blacklight::Lens::Bookmarks
         document_factory:       Blacklight::Lens::DocumentFactory,
         response_model:         Blacklight::Lens::Response,
         repository_class:       Blacklight::Lens::Repository,
-        search_builder_class:   ::SearchBuilder,
+        search_builder_class:   SearchBuilder,
         facet_paginator_class:  Blacklight::Solr::FacetPaginator
       )
 
@@ -78,7 +78,9 @@ module Blacklight::Lens::Bookmarks
       # Ensure Solr gets arguments from :data instead of :params.
       config.http_method = Blacklight::Engine.config.bookmarks_http_method
 
-      Log.debug { "CONFIG for BookmarksController:\n#{config_inspect(config)}" }
+      Log.debug do
+        "CONFIG for BookmarksController:\n#{config_inspect(config)}"
+      end
 
     end
 
@@ -313,16 +315,33 @@ module Blacklight::Lens::Bookmarks
   #
   # @param [Hash] options
   #
+  # @option options [Symbol]  :lens       Specify the controlling lens; default
+  #                                         is `current_lens_key`.
+  #
+  # @option options [Boolean] :canonical  If *true* return the path for the
+  #                                         canonical controller related to
+  #                                         the current controller or to :lens.
+  #
   # @return [String]
   #
   # This method replaces:
   # @see Blacklight::Bookmarks#search_action_url
   #
-  # TODO: In this case the search should be for combined results.
+  # == Implementation Notes
+  # The controller must be given as an absolute path so that #url_for does not
+  # replace :controller with the Devise controller within 'account' pages.
   #
-  def search_action_url(options = {})
-    opt = { controller: current_lens_key, action: 'index' }
-    opt.reverse_merge!(options) if options.is_a?(Hash)
+  # TODO: In this case the search should be for combined results.
+  # @see AdvancedSearchConcern#search_action_url
+  # @see Blacklight::Lens::Controller#search_action_url
+  # @see Blacklight::Lens::Catalog#search_action_url
+  #
+  def search_action_url(options = nil)
+    opt = (options || {}).merge(action: 'index')
+    lens = opt.delete(:lens) || current_lens_key
+    canonical = opt.delete(:canonical)
+    canonical &&= Blacklight::Lens.canonical_for(lens)
+    opt[:controller] = "/#{canonical || lens}"
     url_for(opt)
   end
 

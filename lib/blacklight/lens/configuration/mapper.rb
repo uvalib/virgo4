@@ -124,6 +124,21 @@ module Blacklight::Lens
         end
       end
 
+      # Return the lens key for the related controller which is used for the
+      # canonical version of paths that are generated through the controller
+      # associated with *lens_key*.
+      #
+      # @param [Symbol] lens_key
+      #
+      # @return [Symbol]
+      #
+      # TODO: This information should come from Config::Base and derivatives.
+      #
+      def canonical_for(lens_key)
+        lens_key = key_for(lens_key)
+        (lens_key == :articles) ? lens_key : default_lens_key
+      end
+
     end
 
   end

@@ -7,10 +7,13 @@ __loading_begin(__FILE__)
 
 require 'blacklight/lens'
 
+# Extensions to Blacklight to support Blacklight Lens.
+#
 # Filters added to this controller apply to all controllers in the
 # hosting application as this module is mixed-in to the application controller
 # in the hosting app on installation.
 #
+# Compare with:
 # @see Blacklight::Controller
 #
 module Blacklight::Lens::Controller
@@ -82,7 +85,7 @@ module Blacklight::Lens::Controller
     ).each do |method|
       class_eval <<-EOS
         def #{method}(*args)
-          Rails.logger.warn do
+          Blacklight.logger.warn do
             "SKIPPING DEPRECATED #{method}(\#{args.inspect})"
           end
         end
@@ -121,6 +124,40 @@ module Blacklight::Lens::Controller
   #
   def search_state
     @search_state ||= search_state_class.new(params, blacklight_config, self)
+  end
+
+  # Returns the search URL for the current lens.
+  #
+  # @param [Hash] options
+  #
+  # @option options [Symbol]  :lens       Specify the controlling lens; default
+  #                                         is `current_lens_key`.
+  #
+  # @option options [Boolean] :canonical  If *true* return the path for the
+  #                                         canonical controller related to
+  #                                         the current controller or to :lens.
+  #
+  # @return [String]
+  #
+  # This method overrides:
+  # @see Blacklight::Controller#search_action_url
+  #
+  # == Implementation Notes
+  # The controller must be given as an absolute path so that #url_for does not
+  # replace :controller with the Devise controller within 'account' pages.
+  #
+  # TODO: does not always override Blacklight::Controller#search_action_url
+  # @see AdvancedSearchConcern#search_action_url
+  # @see Blacklight::Lens::Catalog#search_action_url
+  # @see Blacklight::Lens::Bookmarks#search_action_url
+  #
+  def search_action_url(options = nil)
+    opt = (options || {}).merge(action: 'index')
+    lens = opt.delete(:lens) || current_lens_key
+    canonical = opt.delete(:canonical)
+    canonical &&= Blacklight::Lens.canonical_for(lens)
+    opt[:controller] = "/#{canonical || lens}"
+    url_for(opt)
   end
 
   # search_facet_url
@@ -166,6 +203,21 @@ module Blacklight::Lens::Controller
   def render_bookmarks_control?
     !disabled?(:bookmarks_control) &&
       has_user_authentication_provider? && current_or_guest_user.present?
+  end
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  public
+
+  # Defined for flexibility in defining methods that use #search_state_class
+  # and #search_service_class.
+  #
+  # @return [Blacklight::Controller]
+  #
+  def controller
+    self
   end
 
   # ===========================================================================
