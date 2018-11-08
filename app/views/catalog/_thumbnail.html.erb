@@ -1,0 +1,10 @@
+<%# app/views/catalog/_thumbnail.html.erb -%>
+<%-
+  document  ||= Array.wrap(@document || @documents || @document_list).first
+  presenter ||= document && thumbnail_presenter(document)
+  return unless presenter&.exists?
+  counter   ||= document_counter_with_offset(document_counter)
+-%>
+<div class="document-thumbnail" aria-hidden="true">
+  <%= presenter.thumbnail_tag({}, counter: counter) %>
+</div>
