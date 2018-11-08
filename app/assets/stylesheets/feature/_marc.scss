@@ -6,12 +6,11 @@
 
 .marc-modal, #marc_view {
 
-    $control-color: darkgreen;
+    $control-color: green;
     $data-color:    black;
 
     .field {
         display:      flex;
-        color:        $text-muted;
         border-color: $gray-400;
     }
 
@@ -21,51 +20,102 @@
 
     .tag_ind {
 
-        flex:  0 0 5rem;
-        float: none;
+        $tag-gap-unit: 0.5rem;
+
+        flex:   0 0 5.5rem;
+        float:  none;
+        cursor: default;
 
         .tag {
-            margin-right: 0.4rem;
-            color:        $control-color;
+            margin:  0 $tag-gap-unit 0 0;
+            padding: 0;
+            color:   $control-color;
         }
 
         .ind1,
         .ind2 {
-            padding: 0 0.4rem;
+            margin:  0 $tag-gap-unit;
+            padding: 0;
             color:   $control-color;
         }
     }
 
     .control_field_values {
-        flex:  1 1 auto;
-        color: $data-color;
+        flex:   1 1 auto;
+        color:  $data-color;
     }
 
     .subfields {
 
-        $gap-unit: 0.0625rem;
+        $sf-indent:   1.25rem;
+        $sf-gap-unit: 0.0625rem;
 
-        flex:         1 1 auto;
-        margin-left:  1rem;
-        text-indent:  -1rem;
-        padding-left: 0;
+        flex:        1 1 auto;
+        padding:     0;
+        margin-left: $sf-indent;
+        text-indent: -$sf-indent;
 
         .subfield {
-            //display:     inline-block;
-            margin-right: 4 * $gap-unit;
+            margin-right: 4 * $sf-gap-unit;
             text-indent:  0;
         }
 
         .sub_code {
-            margin-right: 2 * $gap-unit;
+            margin-right: 2 * $sf-gap-unit;
             color:        $control-color;
             font-weight:  bold;
+            cursor:       default;
+        }
+
+        .sub_separator {
+
+            color:        $control-color;
+            cursor:       default;
+
+            &:after { content: " "; }
         }
 
         .sub_value {
-            margin-left: -(3 * $gap-unit);
-            color:       $data-color;
+            margin-left:  -(3 * $sf-gap-unit);
+            color:        $data-color;
             //&:after { white-space: pre; } // For one subfield per line
+        }
+    }
+
+    &.monospace {
+
+        font-family: monospace;
+        font-size:   12pt;
+
+        .subfields {
+
+            $sf-indent: 1rem;
+
+            margin-left: $sf-indent;
+            text-indent: -$sf-indent;
+
+            .subfield,
+            .sub_code,
+            .sub_value {
+                margin-left:  0;
+                margin-right: 0;
+            }
+            .sub_separator {
+                &:after { content: none; }
+            }
+
+            @media not print {
+                .url {
+
+                    color:      $link-color;
+                    word-break: break-all;
+
+                    &:focus,
+                    &:hover {
+                        color: $link-hover-color;
+                    }
+                }
+            }
         }
     }
 }

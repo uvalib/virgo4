@@ -28,7 +28,21 @@ module ExportHelper
 
   public
 
+  # URL for RefWorks service import.
+  #
+  # @type [String]
+  #
+  # @see self#refworks_export_url
+  #
   REFWORKS_URL = 'https://www.refworks.com/express/expressimport.asp'
+
+  # Indicate whether the "librarian view" modal should use a monospace font.
+  #
+  # @type [TrueClass, FalseClass]
+  #
+  # @see self#monospace_marc_view?
+  #
+  MARC_VIEW_MONOSPACE = true
 
   # ===========================================================================
   # :section: BlacklightMarcHelper overrides
@@ -54,6 +68,8 @@ module ExportHelper
   # @overload refworks_export_url(url: fullpath)
   #   This is used when initiating a RefWorks import by providing a callback
   #   URL, which outputs the results of #export_as_refworks.
+  #
+  # @see self#REFWORKS_URL
   #
   # This method overrides:
   # @see BlacklightMarcHelper#refworks_export_url
@@ -253,13 +269,189 @@ module ExportHelper
     format = opt[:format] || method&.to_s&.sub(/_.*/, '')
     if format.blank?
       method ||= __method__
-      Rails.logger.error { "ERROR: #{method}: no format specified" }
+      Log.error { "ERROR: #{method}: no format specified" }
     else
       opt[:id]     = args.first if args.first.present?
       opt[:format] = export_format[format] || format
       opt[:action]     ||= opt[:id] ? :show : :index
       opt[:controller] ||= current_lens_key
       url_for(opt)
+    end
+  end
+
+  # ===========================================================================
+  # :section: Librarian View
+  # ===========================================================================
+
+  protected
+
+  # Indicate whether the "librarian view" modal should use a monospace font.
+  #
+  # @see self#MARC_VIEW_MONOSPACE
+  #
+  def marc_view_monospace?
+    MARC_VIEW_MONOSPACE
+  end
+
+  # Render MARC for "librarian view".
+  #
+  # @param [Blacklight::Lens::Document] doc
+  # @param [Hash, nil]                  opt
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  # @return [nil]
+  #
+  def render_marc(doc, opt = nil)
+    (record = doc&.to_marc) && render_marc_record(record, opt)
+  end
+
+  # Render a MARC record for "librarian view".
+  #
+  # @param [MARC::Record] record
+  # @param [Hash, nil]    opt
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def render_marc_record(record, opt = nil)
+    opt = opt ? opt.dup : {}
+    opt[:class] =
+      Array.wrap(opt[:class]).tap { |css|
+        css << 'modal-body' if css.blank?
+        css << 'monospace'  if marc_view_monospace?
+      }.compact.join(' ')
+    content_tag(:div, opt) do
+      lines = [render_marc_leader(record)]
+      lines += render_marc_fields(record)
+      lines.compact.join("\n").html_safe
+    end
+  end
+
+  # Render MARC record fields for "librarian view".
+  #
+  # @param [MARC::Record] record
+  # @param [Range, nil]   valid_tags  Default: '000'..'999'.
+  #
+  # @return [Array<ActiveSupport::SafeBuffer>]
+  #
+  def render_marc_fields(record, valid_tags = nil)
+    valid_tags ||= '000'..'999'
+    record.map { |field|
+      render_marc_field(field) if valid_tags.include?(field.tag)
+    }.compact
+  end
+
+  # Render a MARC record leader field for "librarian view".
+  #
+  # @param [MARC::Record] record
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def render_marc_leader(record)
+    label = t('blacklight.search.librarian_view.leader', default: 'LEADER')
+    value = record.leader
+    content_tag(:div, class: 'leader field') do
+      render_marc_tag(label) + render_marc_control_field(value)
+    end
+  end
+
+  # Render a MARC subfield for "librarian view".
+  #
+  # @param [MARC::ControlField, MARC::DataField] field
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def render_marc_field(field)
+    tag = render_marc_tag(field)
+    ctl = field.is_a?(MARC::ControlField)
+    val = ctl ? render_marc_control_field(field) : render_marc_subfields(field)
+    content_tag(:div, (tag + val), class: 'field')
+  end
+
+  # Render a MARC field tag for "librarian view".
+  #
+  # @param [MARC::ControlField, MARC::DataField, String] field
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def render_marc_tag(field)
+    content_tag(:div, class: 'tag_ind') do
+      case field
+        when MARC::DataField
+          empty = '&nbsp'.html_safe
+          tag  = marc_span(field.tag, class: 'tag')
+          tag << marc_span((field.indicator1.presence || empty), class: 'ind1')
+          tag << marc_span((field.indicator2.presence || empty), class: 'ind2')
+        when MARC::ControlField
+          marc_span(field.tag, class: 'tag')
+        else
+          ERB::Util.h(field.to_s)
+      end
+    end
+  end
+
+  # Render a MARC control field value for "librarian view".
+  #
+  # @param [MARC::ControlField, String] field
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def render_marc_control_field(field)
+    value = field.respond_to?(:value) ? field.value : field
+    marc_span(value, class: 'control_field_values')
+  end
+
+  # Render a MARC subfield values for "librarian view".
+  #
+  # @param [MARC::DataField] field
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def render_marc_subfields(field)
+    content_tag(:div, class: 'subfields') do
+      field.map { |sf| render_marc_subfield(sf) }.join("\n").html_safe
+    end
+  end
+
+  # Render a MARC subfield for "librarian view".
+  #
+  # @param [MARC::Subfield] subfield
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def render_marc_subfield(subfield)
+    content_tag(:span, class: 'subfield') do
+      s = ''.html_safe
+      s << marc_span(subfield.code,  class: 'sub_code')
+      s << marc_span('|'.html_safe,  class: 'sub_separator')
+      s << marc_span(subfield.value, class: 'sub_value')
+    end
+  end
+
+  # ===========================================================================
+  # :section: Librarian View
+  # ===========================================================================
+
+  private
+
+  # Render a value in a span for "librarian view".
+  #
+  # @param [String]    value
+  # @param [Hash, nil] opt            Options for the <span>.
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def marc_span(value, opt = nil)
+    value = value.to_s
+    case value
+      when /^(http|https):/
+        opt = opt ? opt.dup : {}
+        css_class = Array.wrap(opt[:class])
+        css_class << 'url'
+        opt[:class] = css_class.reject(&:blank?).uniq.join(' ')
+        opt[:target] ||= '_blank'
+        link_to(ERB::Util.h(value), value, opt)
+      else
+        content_tag(:span, ERB::Util.h(value), (opt || {}))
     end
   end
 
