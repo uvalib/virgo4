@@ -217,7 +217,9 @@ module BlacklightHelper
   # Defined for consistency.
   #
   def thumbnail_presenter(doc = nil)
-    thumbnail_presenter_class(doc).new(doc, self)
+    view_type   = params[:show] ? :show : :index
+    view_config = blacklight_config_for(doc || self).view_config(view_type)
+    thumbnail_presenter_class(doc).new(doc, self, view_config)
   end
 
   # json_presenter_class
@@ -284,27 +286,32 @@ module BlacklightHelper
   # @param [Hash, nil]            opt
   #
   # @option opt [Boolean] :format               Default: *false*.
-  # @option opt [Boolean] :show_title           Default: *false*.
+  # @option opt [Boolean] :show_title           Default: *true*.
   # @option opt [Boolean] :show_subtitle        Default: *false*.
-  # @option opt [Boolean] :show_authors         Default: *false*.
-  # @option opt [Boolean] :show_linked_authors  Default: *false*.
+  # @option opt [Boolean] :show_author          Default: *false*.
+  # @option opt [Boolean] :show_linked_author   Default: *false*.
+  # @option opt [Boolean] :show_linked_author   Default: *false*.
   #
   # @return [String]
+  #
+  # @see Blacklight::Lens::ShowPresenter#heading
   #
   # Compare with:
   # @see Blacklight::BlacklightHelperBehavior#document_heading
   #
   def document_title(doc = nil, opt = nil)
     doc ||= @document
-    opt = opt ? opt.dup : {}
     config   = blacklight_config_for(doc)
     view_cfg = config.view_config(:show)
-    opt[:format]              = false unless opt.key?(:format)
-    opt[:show_title]          = false if doc.has?(view_cfg.alt_title_field)
-    opt[:show_subtitle]       = false
-    opt[:show_authors]        = false
-    opt[:show_linked_authors] = false
-    presenter(doc).heading(opt)
+    options  = {
+      format:             false,
+      show_title:         !doc.has?(view_cfg.alt_title_field),
+      show_subtitle:      false,
+      show_author:        false,
+      show_linked_author: false
+    }
+    options.merge!(opt) if opt.present?
+    presenter(doc).heading(options)
   end
 
   # Generate a value that can be used for the :id attribute of an HTML element.
