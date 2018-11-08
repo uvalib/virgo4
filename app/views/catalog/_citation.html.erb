@@ -2,16 +2,28 @@
 <%-
   docs = documents ||= nil
   return unless docs.present?
-  mla = t('blacklight.citation.mla',     default: 'MLA')
-  apa = t('blacklight.citation.apa',     default: 'APA')
-  cms = t('blacklight.citation.chicago', default: 'CMOS')
-  mla = content_tag(:h4, mla.html_safe, class: 'citation')
-  apa = content_tag(:h4, apa.html_safe, class: 'citation')
-  cms = content_tag(:h4, cms.html_safe, class: 'citation')
+
+  title_opt ||= { format: true, title_tag: :div, title_max: 125 }
+
+  citations = {
+    mla:     :export_as_mla_citation_txt,
+    apa:     :export_as_apa_citation_txt,
+    chicago: :export_as_chicago_citation_txt
+  }
 -%>
+
 <%- docs.each do |doc| -%>
-  <h3 class="citation-title"><%= document_title(doc, format: true) -%></h3>
-  <%= mla %><%= doc.export_as_mla_citation_txt.html_safe %><br/><br/>
-  <%= apa %><%= doc.export_as_apa_citation_txt.html_safe %><br/><br/>
-  <%= cms %><%= doc.export_as_chicago_citation_txt.html_safe %><br/><br/>
+  <h2 class="citation-title">
+    <%= document_title(doc, title_opt) %>
+  </h2>
+  <%- citations.each_pair do |type, method| -%>
+    <div class="citation card">
+      <h3 class="citation-heading">
+        <%= t("blacklight.citation.#{type}", default: type.upcase).html_safe %>
+      </h3>
+      <div class="citation-content">
+        <%= doc.send(method).html_safe %>
+      </div>
+    </div>
+  <%- end -%>
 <%- end -%>

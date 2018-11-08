@@ -1,0 +1,21 @@
+<%# app/views/catalog/_show_.html.erb -%>
+<%-
+  # Default partial to display Solr document fields in catalog show view.
+  doc = document ||= @document
+  return unless doc.present?
+  doc_presenter = show_presenter(doc)
+  dt_width ||= 4
+  dd_width ||= 12 - dt_width
+-%>
+<dl class="row dl-invert document-metadata">
+  <%- document_show_fields(doc).each do |field_name, field_cfg| -%>
+    <%- next unless should_render_show_field?(doc, field_cfg) -%>
+    <%- name = field_name.parameterize -%>
+    <dt class="blacklight-<%= name -%> col-md-<%= dt_width -%>">
+      <%= render_document_show_field_label(doc, field: field_name) %>
+    </dt>
+    <dd class="blacklight-<%= name -%> col-md-<%= dd_width -%>">
+      <%= doc_presenter.field_value(field_name) %>
+    </dd>
+  <%- end -%>
+</dl>

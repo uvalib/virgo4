@@ -19,9 +19,17 @@
         link_to_next_document(next_doc)
       ].join(' | ').html_safe
     end
+
+  start_over_label ||= t('blacklight.search.start_over')
+  start_over_opt   ||= { class: 'catalog_startOverLink btn btn-primary' }
 -%>
+
 <div class='pagination-search-widgets'>
   <div class="page_links">
     <%= page_links %>
+  </div>
+  <div class="clearfix constraints-container">
+    <%= link_to start_over_label, start_over_path, start_over_opt %>
+    <%= link_back_to_catalog(class: 'btn btn-outline-secondary') %>
   </div>
 </div>

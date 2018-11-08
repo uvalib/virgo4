@@ -11,7 +11,7 @@
   <%- flashes.each_pair do |type, alert_class| -%>
     <%- if flash[type].present? -%>
       <%- alert_class ||= "alert-#{type}" -%>
-      <div class="alert <%= alert_class -%>">
+      <div class="alert alert-dismissable <%= alert_class -%>">
         <%= flash[type] %>
         <a class="close" data-dismiss="alert" href="#">&times;</a>
       </div>

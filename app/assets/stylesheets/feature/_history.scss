@@ -8,9 +8,6 @@
 
     .lens-type {
 
-        //font-size:      100%;
-        //vertical-align: text-bottom;
-
         // Give the lens labels a consistent width.
         .label {
             display:   inline-block;
@@ -18,6 +15,11 @@
             min-width: fit-content;
             max-width: 100%;
         }
+    }
+
+    .filter-name,
+    .filter-separator {
+        color: $body-color !important;
     }
 
     // Align action buttons under the "Clear" button.

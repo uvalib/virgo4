@@ -59,10 +59,10 @@ en:
       lc_call_number:                   'LC Call Number'
       lccn:                             'LCCN'
       library:                          'Library'
-      local_notes:                      'Local Notes'
+      local_notes:                      'Local Note'
       location2:                        'Shelf Location'
       location:                         'Location'
-      marc_error:                       'MARC Errors'
+      marc_error:                       'MARC Error'
       music_composition_form:           'Musical Composition'
       oclc:                             'OCLC'
       pda_catkey:                       'PDA Catkey'
@@ -83,7 +83,7 @@ en:
       title:                            'Title'
       title_added_entry:                'Additional Title'
       title_alternate:                  'Alternate Title'
-      title_notes:                      'Title Notes'
+      title_notes:                      'Title Note'
       title_series:                     'Series'
       title_uniform:                    'Uniform Title'
       title_vern:                       'Title' # in the original language
@@ -110,7 +110,7 @@ en:
       collection_title:                 'Digital Collection'
       content_model:                    '[content_model]'
       content_type:                     '[content_type]'
-      cre:                              'Creators'
+      cre:                              'Creator'
       created_date:                     '[created_date]'
       datafile_name:                    '[datafile_name]'
       date_coverage:                    'Date'
@@ -174,83 +174,83 @@ en:
       torchbearer:                      '[torchbearer_facet]'
       unit:                             'Unit'
       upc:                              'UPC'
-      use:                              'Permissions'
+      use:                              'Permission'
       year:                             'Date'
       year_multisort_i:                 'Year'
 
       # EBSCO EDS metadata fields
-      abstract_supplied_copyright:      '[eds_abstract_supplied_copyright]'
-      access_level:                     '[eds_access_level]'
-      accession_number:                 '[eds_accession_number]'
+      abstract_supplied_copyright:      '[abstract_supplied_copyright]'
+      access_level:                     '[access_level]'
+      accession_number:                 '[accession_number]'
       all_links:                        'Availability'
       all_subjects_search_links:        '[all_subjects_search_links]'
-      author_affiliations:              '[eds_author_affiliations]'
-      author_supplied_keywords:         '[eds_author_supplied_keywords]'
+      author_affiliations:              '[author_affiliations]'
+      author_supplied_keywords:         '[author_supplied_keywords]'
       author_university:                'Author University'
       authors:                          'Author'
-      authors_composed:                 '[eds_authors_composed]'
-      code_naics:                       '[eds_code_naics]'
+      authors_composed:                 '[authors_composed]'
+      code_naics:                       '[code_naics]'
       composed_title:                   'Published in'
       content_provider:                 'Content Provider'
-      cover_medium_url:                 '[eds_cover_medium_url]'
-      cover_thumb_url:                  '[eds_cover_thumb_url]'
-      covers:                           '[eds_covers]'
-      database_id:                      '[eds_database_id]'
-      database_name:                    '[eds_database_name]'
-      descriptors:                      '[eds_descriptors]'
+      cover_medium_url:                 '[cover_medium_url]'
+      cover_thumb_url:                  '[cover_thumb_url]'
+      covers:                           '[covers]'
+      database_id:                      '[database_id]'
+      database_name:                    '[database_name]'
+      descriptors:                      '[descriptors]'
       document_doi:                     'DOI'
       document_oclc:                    'OCLC'
       document_type:                    'Document Type'
-      ebook_epub_fulltext_available:    '[eds_ebook_epub_fulltext_available]'
-      ebook_pdf_fulltext_available:     '[eds_ebook_pdf_fulltext_available]'
+      ebook_epub_fulltext_available:    '[ebook_epub_fulltext_available]'
+      ebook_pdf_fulltext_available:     '[ebook_pdf_fulltext_available]'
       fulltext_links:                   'Fulltext'
-      fulltext_word_count:              '[eds_fulltext_word_count]'
+      fulltext_word_count:              '[fulltext_word_count]'
       html_fulltext:                    'Full Text'
       html_fulltext_available:          'Full text on page'
-      images:                           '[eds_images]'
-      isbn_electronic:                  '[eds_isbn_electronic]'
-      isbn_print:                       '[eds_isbn_print]'
+      images:                           '[images]'
+      isbn_electronic:                  '[isbn_electronic]'
+      isbn_print:                       '[isbn_print]'
       isbns:                            'ISBN'
-      isbns_related:                    '[eds_isbns_related]'
-      issn_print:                       '[eds_issn_print]'
+      isbns_related:                    '[isbns_related]'
+      issn_print:                       '[issn_print]'
       issns:                            'ISSN'
       issue:                            'Issue'
       journal:                          'Journal'
       languages:                        'Language'
       library_collection:               'Library Collection'
       library_location:                 'Library Location'
-      notes:                            'Notes'
-      other_titles:                     'Other Titles'
+      notes:                            'Note'
+      other_titles:                     'Other Title'
       page_count:                       'Page Count'
-      pdf_fulltext_available:           '[eds_pdf_fulltext_available]'
+      pdf_fulltext_available:           '[pdf_fulltext_available]'
       physical_description:             'Description'
       plink:                            'EBSCO Record'
       publication_date:                 'Publication Date'
-      publication_id:                   '[eds_publication_id]'
+      publication_id:                   '[publication_id]'
       publication_info:                 'Published'
-      publication_is_searchable:        '[eds_publication_is_searchable]'
-      publication_scope_note:           '[eds_publication_scope_note]'
+      publication_is_searchable:        '[publication_is_searchable]'
+      publication_scope_note:           '[publication_scope_note]'
       publication_status:               'Status'
       publication_type:                 'Format'
-      publication_type_id:              '[eds_publication_type_id]'
+      publication_type_id:              '[publication_type_id]'
       publication_year:                 'Publication Year'
       publication_year_range:           'Date Range'
       publisher:                        'Publisher'
-      relevancy_score:                  '[eds_relevancy_score]'
-      result_id:                        '[eds_result_id]'
-      search_limiters:                  'Search Limiters'
+      relevancy_score:                  '[relevancy_score]'
+      result_id:                        '[result_id]'
+      search_limiters:                  'Search Limiter'
       series:                           'Series'
       source_title:                     'Journal'
       start_page:                       'Start Page'
       subject_topic:                    'Topic'
-      subjects:                         '[eds_subjects]'
-      subjects_bisac:                   '[eds_subjects_bisac]'
-      subjects_company:                 '[eds_subjects_company]'
-      subjects_genre:                   '[eds_subjects_genre]'
+      subjects:                         '[subjects]'
+      subjects_bisac:                   '[subjects_bisac]'
+      subjects_company:                 '[subjects_company]'
+      subjects_genre:                   '[subjects_genre]'
       subjects_geographic:              'Geography'
-      subjects_mesh:                    '[eds_subjects_mesh]'
-      subjects_person:                  '[eds_subjects_person]'
-      subset:                           '[eds_subset]'
+      subjects_mesh:                    '[subjects_mesh]'
+      subjects_person:                  '[subjects_person]'
+      subset:                           '[subset]'
       volume:                           'Volume'
 
     # -------------------------------------------------------------------------
@@ -278,7 +278,7 @@ en:
 
     show_field:         &SHOW_FIELD_LABELS
       <<:               *METADATA_FIELD_LABELS
-      author:           'Creators'
+      author:           'Creator'
       call_number:      '[call_number_facet]'
       location2:        '[location2_facet]'
       published_date:   'Date'
@@ -307,7 +307,9 @@ en:
       newest:           'Date Published (newest)'
       oldest:           'Date Published (oldest)'
       title:            'Title'
+      title_rev:        'Title (reverse)'
       author:           'Author'
+      author_rev:       'Author (reverse)'
       call_number:      'Call Number'
       call_number_rev:  'Call Number (reverse)'
 
@@ -328,14 +330,17 @@ en:
     # -------------------------------------------------------------------------
 
     lens:
-      welcome:                '%{lens} Search'
-      page_title:             '%{lens} Search'
+      welcome:            '%{lens} Search'
+      page_title:         '%{lens} Search'
+      tooltip:            '%{lens} search'
       featured_items:
-        title:                'Featured %{lens} items'
+        title:            'Featured %{lens} items'
       announcements:
-        title:                'Changes to %{lens} search'
+        title:            'Changes to %{lens} search'
       advanced:
-        title:                '%{lens} Advanced Search'
+        title:            '%{lens} Advanced Search'
+        label:            'More options'
+        tooltip:          'Advanced %{lens} search'
 
     # -------------------------------------------------------------------------
     # Combined (Catalog+Articles) lens
@@ -343,30 +348,32 @@ en:
 
     all:
 
-      welcome:                'Catalog+Articles Search'
-      tooltip:                'Search for all types of items'
+      welcome:            'Catalog+Articles Search'
+      tooltip:            'Search for all types of items'
+      advanced:
+        tooltip:          'N/A'
 
       # -----------------------------------------------------------------------
       # Field label variants for this lens
       # -----------------------------------------------------------------------
 
       field:
-        <<:                   *METADATA_FIELD_LABELS
+        <<:               *METADATA_FIELD_LABELS
 
       facet_field:
-        <<:                   *FACET_FIELD_LABELS
+        <<:               *FACET_FIELD_LABELS
 
       index_field:
-        <<:                   *INDEX_FIELD_LABELS
+        <<:               *INDEX_FIELD_LABELS
 
       show_field:
-        <<:                   *SHOW_FIELD_LABELS
+        <<:               *SHOW_FIELD_LABELS
 
       search_field:
-        <<:                   *SEARCH_FIELD_LABELS
+        <<:               *SEARCH_FIELD_LABELS
 
       sort_field:
-        <<:                   *SORT_FIELD_LABELS
+        <<:               *SORT_FIELD_LABELS
 
     # -------------------------------------------------------------------------
     # Catalog lens
@@ -374,32 +381,32 @@ en:
 
     catalog:
 
-      welcome:                'Catalog Search'
-      tooltip:                'Search the library catalog and repositories'
+      welcome:            'Catalog Search'
+      tooltip:            'Search the library catalog and repositories'
       featured_items:
-        title:                'Recent arrivals'
+        title:            'Recent arrivals'
 
       # -----------------------------------------------------------------------
       # Field label variants for this lens
       # -----------------------------------------------------------------------
 
       field:
-        <<:                   *METADATA_FIELD_LABELS
+        <<:               *METADATA_FIELD_LABELS
 
       facet_field:
-        <<:                   *FACET_FIELD_LABELS
+        <<:               *FACET_FIELD_LABELS
 
       index_field:
-        <<:                   *INDEX_FIELD_LABELS
+        <<:               *INDEX_FIELD_LABELS
 
       show_field:
-        <<:                   *SHOW_FIELD_LABELS
+        <<:               *SHOW_FIELD_LABELS
 
       search_field:
-        <<:                   *SEARCH_FIELD_LABELS
+        <<:               *SEARCH_FIELD_LABELS
 
       sort_field:
-        <<:                   *SORT_FIELD_LABELS
+        <<:               *SORT_FIELD_LABELS
 
     # -------------------------------------------------------------------------
     # Articles lens
@@ -407,42 +414,42 @@ en:
 
     articles:
 
-      welcome:                'Articles Search'
-      tooltip:                'Search journals for individual articles'
+      welcome:            'Articles Search'
+      tooltip:            'Search journals for individual articles'
       featured_items:
-        title:                'Featured articles'
+        title:            'Featured articles'
 
       # -----------------------------------------------------------------------
       # Field label variants for this lens
       # -----------------------------------------------------------------------
 
       field:
-        <<:                   *METADATA_FIELD_LABELS
+        <<:               *METADATA_FIELD_LABELS
 
       facet_field:
-        <<:                   *FACET_FIELD_LABELS
+        <<:               *FACET_FIELD_LABELS
 
       index_field:
-        <<:                   *INDEX_FIELD_LABELS
+        <<:               *INDEX_FIELD_LABELS
 
       show_field:
-        <<:                   *SHOW_FIELD_LABELS
-        publication_date:     'Publication Date'
-        publication_year:     'Year'
-        subjects_geographic:  '[eds_subjects_geographic]'
+        <<:               *SHOW_FIELD_LABELS
+        publication_date: 'Publication Date'
+        publication_year: 'Year'
+        subjects_geographic: '[subjects_geographic]'
 
       search_field:
-        <<:                   *SEARCH_FIELD_LABELS
-        text:                 'Text'
-        descriptor:           'Descriptor'
-        series:               'Series'
-        subject_heading:      'Subject Heading'
-        keywords:             'Keywords'
+        <<:               *SEARCH_FIELD_LABELS
+        text:             'Text'
+        descriptor:       'Descriptor'
+        series:           'Series'
+        subject_heading:  'Subject Heading'
+        keywords:         'Keywords'
 
       sort_field:
-        <<:                   *SORT_FIELD_LABELS
-        newest:               'Date'
-        oldest:               'Date (oldest first)'
+        <<:               *SORT_FIELD_LABELS
+        newest:           'Date'
+        oldest:           'Date (oldest first)'
 
     # -------------------------------------------------------------------------
     # Video lens
@@ -450,36 +457,36 @@ en:
 
     video:
 
-      welcome:                'Video Search'
-      tooltip:                'Search for DVDs, BluRays and online videos'
+      welcome:            'Video Search'
+      tooltip:            'Search for DVDs, BluRays and online videos'
       featured_items:
-        title:                'Featured videos'
+        title:            'Featured videos'
 
       # -----------------------------------------------------------------------
       # Field label variants for this lens
       # -----------------------------------------------------------------------
 
       field:
-        <<:                   *METADATA_FIELD_LABELS
+        <<:               *METADATA_FIELD_LABELS
 
       facet_field:
-        <<:                   *FACET_FIELD_LABELS
+        <<:               *FACET_FIELD_LABELS
 
       index_field:
-        <<:                   *INDEX_FIELD_LABELS
+        <<:               *INDEX_FIELD_LABELS
 
       show_field:
-        <<:                   *SHOW_FIELD_LABELS
+        <<:               *SHOW_FIELD_LABELS
 
       search_field:
-        <<:                   *SEARCH_FIELD_LABELS
-        published:            'Distributor Name/Place'
-        publication_date:     'Year Released'
+        <<:               *SEARCH_FIELD_LABELS
+        published:        'Distributor Name/Place'
+        publication_date: 'Year Released'
 
       sort_field:
-        <<:                   *SORT_FIELD_LABELS
-        newest:               'Date Released (newest)'
-        oldest:               'Date Released (oldest)'
+        <<:               *SORT_FIELD_LABELS
+        newest:           'Date Released (newest)'
+        oldest:           'Date Released (oldest)'
 
     # -------------------------------------------------------------------------
     # Music lens
@@ -487,33 +494,33 @@ en:
 
     music:
 
-      welcome:                'Music Search'
-      tooltip:                'Search for CDs, LPs and music library items'
+      welcome:            'Music Search'
+      tooltip:            'Search for CDs, LPs and music library items'
       featured_items:
-        title:                'Featured music'
+        title:            'Featured music'
 
       # -----------------------------------------------------------------------
       # Field label variants for this lens
       # -----------------------------------------------------------------------
 
       field:
-        <<:                   *METADATA_FIELD_LABELS
+        <<:               *METADATA_FIELD_LABELS
 
       facet_field:
-        <<:                   *FACET_FIELD_LABELS
+        <<:               *FACET_FIELD_LABELS
 
       index_field:
-        <<:                   *INDEX_FIELD_LABELS
+        <<:               *INDEX_FIELD_LABELS
 
       show_field:
-        <<:                   *SHOW_FIELD_LABELS
+        <<:               *SHOW_FIELD_LABELS
 
       search_field:
-        <<:                   *SEARCH_FIELD_LABELS
-        published:            'Distributor Name/Place'
-        publication_date:     'Year Released'
+        <<:               *SEARCH_FIELD_LABELS
+        published:        'Distributor Name/Place'
+        publication_date: 'Year Released'
 
       sort_field:
-        <<:                   *SORT_FIELD_LABELS
-        newest:               'Date (newest)'
-        oldest:               'Date (oldest)'
+        <<:               *SORT_FIELD_LABELS
+        newest:           'Date (newest)'
+        oldest:           'Date (oldest)'

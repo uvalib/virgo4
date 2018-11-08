@@ -4,6 +4,7 @@
   url_opt   ||= @url_gen_params || {}
 -%>
 <%- documents.each do |doc| -%>
+<%-   url = full_url_for(url_for_document(doc, url_opt)) -%>
 <%=   doc.to_sms_text %>
-<%=   t('blacklight.sms.text.url', url: full_url_for(url_for_document(doc, url_opt))) %>
+<%=   t('blacklight.sms.text.url', url: url) %>
 <%- end -%>

@@ -25,6 +25,7 @@ en:
     # =========================================================================
 
     header_links:
+      toggle:           'Toggle navigation'
       bookmarks:        'Bookmarks'
       login:            'Sign in'                 # was: 'Login'
       logout:           'Sign out'                # was: 'Log Out'
@@ -49,8 +50,17 @@ en:
       info_terms:       'Terms of Use'
       info_opt_out:     'Tracking Opt-out'
       gov_doc:          'U.S. Government documents'
-      gov_doc_1:        'This library is a Congressionally designated depository for %{link}.'
-      gov_doc_2:        'Public access to the Government documents is guaranteed by public law.'
+      gov_doc_1: >
+        This library is a Congressionally designated depository for %{link}.
+      gov_doc_2: >
+        Public access to the Government documents is guaranteed by public law.
+
+    # =========================================================================
+    # Generic modal dialog
+    # =========================================================================
+
+    modal:
+      close:            'Close'
 
     # =========================================================================
     # Tools
@@ -103,7 +113,8 @@ en:
       errors:
         to:
           invalid:      'You must enter a valid email address.'
-          blank:        'You must enter a recipient in order to send this message.'
+          blank: >
+            You must enter a recipient in order to send this message.
 
     # =========================================================================
     # Tools - SMS text input form
@@ -127,7 +138,9 @@ en:
       errors:
         to:
           invalid:      'You must enter a valid 10-digit phone number.'
-          blank:        'You must enter a recipient phone number in order to send this message.'
+          blank: >
+            You must enter a recipient phone number in order to send this
+            message.
         carrier:
           blank:        'You must select a cell service carrier.'
           invalid:      'You must enter a valid cell service carrier.'
@@ -185,7 +198,7 @@ en:
       list_title:       'Your saved searches'
 
       no_searches:      'You have no saved searches.'
-      need_login:       'Please sign in to manage and view your saved searches.'
+      need_login:       'Please sign in to manage and view saved searches.'
       delete:           'delete'
 
       add:
@@ -229,10 +242,10 @@ en:
     search:
 
       # i18n key 'title' is deprecated and will be removed in Blacklight 6.0
-      title:                    '%{application_name} Search Results'
+      title:            '%{application_name} Search Results'
       page_title:
-        title:                  '%{constraints} - %{application_name} Search Results'
-        constraint:             '%{label}: %{value}'
+        title:          '%{constraints} - %{application_name} Search Results'
+        constraint:     '%{label}: %{value}'
         many_constraint_values: '%{values} selected'
       search_results:           'Search Results'
       search_results_header:    'Search Constraints'
@@ -242,50 +255,53 @@ en:
       # Controls
       # =======================================================================
 
-      start_over:           'Start over'
-      rss_feed:             'RSS for results'
-      atom_feed:            'Atom for results'
+      start_over:       'Start over'
+      rss_feed:         'RSS for results'
+      atom_feed:        'Atom for results'
 
       # =======================================================================
       # Flash error messages
       # =======================================================================
 
       errors:
-        invalid_solr_id:    "Sorry, you have requested a record that doesn't exist."
-        request_error:      "Sorry, I don't understand your search."
-        ebsco_eds:          'EBSCO Discovery Service: %{error}'
-        solr:               'Solr search index: %{error}'
-        unknown:            'Unknown error.'
+        invalid_solr_id: >
+          Sorry, you have requested a record that doesn't exist.
+        request_error:  "Sorry, I don't understand your search."
+        ebsco_eds:      'EBSCO Discovery Service: %{error}'
+        solr:           'Solr search index: %{error}'
+        unknown:        'Unknown error.'
         authorization:
-          general:          'Please login to view.'
-          eds:              'Please sign on to complete this article search.'
-          eds_blocked:      'Your IP address has been blocked from making article searches. Please contact a librarian.'
+          general:      'Please login to view.'
+          eds:          'Please sign on to complete this article search.'
+          eds_blocked: >
+            Your IP address has been blocked from making article searches.
+            Please contact a librarian.
         connect:
-          general:          'Could not connect to external service.'
-          eds:              'Could not connect to EBSCO Discovery Service: %{error}'
-          solr:             'Could not connect to Solr search service: %{error}'
+          general:      'Could not connect to external service.'
+          eds:          'Could not connect to EBSCO Discovery Service: %{error}'
+          solr:         'Could not connect to Solr search service: %{error}'
         receive:
-          general:          'Could not receive data from remote system.'
-          eds:              'Article search provider reports: %{error}'
+          general:      'Could not receive data from remote system.'
+          eds:          'Article search provider reports: %{error}'
 
       # =======================================================================
       # Page size menu
       # =======================================================================
 
       per_page:
-        button_label:       '%{count} per page'
-        label:              '%{count}<span class="sr-only"> per page</span>'
-        title:              'Number of results to display per page'
-        submit:             'Update'
+        button_label:   '%{count} per page'
+        label:          '%{count}<span class="sr-only"> per page</span>'
+        title:          'Number of results to display per page'
+        submit:         'Update'
 
       # =======================================================================
       # Sort menu
       # =======================================================================
 
       sort:
-        label:              'Sort by %{field}'
-        submit:             'sort results'
-        disabled_note:      'Not meaningful without search terms'
+        label:          'Sort by %{field}'
+        submit:         'sort results'
+        disabled_note:  'Not meaningful without search terms'
 
       # =======================================================================
       # Search box
@@ -293,13 +309,15 @@ en:
 
       form:
         search_field:
-          label:            'Search in'
-          title:            'Targeted search options'
-          post_label:       'for'
+          label:        'Search in'
+          post_label:   'for'
+          title: >
+            For best results, specify the type of search; use "%{all_fields}"
+            to find all possible matches for your search terms.
         search:
-          label:            'search for'
-          placeholder:      'Search...'
-        submit:             'Search'
+          label:        'search for'
+          placeholder:  'Search...'
+        submit:         'Search'
 
       # =======================================================================
       # Search results pagination
@@ -310,27 +328,36 @@ en:
       # =======================================================================
 
       pagination:
-        title:              'Results navigation'
-        at_beginning:       'Already at the beginning of the list.'
-        at_end:             'Already at the end of the list.'
+        title:          'Results navigation'
+        at_beginning:   'Already at the beginning of the list.'
+        at_end:         'Already at the end of the list.'
 
       pagination_info:
-        no_items_found:     'No %{entry_name} found'
-        single_item_found:  '<strong>1</strong> %{entry_name} found'
+        no_items_found: 'No %{entry_name} found'
+        single_item_found: >
+          <strong>1</strong> %{entry_name} found
         pages:
-          one:              '<strong>%{start_num}</strong> - <strong>%{end_num}</strong> of <strong>%{total_num}</strong>'
-          other:            '<strong>%{start_num}</strong> - <strong>%{end_num}</strong> of <strong>%{total_num}</strong>'
+          one: >
+            <strong>%{start_num}</strong> - <strong>%{end_num}</strong>
+            of
+            <strong>%{total_num}</strong>
+          other: >
+            <strong>%{start_num}</strong> - <strong>%{end_num}</strong>
+            of
+            <strong>%{total_num}</strong>
 
       entry_pagination_info:
-        one:                '<strong>%{current}</strong> of <strong>%{total}</strong>'
-        other:              '<strong>%{current}</strong> of <strong>%{total}</strong>'
+        one: >
+          <strong>%{current}</strong> of <strong>%{total}</strong>
+        other: >
+          <strong>%{current}</strong> of <strong>%{total}</strong>
 
       # =======================================================================
       # Search results item list
       # =======================================================================
 
       documents:
-        counter:            '%{counter}. '
+        counter:        '%{counter}. '
 
       # =======================================================================
       # Search results facets
@@ -338,59 +365,63 @@ en:
 
       facets:
 
-        title:              'Limit your search'
-        clear:              'Clear Filter'
-        count:              '%{number}'
-        missing:            '[Missing]'
-        more_html:          'more <span class="sr-only">%{field_name}</span> »'
+        title:          'Limit your search'
+        clear:          'Clear Filter'
+        count:          '%{number}'
+        missing:        '[Missing]'
+        more_html:      'more <span class="sr-only">%{field_name}</span> »'
 
         selected:
-          remove:           '[remove]'
+          remove:       '[remove]'
 
         sort:
-          count:            'Numerical Sort'
-          index:            'A-Z Sort'
+          count:        'Numerical Sort'
+          index:        'A-Z Sort'
 
         toggle:
-          label:            'Toggle facets'
+          label:        'Toggle facets'
 
       group:
-        more:               'more »'
+        more:           'more »'
 
       # =======================================================================
       # Applied search filters
       # =======================================================================
 
       filters:
-        title:              'You searched for:'
-        label:              '%{label}:'
+        title:          'You searched for:'
+        label:          '%{label}:'
         remove:
-          value:            'Remove constraint %{value}'
-          label_value:      'Remove constraint %{label}: %{value}'
+          value:        'Remove constraint %{value}'
+          label_value:  'Remove constraint %{label}: %{value}'
 
       index:
-        label:              '%{label}:'
+        label:          '%{label}:'
 
       show:
-        title:              '%{document_title} - %{application_name}'
-        label:              '%{label}:'
+        title:          '%{document_title} - %{application_name}'
+        label:          '%{label}:'
 
       fields:
-        default:            'Keyword'
+        default:        'Keyword'
 
       bookmarks:
-        present:            'In Bookmarks'
-        absent:             'Bookmark'
-        inprogress:         'Saving...'
+        present:        'In Bookmarks'
+        absent:         'Bookmark'
+        inprogress:     'Saving...'
 
       zero_results:
-        title:              'No results found for your search.'
-        modify_search:      'Try modifying your search.'
-        use_fewer_keywords: 'Use fewer keywords to start, then refine your search using the links on the left.'
-        search_fields:      'you searched by %{search_fields}'
-        search_everything:  'try searching everything'
+        title:          'No results found for your search.'
+        modify_search:  'Try modifying your search.'
+        use_fewer_keywords: >
+          Use fewer keywords to start, then refine your search using the links
+          on the left.
+        search_fields: >
+          you searched by %{search_fields}
+        search_everything: >
+          try searching everything
 
-      view_title:           'View results as: '
+      view_title:       'View results as: '
 
       view:
-        list:               'List'
+        list:           'List'
