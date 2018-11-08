@@ -11,7 +11,11 @@ require 'blacklight/configuration'
 require 'blacklight/configuration/view_config'
 require 'blacklight/lens'
 
-override Blacklight::Configuration::ViewConfig do
+# Override Blacklight definitions.
+#
+# @see Blacklight::Configuration::ViewConfig
+#
+module Blacklight::Configuration::ViewConfigExt
 
   # Return the configured label for the current field definition.
   #
@@ -20,19 +24,30 @@ override Blacklight::Configuration::ViewConfig do
   #
   # @return [String]
   #
+  # Compare with:
+  # @see Blacklight::ConfigurationHelperBehavior#view_label
+  #
   def display_label(view, lens = nil)
     lens = Blacklight::Lens.key_for(lens)
     keys = []
-    keys << :"blacklight.#{lens}.search.view_title.#{view}" if lens
-    keys << :"blacklight.#{lens}.search.view.#{view}"       if lens
-    keys << :"blacklight.search.view_title.#{view}"
+    keys << :"blacklight.#{lens}.search.view_title"   if lens
+    keys << :"blacklight.#{lens}.search.view.#{view}" if lens
+    keys << :'blacklight.search.view_title'
     keys << :"blacklight.search.view.#{view}"
+    keys << label
     keys << title
     keys << view.to_s.titleize
     keys.delete_if(&:blank?)
-    I18n.translate(label, default: keys)
+    field_label(*keys)
   end
 
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override Blacklight::Configuration::ViewConfig =>
+         Blacklight::Configuration::ViewConfigExt
 
 __loading_end(__FILE__)

@@ -4,44 +4,67 @@
 
 __loading_begin(__FILE__)
 
-override EBSCO::EDS::Record do
-
-  #override Record do
+# Override EBSCO::EDS definitions.
+#
+# @see EBSCO::EDS::Record
+#
+module EBSCO::EDS::RecordExt
 
   require 'i18n'
 
   # The RELAXED config:
   # @see https://github.com/rgrove/sanitize/blob/master/lib/sanitize/config/relaxed.rb
+  #
+  # @type [Hash{Symbol=>Array<String>}]
+  #
   SANITIZE_BASE_CONFIG = Sanitize::Config::RELAXED
 
   # Additional HTML elements that are not removed during sanitization.
-  SANITIZE_PERMITTED_ELEMENTS =
+  #
+  # @type [Array<String>]
+  #
+  SANITIZE_PERMITTED_ELEMENTS = (
     SANITIZE_BASE_CONFIG[:elements] + %w(relatesto searchlink)
+  ).deep_freeze
 
   # Additional HTML attributes that are not removed during sanitization.
+  #
+  # @type [Array<String>]
+  #
   SANITIZE_PERMITTED_ATTRIBUTES =
-    SANITIZE_BASE_CONFIG[:attributes].merge('searchlink' => %w(fieldcode term))
+    SANITIZE_BASE_CONFIG[:attributes]
+      .merge('searchlink' => %w(fieldcode term))
+      .deep_freeze
 
   # General sanitization configuration.
   # @see self#html_decode_and_sanitize
+  #
+  # @type [Hash{Symbol=>Array<String>}]
+  #
   SANITIZE_CONFIG =
     Sanitize::Config.merge(
       SANITIZE_BASE_CONFIG,
       elements:   SANITIZE_PERMITTED_ELEMENTS,
       attributes: SANITIZE_PERMITTED_ATTRIBUTES
-    ).freeze
+    ).deep_freeze
 
   # Default replacements of XML node names with related HTML element names.
+  #
+  # @type [HashWithIndifferentAccess{String=>String}]
+  #
   FULL_TEXT_DEFAULT_TRANSFORM = {
     title:    'h1',
     sbt:      'h2',
     jsection: 'h3',
     et:       'h3',
-  }.with_indifferent_access.freeze
+  }.with_indifferent_access.deep_freeze
 
   # Replace received XML node names with related HTML element names from
   # 'ebsco_eds.html_fulltext' or #FULL_TEXT_DEFAULT_TRANSFORM.
   # @see config/locale/ebsco_eds.yml
+  #
+  # @type [Proc]
+  #
   SANITIZE_TRANSFORMER =
     lambda do |env|
       node = env[:node]
@@ -55,22 +78,27 @@ override EBSCO::EDS::Record do
 
   # Sanitization configuration for full-text content.
   # @see self#html_fulltext
+  #
+  # @type [Hash{Symbol=>Object}]
+  #
   SANITIZE_FULLTEXT_CONFIG =
     SANITIZE_CONFIG.merge(
       remove_contents: true,
       transformers:    [SANITIZE_TRANSFORMER]
-    ).freeze
+    ).deep_freeze
 
   # Date parts and widths (in characters).
   #
   # @see config/locales/ebsco_eds.yml
   # @see self#bib_publication_date
   #
+  # @type [Hash{Symbol=>Numeric}]
+  #
   PUB_DATE_WIDTH = {
     Y: I18n.t('ebsco_eds.bib_publication_date.width.year',  default: 4),
     M: I18n.t('ebsco_eds.bib_publication_date.width.month', default: 2),
     D: I18n.t('ebsco_eds.bib_publication_date.width.day',   default: 2)
-  }
+  }.deep_freeze
 
   # ===========================================================================
   # :section: MISC HELPERS
@@ -84,6 +112,9 @@ override EBSCO::EDS::Record do
   #
   # @return [String]                  Fallback: 'ebsco_eds.message.title'
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#title
+  #
   # The default fallback title is taken from 'ebsco_eds.message.title':
   # @see config/locales/ebsco_eds.yml
   #
@@ -95,6 +126,9 @@ override EBSCO::EDS::Record do
   # The source title (e.g.: 'Salem Press Encyclopedia')
   #
   # @return [String, nil]
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#source_title
   #
   def source_title
     result = bib_source_title || get_item_data(name: 'TitleSource')
@@ -110,6 +144,9 @@ override EBSCO::EDS::Record do
   # @return [String, nil]
   #
   # @see self#SANITIZE_FULLTEXT_CONFIG
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#html_fulltext
   #
   def html_fulltext(sanitize_config = nil)
     return unless html_fulltext_available
@@ -133,6 +170,9 @@ override EBSCO::EDS::Record do
   #
   # Default link labels and icons in 'ebsco_eds.fulltext_links':
   # @see config/locales/ebsco_eds.yml
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#fulltext_links
   #
   def fulltext_links
 
@@ -207,11 +247,20 @@ override EBSCO::EDS::Record do
   #
   # @return [Array<Hash>]
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#non_fulltext_links
+  #
   def non_fulltext_links
     Array.wrap(@record['CustomLinks']).map { |link|
       make_link(__method__, 'customlink-other', false, link)
     }.compact
   end
+
+  # ===========================================================================
+  # :section: LINK HELPERS
+  # ===========================================================================
+
+  protected
 
   # make_link
   #
@@ -253,6 +302,9 @@ override EBSCO::EDS::Record do
   #
   # @return [String, nil]
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#bib_issn_print
+  #
   def bib_issn_print
     get_bib_identifier_values('issn-print').first
   end
@@ -260,6 +312,9 @@ override EBSCO::EDS::Record do
   # bib_issn_electronic
   #
   # @return [String, nil]
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#bib_issn_electronic
   #
   def bib_issn_electronic
     get_bib_identifier_values('issn-electronic').first
@@ -269,6 +324,9 @@ override EBSCO::EDS::Record do
   #
   # @return [Array<String>]
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#bib_issns
+  #
   def bib_issns
     get_bib_identifier_values('issn', except: 'locals')
   end
@@ -276,6 +334,9 @@ override EBSCO::EDS::Record do
   # bib_isbn_print
   #
   # @return [String, nil]
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#bib_isbn_print
   #
   def bib_isbn_print
     get_bib_identifier_values('isbn-print').first
@@ -285,6 +346,9 @@ override EBSCO::EDS::Record do
   #
   # @return [String, nil]
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#bib_isbn_electronic
+  #
   def bib_isbn_electronic
     get_bib_identifier_values('isbn-electronic').first
   end
@@ -293,9 +357,18 @@ override EBSCO::EDS::Record do
   #
   # @return [Array<String>]
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#bib_isbns
+  #
   def bib_isbns
     get_bib_identifier_values('isbn', except: 'locals')
   end
+
+  # ===========================================================================
+  # :section: BIB - IS PART OF (journal, book)
+  # ===========================================================================
+
+  protected
 
   # get_bib_identifier_values
   #
@@ -325,11 +398,20 @@ override EBSCO::EDS::Record do
     @bib_identifiers ||= Array.wrap(@bib_part&.dig('BibEntity', 'Identifiers'))
   end
 
+  # ===========================================================================
+  # :section: BIB - IS PART OF (journal, book)
+  # ===========================================================================
+
+  public
+
   # bib_publication_date
   #
   # @return [String, nil]
   #
   # @see self#PUB_DATE_WIDTH
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#bib_publication_date
   #
   def bib_publication_date
     date   = get_bib_pub_date
@@ -348,6 +430,9 @@ override EBSCO::EDS::Record do
   #
   # @return [String, nil]
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#bib_publication_year
+  #
   def bib_publication_year
     get_bib_pub_date['Y'].presence
   end
@@ -356,9 +441,18 @@ override EBSCO::EDS::Record do
   #
   # @return [String, nil]
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#bib_publication_month
+  #
   def bib_publication_month
     get_bib_pub_date['M'].presence
   end
+
+  # ===========================================================================
+  # :section: BIB - IS PART OF (journal, book)
+  # ===========================================================================
+
+  protected
 
   # get_bib_pub_date
   #
@@ -389,14 +483,21 @@ override EBSCO::EDS::Record do
   #
   # @see self#SANITIZE_CONFIG
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Record#html_decode_and_sanitize
+  #
   def html_decode_and_sanitize(data, sanitize_config = nil)
     data = CGI.unescapeHTML(data.to_s)
     sanitize_config ||= SANITIZE_CONFIG
     Sanitize.fragment(data, sanitize_config)
   end
 
-  #end
-
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override EBSCO::EDS::Record => EBSCO::EDS::RecordExt
 
 __loading_end(__FILE__)

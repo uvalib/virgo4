@@ -5,15 +5,11 @@
 
 __loading_begin(__FILE__)
 
-require 'uva'
-
 module UVA
 
   # UVA::Config
   #
   module Config
-
-    include UVA
 
     # =========================================================================
     # :section:

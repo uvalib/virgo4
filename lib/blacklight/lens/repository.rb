@@ -23,6 +23,23 @@ module Blacklight::Lens
     DEF_AUTOCOMPLETE_SUGGESTER = 'mySuggester'
 
     # =========================================================================
+    # :section: Blacklight::AbstractRepository replacements
+    # =========================================================================
+
+    private
+
+    # logger
+    #
+    # @return [Logger]
+    #
+    # This method overrides:
+    # @see Blacklight::AbstractRepository#logger
+    #
+    def logger
+      @logger ||= Log.logger
+    end
+
+    # =========================================================================
     # :section: Blacklight::Solr::Repository replacements
     # =========================================================================
 
@@ -32,6 +49,9 @@ module Blacklight::Lens
     #
     # @return [String]
     #
+    # Compare with:
+    # @see Blacklight::Solr::Repository#suggest_handler_path
+    #
     def suggest_handler_path
       blacklight_config.autocomplete_path || DEF_AUTOCOMPLETE_PATH
     end
@@ -39,6 +59,9 @@ module Blacklight::Lens
     # suggester_name
     #
     # @return [String]
+    #
+    # Compare with:
+    # @see Blacklight::Solr::Repository#suggester_name
     #
     def suggester_name
       blacklight_config.autocomplete_suggester || DEF_AUTOCOMPLETE_SUGGESTER

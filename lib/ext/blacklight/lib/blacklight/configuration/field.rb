@@ -11,7 +11,11 @@ require 'blacklight/configuration'
 require 'blacklight/configuration/field'
 require 'blacklight/lens'
 
-override Blacklight::Configuration::Field do
+# Override Blacklight definitions.
+#
+# @see Blacklight::Configuration::Field
+#
+module Blacklight::Configuration::FieldExt
 
   # Prefixes for search service metadata fields which can be stripped to get
   # the base metadata field term, e.g. "eds_authors" -> "authors".
@@ -24,7 +28,7 @@ override Blacklight::Configuration::Field do
   FIELD_SUFFIX_RE = Regexp.new(/_(#{FIELD_SUFFIXES.join('|')})$/)
 
   # ===========================================================================
-  # :section:
+  # :section: Blacklight::Configuration::Field overrides
   # ===========================================================================
 
   public
@@ -36,14 +40,17 @@ override Blacklight::Configuration::Field do
   #
   # @return [String]
   #
+  # This method overrides:
+  # @see Blacklight::Configuration::Field#display_label
+  #
   def display_label(context = nil, lens = nil)
-    type = context.to_s.sub(/_field$/, '').presence
+    type = context.to_s.presence
     lens = Blacklight::Lens.key_for(lens)
     name = key.to_s.sub(FIELD_PREFIX_RE, '').sub(FIELD_SUFFIX_RE, '')
     keys = []
-    keys << :"blacklight.#{lens}.#{type}.#{name}" if lens && type
-    keys << :"blacklight.#{lens}.field.#{name}"   if lens
-    keys << :"blacklight.#{type}.#{name}"         if type
+    keys << :"blacklight.#{lens}.#{type}_field.#{name}" if lens && type
+    keys << :"blacklight.#{lens}.field.#{name}"         if lens
+    keys << :"blacklight.#{type}_field.#{name}"         if type
     keys << :"blacklight.field.#{name}"
     keys << label
     keys << name.to_s.titleize
@@ -52,5 +59,12 @@ override Blacklight::Configuration::Field do
   end
 
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override Blacklight::Configuration::Field =>
+         Blacklight::Configuration::FieldExt
 
 __loading_end(__FILE__)

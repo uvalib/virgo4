@@ -7,6 +7,11 @@ __loading_begin(__FILE__)
 
 require 'blacklight/lens'
 
+# Extensions to Blacklight to support Blacklight Lens.
+#
+# Compare with:
+# @see Blacklight::SearchContext
+#
 module Blacklight::Lens::SearchContext
 
   extend ActiveSupport::Concern
@@ -16,6 +21,27 @@ module Blacklight::Lens::SearchContext
   included do |base|
     __included(base, 'Blacklight::Lens::SearchContext')
   end
+
+  # A list of query parameters that should not be persisted for a search.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see self#blacklisted_search_session_params
+  #
+  PARAM_NOT_PERSISTED = %i(
+    commit counter total search_id page per_page
+    sort
+  ).freeze
+
+  # A list of query parameters that are persisted as part of a search but do
+  # not count towards determining whether the search is one that should be
+  # persisted.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see self#blacklisted_search_session_params
+  #
+  PARAM_NOT_COUNTED = %i(action search_field)
 
   # ===========================================================================
   # :section: Blacklight::SearchContext overrides
@@ -54,26 +80,34 @@ module Blacklight::Lens::SearchContext
   # @param [Hash] params
   #
   # @return [Search]
+  # @return [nil]                     If the search has no query or facets.
+  #
+  # This method overrides:
+  # @see Blacklight::SearchContext#find_or_initialize_search_session_from_params
   #
   def find_or_initialize_search_session_from_params(params)
     search_param_count = 0
+    null_search = (params[:q] == '*')
     params =
       params.map { |k, v|
         k = k.to_sym
         next if v.blank? || blacklisted_search_session_params.include?(k)
-        if k == :controller
-          v = (v == 'advanced') ? 'catalog' : v.sub(/_advanced$/, '')
-        elsif k != :action
-          search_param_count += 1
-        end
+        does_not_count =
+          case k
+            when :controller
+              v = (v == 'advanced') ? 'catalog' : v.sub(/_advanced$/, '')
+            when :q
+              null_search
+            else
+              PARAM_NOT_COUNTED.include?(k)
+          end
+        search_param_count += 1 unless does_not_count
         [k, v]
       }.compact.to_h.with_indifferent_access
     return if search_param_count.zero?
 
     searches_from_history.find { |x| x.query_params == params } ||
-    Search.create(query_params: params).tap do |s|
-      add_to_search_history(s)
-    end
+      Search.create(query_params: params).tap { |s| add_to_search_history(s) }
   end
 
   # Add a search to the in-session search history list.
@@ -82,10 +116,26 @@ module Blacklight::Lens::SearchContext
   #
   # @return [Array<Numeric>]
   #
+  # This method overrides:
+  # @see Blacklight::SearchContext#add_to_search_history
+  #
   def add_to_search_history(search)
     h = session[:history]
     h = h ? h.reject(&:blank?).unshift(search.id).uniq : [search.id]
     session[:history] = h.first(blacklight_config.search_history_window)
+  end
+
+  # A list of query parameters that should not be persisted for a search.
+  #
+  # @return [Array<Symbol>]
+  #
+  # @see self#PARAM_NOT_PERSISTED
+  #
+  # This method overrides:
+  # @see Blacklight::SearchContext#blacklisted_search_session_params
+  #
+  def blacklisted_search_session_params
+    PARAM_NOT_PERSISTED
   end
 
   # Used in the show action for single view pagination.

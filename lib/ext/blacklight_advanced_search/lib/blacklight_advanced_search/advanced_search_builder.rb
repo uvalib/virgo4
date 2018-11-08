@@ -7,7 +7,11 @@ __loading_begin(__FILE__)
 
 require 'blacklight_advanced_search/advanced_search_builder'
 
-override BlacklightAdvancedSearch::AdvancedSearchBuilder do
+# Override BlacklightAdvancedSearch definitions.
+#
+# @see BlacklightAdvancedSearch::AdvancedSearchBuilder
+#
+module BlacklightAdvancedSearch::AdvancedSearchBuilderExt
 
   include Blacklight::Lens::SearchFields
 
@@ -59,5 +63,12 @@ override BlacklightAdvancedSearch::AdvancedSearchBuilder do
   end
 
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override BlacklightAdvancedSearch::AdvancedSearchBuilder =>
+         BlacklightAdvancedSearch::AdvancedSearchBuilderExt
 
 __loading_end(__FILE__)

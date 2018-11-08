@@ -85,7 +85,7 @@ module ApplicationHelper
     html_opt.merge!(opt) if opt.present?
     icon = html_opt.delete(:icon) || '&times;'.html_safe
     icon = content_tag(:span, icon, aria_hidden: true)
-    tip  = t('blacklight.modal.close', default: nil)
+    tip  = t('blacklight.modal.close', default: '').presence
     html_opt[:title]        ||= tip if tip
     html_opt[:'aria-label'] ||= tip || 'Close'
     content_tag(:button, icon, html_opt)
@@ -99,12 +99,12 @@ module ApplicationHelper
 
   # Render a field as hidden.
   #
-  # @param [Hash] options             Supplied by the presenter.
+  # @param [Hash] opt                 Supplied by the presenter.
   #
   # @return [String, Array]
   #
-  def raw_value(options = nil)
-    values = (options[:value] if options.is_a?(Hash))
+  def raw_value(opt = nil)
+    values = (opt[:value] if opt.is_a?(Hash))
     values = Array.wrap(values).reject(&:blank?)
     (values.size > 1) ? values : values.first
   end
@@ -128,7 +128,7 @@ module ApplicationHelper
   # @see ActionView::Helper::OutputSafetyHelper#to_sentence
   #
   def url_link(value, opt = nil)
-    return raw_value(options) unless request.format.html?
+    return raw_value(opt) unless request.format.html?
     values, opt = extract_config_value(value, opt)
     separator = opt.delete(:separator) || ' '
     result =

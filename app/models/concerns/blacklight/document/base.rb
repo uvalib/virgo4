@@ -125,7 +125,7 @@ module Blacklight::Document
     #
     def self.register_export_formats(doc)
       Blacklight::Lens::Export.mime_types.each_pair do |format, mime_type|
-        doc.will_export_as(format, mime_type)
+        doc.will_export_as(format.to_sym, mime_type)
       end
     end
 

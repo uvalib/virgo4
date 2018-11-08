@@ -4,9 +4,11 @@
 
 __loading_begin(__FILE__)
 
-override EBSCO::EDS::Results do
-
-  #override Results do
+# Override EBSCO::EDS definitions.
+#
+# @see EBSCO::EDS::Results
+#
+module EBSCO::EDS::ResultsExt
 
   TITLEIZE_FACETS = %w(
     Language
@@ -17,7 +19,7 @@ override EBSCO::EDS::Results do
   ).freeze
 
   # ===========================================================================
-  # :section: Replacement methods
+  # :section: EBSCO::EDS::Results overrides
   # ===========================================================================
 
   public
@@ -27,17 +29,17 @@ override EBSCO::EDS::Results do
   #
   # @param [Hash]                      search_results
   # @param [EBSCO::EDS::Configuration] eds_config
-  # @param [Hash]                      additional_limiters
-  # @param [Hash]                      options
+  # @param [Hash]                      limiters
+  # @param [Hash]                      opt
   #
-  # This method replaces:
+  # This method overrides:
   # @see EBSCO::EDS::Results#initialize
   #
-  def initialize(search_results, eds_config = nil, additional_limiters = nil, options = nil)
+  def initialize(search_results, eds_config = nil, limiters = nil, opt = nil)
 
     @results     = search_results || {}
-    @limiters    = additional_limiters || []
-    @raw_options = options || {}
+    @limiters    = limiters || []
+    @raw_options = opt || {}
 
     result               = @results['SearchResult'] || {}
     data_records         = result.dig('Data', 'Records') || []
@@ -98,6 +100,9 @@ override EBSCO::EDS::Results do
   # Convert to the Solr search response format.
   #
   # @return [Hash]
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Results#to_solr
   #
   def to_solr
 
@@ -202,6 +207,9 @@ override EBSCO::EDS::Results do
   #
   # @return [Array<String>]           Alternating values and counts.
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Results#solr_facets
+  #
   def solr_facets(facet_id = 'all')
 
     # Convert facet pagination parameters into a useful form, ensuring that
@@ -261,6 +269,9 @@ override EBSCO::EDS::Results do
   #
   # @return [Hash]
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Results#date_range
+  #
   # @example
   # { mindate: '1501-01',
   #   maxdate: '2018-04',
@@ -287,6 +298,9 @@ override EBSCO::EDS::Results do
 
   # Returns a simple list of the search terms used. Boolean operators are not
   # indicated.
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Results#search_terms
   #
   # == Example
   #   ["earthquakes", "california"]
@@ -433,18 +447,12 @@ override EBSCO::EDS::Results do
 
   end
 
-  #end
-
 end
 
-module EBSCO
-  module EDS
-    class Titleize
-      def initialize
-        # NOTE: This explicit definition was needed to quiet RubyMine.
-      end
-    end
-  end
-end
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override EBSCO::EDS::Results => EBSCO::EDS::ResultsExt
 
 __loading_end(__FILE__)

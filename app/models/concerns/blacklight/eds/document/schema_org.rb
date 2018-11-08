@@ -5,7 +5,6 @@
 
 __loading_begin(__FILE__)
 
-require_relative '../document'
 require_relative '../../lens/document/schema_org'
 
 module Blacklight::Eds::Document
@@ -104,4 +103,5 @@ module Blacklight::Eds::Document
   end
 
 end
+
 __loading_end(__FILE__)

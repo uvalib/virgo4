@@ -21,6 +21,11 @@ class ApplicationController < ActionController::Base
 
   add_flash_types :error, :success
 
+  # Include the UVA constants in the compiled *.html.erb files.
+  [UVA, UVA::Constants].each do |mod|
+    ActionView::CompiledTemplates.send(:include, mod)
+  end
+
   # ===========================================================================
   # :section: Devise::Controllers::Helpers overrides
   # ===========================================================================

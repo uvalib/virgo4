@@ -4,12 +4,14 @@
 
 __loading_begin(__FILE__)
 
-override EBSCO::EDS::Session do
-
-  #override Session do
+# Override EBSCO::EDS definitions.
+#
+# @see EBSCO::EDS::Session
+#
+module EBSCO::EDS::SessionExt
 
   # ===========================================================================
-  # :section: Replacement methods
+  # :section: EBSCO::EDS::Session overrides
   # ===========================================================================
 
   public
@@ -49,6 +51,9 @@ override EBSCO::EDS::Session do
   # @example Through environment variables
   # Once you have environment variables set, simply create a session like this:
   #   session = EBSCO::EDS::Session.new
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Session#initialize
   #
   def initialize(options = nil)
 
@@ -259,7 +264,7 @@ override EBSCO::EDS::Session do
   #     include_facets:   false
   #   })
   #
-  # This method replaces:
+  # This method overrides:
   # @see EBSCO::EDS::Session#search
   #
   def search(options = {}, add_actions = false, increment_page = true)
@@ -327,7 +332,7 @@ override EBSCO::EDS::Session do
   # @param [String]              path
   # @param [EBSCO::EDS::Options] payload
   #
-  # This method replaces:
+  # This method overrides:
   # @see EBSCO::EDS::Session#do_request
   #
   def do_request(method, path:, payload: nil, attempt: 0)
@@ -343,7 +348,7 @@ override EBSCO::EDS::Session do
   end
 
   # ===========================================================================
-  # :section: Replacement methods
+  # :section: EBSCO::EDS::Session overrides
   # ===========================================================================
 
   private
@@ -353,6 +358,9 @@ override EBSCO::EDS::Session do
   # @param [TrueClass, FalseClass, nil] use_cache
   #
   # @return [Faraday::Connection]
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Session#connection
   #
   def connection(use_cache = @use_cache)
     Faraday.new(@conn_opt) do |conn|
@@ -370,6 +378,9 @@ override EBSCO::EDS::Session do
   # Same as above but no caching.
   #
   # @return [Faraday::Connection]
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Session#jump_connection
   #
   def jump_connection
     connection(false)
@@ -407,8 +418,12 @@ override EBSCO::EDS::Session do
     EBSCO::EDS::Results.new(resp, @config, @info.available_limiters, options)
   end
 
-  #end
-
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override EBSCO::EDS::Session => EBSCO::EDS::SessionExt
 
 __loading_end(__FILE__)

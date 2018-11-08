@@ -226,3 +226,5 @@ module Blacklight::Lens
   end
 
 end
+
+__loading_end(__FILE__)

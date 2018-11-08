@@ -31,6 +31,8 @@ module BlacklightUrlHelper
   #
   # @return [ActiveSupport::SafeBuffer]
   #
+  # @see Blacklight::Lens::SearchState#url_for_document
+  #
   # This method overrides:
   # @see Blacklight::UrlHelperBehavior#url_for_document
   #
@@ -187,6 +189,11 @@ module BlacklightUrlHelper
     label ||= t('blacklight.back_to_bookmarks') if from_bookmarks
     label ||= t('blacklight.back_to_search')
     link_to(label, link_url, opts)
+  end
+
+  # Search History and Saved Searches display
+  def link_to_previous_search(params)
+    link_to(render_search_to_s(params), search_action_path(params))
   end
 
   # ===========================================================================

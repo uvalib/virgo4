@@ -4,12 +4,14 @@
 
 __loading_begin(__FILE__)
 
-override EBSCO::EDS::RetrievalCriteria do
-
-  #override RetrievalCriteria do
+# Override EBSCO::EDS definitions.
+#
+# @see EBSCO::EDS::RetrievalCriteria
+#
+module EBSCO::EDS::RetrievalCriteriaExt
 
   # ===========================================================================
-  # :section: New methods
+  # :section: Added attributes
   # ===========================================================================
 
   public
@@ -21,7 +23,7 @@ override EBSCO::EDS::RetrievalCriteria do
   attr_accessor :Offset
 
   # ===========================================================================
-  # :section: Replacement methods
+  # :section: EBSCO::EDS::RetrievalCriteria overrides
   # ===========================================================================
 
   public
@@ -31,7 +33,7 @@ override EBSCO::EDS::RetrievalCriteria do
   # @param [Hash]             options
   # @param [EBSCO::EDS::Info] info
   #
-  # This method replaces:
+  # This method overrides:
   # @see EBSCO::EDS::RetrievalCriteria#initialize
   #
   # == Usage Notes
@@ -94,7 +96,7 @@ override EBSCO::EDS::RetrievalCriteria do
         # =====================================================================
 
         else
-          Rails.logger.debug {
+          Log.debug {
             "EDS RetrievalCriteria: ignoring param #{key} = #{value.inspect}"
           }
 
@@ -116,8 +118,12 @@ override EBSCO::EDS::RetrievalCriteria do
 
   end
 
-  #end
-
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override EBSCO::EDS::RetrievalCriteria => EBSCO::EDS::RetrievalCriteriaExt
 
 __loading_end(__FILE__)

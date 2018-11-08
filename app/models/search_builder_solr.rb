@@ -11,7 +11,7 @@ require 'search_builder'
 #
 # @see SearchBuilder
 #
-class SearchBuilderSolr < ::SearchBuilder
+class SearchBuilderSolr < SearchBuilder
 end
 
 __loading_end(__FILE__)

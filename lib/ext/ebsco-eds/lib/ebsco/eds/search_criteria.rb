@@ -4,12 +4,14 @@
 
 __loading_begin(__FILE__)
 
-override EBSCO::EDS::SearchCriteria do
-
-  #override SearchCriteria do
+# Override EBSCO::EDS definitions.
+#
+# @see EBSCO::EDS::SearchCriteria
+#
+module EBSCO::EDS::SearchCriteriaExt
 
   # ===========================================================================
-  # :section: Replacement methods
+  # :section: EBSCO::EDS::SearchCriteria overrides
   # ===========================================================================
 
   public
@@ -20,7 +22,7 @@ override EBSCO::EDS::SearchCriteria do
   # @param [Hash]             options
   # @param [EBSCO::EDS::Info] info
   #
-  # This method replaces:
+  # This method overrides:
   # @see EBSCO::EDS::SearchCriteria#initialize
   #
   # == Usage Notes
@@ -296,7 +298,7 @@ override EBSCO::EDS::SearchCriteria do
             query[:BooleanOperator] = logical_op if logical_op
             @Queries << query
           else
-            Rails.logger.debug {
+            Log.debug {
               "EDS SearchCriteria: ignoring param #{key} = #{value.inspect}"
             }
           end
@@ -466,8 +468,12 @@ override EBSCO::EDS::SearchCriteria do
     end
   end
 
-  #end
-
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override EBSCO::EDS::SearchCriteria => EBSCO::EDS::SearchCriteriaExt
 
 __loading_end(__FILE__)

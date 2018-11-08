@@ -77,6 +77,16 @@ module Blacklight::Lens
 
     protected
 
+    # Blacklight::Lens::Routes::RouteSets
+    #
+    # == Usage Notes
+    # When this is 'included' below, it defines:
+    #
+    #   Blacklight::Lens::Routes#articles
+    #   Blacklight::Lens::Routes#catalog
+    #   Blacklight::Lens::Routes#music
+    #   Blacklight::Lens::Routes#video
+    #
     module RouteSets
 
       DEFAULT_ROUTE_SETS.each do |lens|
@@ -92,7 +102,8 @@ module Blacklight::Lens
                                         as: '#{lens}_advanced_search',
                                         controller: '#{lens}_advanced'
 
-              get '#{lens}/opensearch', to: '#{lens}#opensearch'
+              get '#{lens}/opensearch', to: '#{lens}#opensearch',
+                                        format: 'xml'
             end
           end
         EOS

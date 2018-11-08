@@ -128,8 +128,6 @@ module BlacklightConfigurationHelper
   #
   # @return [String]
   #
-  # @see Config::Common#field_label
-  #
   # This method overrides:
   # @see Blacklight::ConfigurationHelperBehavior#index_field_label
   #

@@ -7,7 +7,6 @@ __loading_begin(__FILE__)
 
 require 'blacklight'
 require 'blacklight/solr'
-require_relative '../lens/search_service'
 
 module Blacklight::Solr
 

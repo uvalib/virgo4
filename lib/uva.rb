@@ -2,14 +2,18 @@
 #
 # frozen_string_literal: true
 # warn_indent:           true
+#
+# This file is loaded from config/initializers/_extensions.rb.
 
 require '_trace'
 
 __loading_begin(__FILE__)
 
 # =============================================================================
-# Utility methods
+# Loader methods
 # =============================================================================
+
+public
 
 # Require files via one or more "glob" patterns.
 #
@@ -56,17 +60,14 @@ end
 
 module UVA
 end
-include UVA
 
 # =============================================================================
-# Require all modules from the "lib/uva" directory
+# Require all modules from extensions and the "lib/uva" directory.
 # =============================================================================
 
 require 'ext/active_support/ext'
 require_subdir(__FILE__, 'uva')
 require 'ext'
 require 'blacklight/lens'
-require_subdir(__FILE__, 'blacklight/solr')
-require 'blacklight/eds'
 
 __loading_end(__FILE__)

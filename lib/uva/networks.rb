@@ -6,15 +6,12 @@
 __loading_begin(__FILE__)
 
 require 'ipaddr'
-require 'uva'
 
 module UVA
 
   # UVA::Networks
   #
   module Networks
-
-    include UVA
 
     # Configuration file listing local ("on Grounds") subnets.
     LOCAL_SUBNET_CONFIG = 'config/subnets.yml'

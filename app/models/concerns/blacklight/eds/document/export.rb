@@ -5,7 +5,6 @@
 
 __loading_begin(__FILE__)
 
-require_relative '../document'
 require_relative '../../lens/document/export'
 
 module Blacklight::Eds::Document

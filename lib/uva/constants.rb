@@ -5,8 +5,6 @@
 
 __loading_begin(__FILE__)
 
-require 'uva'
-
 module UVA
 
   # Various useful constants.

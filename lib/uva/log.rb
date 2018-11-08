@@ -164,4 +164,7 @@ module UVA
 
 end
 
+# Defined as an "alias" for UVA::Log without needing to "include UVA".
+Log = UVA::Log
+
 __loading_end(__FILE__)

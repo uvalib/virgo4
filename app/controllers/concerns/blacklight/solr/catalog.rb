@@ -7,6 +7,12 @@ __loading_begin(__FILE__)
 
 require 'blacklight/solr'
 
+# An extension of Blacklight::Catalog supporting Blacklight Lens for
+# controllers that work with index items (SolrDocument).
+#
+# Compare with:
+# @see Blacklight::Catalog
+#
 module Blacklight::Solr::Catalog
 
   extend ActiveSupport::Concern

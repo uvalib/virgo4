@@ -7,11 +7,10 @@ __loading_begin(__FILE__)
 
 require 'blacklight/lens'
 
-# Effective overrides for Blacklight::Facet
+# Extensions to Blacklight to support Blacklight Lens.
 #
-# == Usage Notes
-# Anywhere that Blacklight::Facet would be used should be explicitly replaced
-# with Blacklight::Lens::Facet (or a derivative).
+# Compare with:
+# @see Blacklight::Facet
 #
 module Blacklight::Lens::Facet
 
