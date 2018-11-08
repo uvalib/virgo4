@@ -5,53 +5,49 @@
 
 __loading_begin(__FILE__)
 
-require_relative '_base'
 require_relative '_eds'
 
-module Config
+# Configuration for the Articles lens.
+#
+class Config::Articles < Config::Base
 
-  # Config::Articles
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  public
+
+  # Create a configuration object to associate with a controller.
   #
-  class Articles
+  # @param [Blacklight::Controller] controller
+  #
+  # @return [::Config::Base]
+  #
+  # @see Config::Eds#initialize
+  #
+  def self.build(controller)
+    ::Config::Eds.new(controller)
+  end
 
-    include ::Config::Common
-    extend  ::Config::Common
-    include ::Config::Base
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
 
-    # =========================================================================
-    # :section:
-    # =========================================================================
+  public
 
-    public
-
-    # Create a configuration object to associate with a controller.
-    #
-    # @param [Blacklight::Controller] controller
-    #
-    # @return [::Config::Base]
-    #
-    def self.build(controller)
-      ::Config::Eds.new(controller)
-    end
-
-    # =========================================================================
-    # :section:
-    # =========================================================================
-
-    public
-
-    # Initialize a new instance.
-    #
-    # @param [Blacklight::Controller, nil] controller
-    #
-    # @see Config::Eds#instance
-    #
-    def initialize(controller = nil)
-      controller ||= ArticlesController
-      config_base  = self.class.build(controller)
-      register(config_base)
-    end
-
+  # Initialize a new instance.
+  #
+  # @param [Blacklight::Controller, nil] controller
+  #
+  # @see self#build
+  #
+  # This method overrides:
+  # @see Config::Base#initialize
+  #
+  def initialize(controller = nil)
+    controller ||= ArticlesController
+    config_base  = self.class.build(controller)
+    super(config_base)
   end
 
 end

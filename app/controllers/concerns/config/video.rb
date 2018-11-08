@@ -5,84 +5,84 @@
 
 __loading_begin(__FILE__)
 
-require_relative 'catalog'
+require_relative '_solr'
 
-module Config
+# Configuration for the Video lens.
+#
+class Config::Video < Config::Base
 
-  # Config::Video
+  NON_VIDEO_TYPES = Config::Solr::CATALOG_TYPES + Config::Solr::MUSIC_TYPES
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  public
+
+  # Create a configuration object to associate with a controller.
   #
-  class Video
+  # @param [Blacklight::Controller] controller
+  #
+  # @return [::Config::Base]
+  #
+  # @see Config::Solr#initialize
+  #
+  def self.build(controller)
+    ::Config::Solr.new(controller).deep_copy(self).tap do |config|
 
-    include ::Config::Common
-    extend  ::Config::Common
-    include ::Config::Base
+      # Specify the lens key for this configuration.
+      config.lens_key = :video
 
-    # =========================================================================
-    # :section:
-    # =========================================================================
+      # === Facet fields ===
 
-    public
+      remove_facets!(config, NON_VIDEO_TYPES)
 
-    # Create a configuration object to associate with a controller.
-    #
-    # @param [Blacklight::Controller] controller
-    #
-    # @return [::Config::Base]
-    #
-    def self.build(controller)
-      ::Config::Solr.new(controller).deep_copy(self).tap do |config|
+      # === Index metadata fields ===
 
-        config.klass = controller.is_a?(Class) ? controller : controller.class
+      # TODO: ???
 
-        # Specify the lens key for this configuration.
-        config.lens_key = :video
+      # === Show page (item details) metadata fields ===
 
-        # === Facet fields ===
+      # TODO: ???
 
-        remove_facets!(config, Solr::CATALOG_TYPES, Solr::MUSIC_TYPES)
+      # === Search fields ===
 
-        # === Index (results page) metadata fields ===
-
-        # TODO: ???
-
-        # === Item details (show page) metadata fields ===
-
-        # TODO: ???
-
-        # === Search fields ===
-
-        # Hide selected catalog lens search fields.
-        config.search_fields.each_pair do |key, field|
-          next unless %w(journal issn isbn).include?(key)
-          field.include_in_advanced_search = false
-        end
-
-        # === Localization ===
-        # Get field labels from I18n, including labels specific to this lens.
-
-        finalize_configuration!(config)
-
+      # Hide selected catalog lens search fields.
+      config.search_fields.each_pair do |key, field|
+        next unless %w(journal issn isbn).include?(key)
+        field.include_in_advanced_search = false
       end
+
+      # === Sort fields ===
+
+      # TODO: ???
+
+      # === Finalize ===
+
+      finalize_configuration!(config)
+
     end
+  end
 
-    # =========================================================================
-    # :section:
-    # =========================================================================
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
 
-    public
+  public
 
-    # Initialize a new instance.
-    #
-    # @param [Blacklight::Controller, nil] controller
-    #
-    # @see Config::Catalog#instance
-    #
-    def initialize(controller = nil)
-      controller ||= VideoController
-      config_base  = self.class.build(controller)
-      register(config_base)
-    end
-
+  # Create a configuration object to associate with a controller.
+  #
+  # @param [Blacklight::Controller, nil] controller
+  #
+  # @see self#build
+  #
+  # This method overrides:
+  # @see Config::Base#initialize
+  #
+  def initialize(controller = nil)
+    controller ||= VideoController
+    config_base  = self.class.build(controller)
+    super(config_base)
   end
 
 end

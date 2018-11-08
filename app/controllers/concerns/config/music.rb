@@ -5,85 +5,86 @@
 
 __loading_begin(__FILE__)
 
-require_relative 'catalog'
+require_relative '_solr'
 
-module Config
+# Configuration for the Music lens.
+#
+class Config::Music < Config::Base
 
-  # Config::Music
+  NON_MUSIC_TYPES = Config::Solr::CATALOG_TYPES + Config::Solr::VIDEO_TYPES
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  public
+
+  # Create a configuration object to associate with a controller.
   #
-  class Music
+  # @param [Blacklight::Controller] controller
+  #
+  # @return [::Config::Base]
+  #
+  # @see Config::Solr#initialize
+  #
+  def self.build(controller)
+    ::Config::Solr.new(controller).deep_copy(self).tap do |config|
 
-    include ::Config::Common
-    extend  ::Config::Common
-    include ::Config::Base
+      # Specify the lens key for this configuration.
+      config.lens_key = :music
 
-    # =========================================================================
-    # :section:
-    # =========================================================================
+      # === Facet fields ===
 
-    public
+      remove_facets!(config, NON_MUSIC_TYPES)
 
-    # Create a configuration object to associate with a controller.
-    #
-    # @param [Blacklight::Controller] controller
-    #
-    # @return [::Config::Base]
-    #
-    def self.build(controller)
-      ::Config::Solr.new(controller).deep_copy(self).tap do |config|
+      # === Index metadata fields ===
 
-        config.klass = controller.is_a?(Class) ? controller : controller.class
+      #config.add_index_field 'recording_format_f'     # TODO: not in index
 
-        # Specify the lens key for this configuration.
-        config.lens_key = :music
+      # === Show page (item details) metadata fields ===
 
-        # === Facet fields ===
+      #config.add_show_field 'instrument_f'
+      #config.add_show_field 'composition_era_f'
+      #config.add_show_field 'recordings_and_scores_f' # TODO: not in index
 
-        remove_facets!(config, Solr::CATALOG_TYPES, Solr::VIDEO_TYPES)
+      # === Search fields ===
 
-        # === Index (results page) metadata fields ===
-
-        #config.add_index_field 'recording_format_f'     # TODO: not in index
-
-        # === Item details (show page) metadata fields ===
-
-        #config.add_show_field 'instrument_f'
-        #config.add_show_field 'composition_era_f'
-        #config.add_show_field 'recordings_and_scores_f' # TODO: not in index
-
-        # === Search fields ===
-
-        # Hide selected catalog lens search fields.
-        config.search_fields.each_pair do |key, field|
-          next unless %w(journal issn).include?(key)
-          field.include_in_advanced_search = false
-        end
-
-        # === Localization ===
-
-        finalize_configuration!(config)
-
+      # Hide selected catalog lens search fields.
+      config.search_fields.each_pair do |key, field|
+        next unless %w(journal issn).include?(key)
+        field.include_in_advanced_search = false
       end
+
+      # === Sort fields ===
+
+      # TODO: ???
+
+      # === Finalize ===
+
+      finalize_configuration!(config)
+
     end
+  end
 
-    # =========================================================================
-    # :section:
-    # =========================================================================
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
 
-    public
+  public
 
-    # Initialize a new instance.
-    #
-    # @param [Blacklight::Controller, nil] controller
-    #
-    # @see Config::Catalog#instance
-    #
-    def initialize(controller = nil)
-      controller ||= MusicController
-      config_base  = self.class.build(controller)
-      register(config_base)
-    end
-
+  # Create a configuration object to associate with a controller.
+  #
+  # @param [Blacklight::Controller, nil] controller
+  #
+  # @see self#build
+  #
+  # This method overrides:
+  # @see Config::Base#initialize
+  #
+  def initialize(controller = nil)
+    controller ||= MusicController
+    config_base  = self.class.build(controller)
+    super(config_base)
   end
 
 end

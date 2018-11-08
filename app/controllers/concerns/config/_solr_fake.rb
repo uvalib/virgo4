@@ -5,14 +5,50 @@
 
 __loading_begin(__FILE__)
 
-require_relative '_common'
-require 'blacklight/solr'
+require_relative '_solr'
 
-class Config::SolrFake
+# A baseline configuration for lenses that access items from a desktop Solr
+# instance (for example, based on the test Solr configuration in solr/conf in
+# this project directory).
+#
+# A baseline configuration for a repository contains all possible fields that
+# will be needed from the repository.  Individual lens configurations tailor
+# information displayed to the user by selecting removing fields from their
+# copy of this configuration.
+#
+class Config::SolrFake < Config::Base
 
-  include ::Config::Common
-  extend  ::Config::Common
-  include ::Config::Base
+  # === Common field values ===
+  #
+  # Certain "index" and "show" configuration fields have the same values based
+  # on the relevant fields defined by the search service.
+  #
+  # @see #semantic_fields!
+  #
+  SEMANTIC_FIELDS = {
+    display_type_field: 'format',
+    title_field:        'title_display',
+    subtitle_field:     nil,
+    alt_title_field:    nil,
+    author_field:       nil,
+    alt_author_field:   nil,
+    thumbnail_field:    'thumbnail_path_ss'
+  }
+
+  # === Sort field values ===
+  #
+  BY_AUTHOR = 'author_sort'
+  BY_SCORE  = 'score'
+  BY_TITLE  = 'title_sort'
+  BY_YEAR   = 'pub_date_sort'
+
+  BY_NEWEST         = "#{BY_YEAR} desc, #{BY_TITLE} asc"
+  BY_OLDEST         = "#{BY_YEAR} asc, #{BY_TITLE} asc"
+  IN_TITLE_ORDER    = "#{BY_TITLE} asc, #{BY_AUTHOR} asc"
+  IN_TITLE_REVERSE  = "#{BY_TITLE} desc, #{BY_AUTHOR} asc"
+  IN_AUTHOR_ORDER   = "#{BY_AUTHOR} asc, #{BY_TITLE} asc"
+  IN_AUTHOR_REVERSE = "#{BY_AUTHOR} desc, #{BY_TITLE} asc"
+  BY_RELEVANCE      = "#{BY_SCORE} desc, #{BY_NEWEST}"
 
   # ===========================================================================
   # :section:
@@ -20,417 +56,260 @@ class Config::SolrFake
 
   public
 
-  # Modify a base configuration.
-  #
-  # @param [Blacklight::Configuration]     config
-  # @param [Blacklight::Controller, Class] controller
-  #
-  # @return [Blacklight::Configuration]   The modified configuration.
-  #
-  def self.configure!(config, controller)
-    # rubocop:disable Metrics/LineLength
+  module ClassMethods
+    include Config::Base::ClassMethods
 
-    config.klass = controller.is_a?(Class) ? controller : controller.class
-
-    # =========================================================================
-    # Lens
-    # =========================================================================
-
-    # Default Blacklight Lens for controllers based on this configuration.
-    config.lens_key = :catalog
-
-    # === Search request configuration ===
-
-    # HTTP method to use when making requests to Solr; valid values are
-    # :get and :post.
-    # config.http_method = :get
-
-    # Solr path which will be added to Solr base URL before the other Solr
-    # params.
-    # config.solr_path = 'select'
-
-    # Default parameters to send to Solr for all search-like requests.
-    # @see Blacklight::SearchBuilder#processed_parameters
-    config.default_solr_params = {
-      qt:   'search',
-      rows: 10,
-      #'facet.sort': 'index' # Sort by byte order rather than by count.
-    }
-
-    # === Single document request configuration ===
-
-    # The Solr request handler to use when requesting only a single document.
-    # config.document_solr_request_handler = 'document'
-
-    # The path to send single document requests to Solr (if different than
-    # 'config.solr_path').
-    # config.document_solr_path = 'get'
-
-    # Primary key for indexed documents.
-    # config.document_unique_id_param = :ids
-
-    # Default parameters to send on single-document requests to Solr.
-    # config.default_document_solr_params = {
-    #   qt: 'document',
-    #   ## These are hard-coded in the blacklight 'document' requestHandler
-    #   # fl: '*',
-    #   # rows: 1,
-    #   # q: '{!term f=id v=$id}'
-    # }
-
-    # Base Solr parameters for pagination of single documents.
-    # @see Blacklight::RequestBuilders#previous_and_next_document_params
-    # config.document_pagination_params = {}
-
-    # === Response models ===
-
-    config.lens = Blacklight::OpenStructWithHashAccess.new(
-      document_model:         SolrDocument,
-      document_factory:       Blacklight::Solr::DocumentFactory,
-      response_model:         Blacklight::Lens::Response,
-      repository_class:       Blacklight::Solr::Repository,
-      search_builder_class:   SearchBuilderSolr,
-      facet_paginator_class:  Blacklight::Solr::FacetPaginator
-    )
-
-    # Class for sending and receiving requests from a search index.
-    config.repository_class = config.lens.repository_class
-
-    # Class for converting Blacklight's URL parameters into request
-    # parameters for the search index via repository_class.
-    config.search_builder_class = config.lens.search_builder_class
-
-    # Model that maps search index responses to Blacklight responses.
-    config.response_model = config.lens.response_model
-
-    # The model to use for each response document.
-    config.document_model = config.lens.document_model
-
-    # A class that builds documents.
-    config.document_factory = config.lens.document_factory
-
-    # Class for paginating long lists of facet fields.
-    config.facet_paginator_class = config.lens.facet_paginator_class
-
-    # Repository connection configuration.
-    # NOTE: For the standard catalog this is based on blacklight.yml;
-    # for alternate lenses this might allow for an alternate Solr to be
-    # accessed by providing an alternate blacklight.yml.
-    # config.connection_config = nil
-
-    # =========================================================================
-    # Metadata fields
-    # =========================================================================
-
-    # === Configuration for search results/index views ===
-    # @see Blacklight::Configuration::ViewConfig::Index
-
-    config.index.document_presenter_class = Blacklight::Lens::IndexPresenter
-    config.index.field_presenter_class    = Blacklight::Lens::FieldPresenter
-    config.index.partials                 = %i(index_header index)
-=begin # TODO: Thumbnails
-    config.index.partials                 = %i(index_header thumbnail index)
-=end
-
-    config.index.display_type_field = 'format'
-    config.index.title_field        = 'title_display'
-    config.index.thumbnail_field    = 'thumbnail_path_ss'
-
-    # === Configuration for document/show views ===
-    # @see Blacklight::Configuration::ViewConfig::Show
-
-    config.show.document_presenter_class = Blacklight::Lens::ShowPresenter
-    config.show.field_presenter_class    = Blacklight::Lens::FieldPresenter
-    config.show.partials                 = %i(show_header show)
-=begin # TODO: Thumbnails
-    config.show.partials                 = %i(show_header thumbnail show)
-=end
-
-    config.show.display_type_field  = 'format'
-    config.show.title_field         = 'title_display'
-    config.show.thumbnail_field     = 'thumbnail_path_ss'
-
-    # === Configurations for specific types of index views ===
-    # @see Blacklight::Configuration#view_config
-
-    # config.view =
-    #   Blacklight::NestedOpenStructWithHashAccess.new(
-    #     Blacklight::Configuration::ViewConfig,
-    #     'list',
-    #     atom: { if: false, partials: [:document] },
-    #     rss:  { if: false, partials: [:document] },
-    #   )
-
-    # === Facet fields ===
-    # Solr fields that will be treated as facets by the application.
-    # (The ordering of the field names is the order of display.)
+    # Modify a configuration to support searches to a desktop Solr instance.
     #
-    # Setting a limit will trigger Blacklight's 'more' facet values link.
+    # @param [Blacklight::Configuration]     config
+    # @param [Blacklight::Controller, Class] controller
     #
-    # * If left unset, then all facet values returned by Solr will be
-    #     displayed.
+    # @return [Blacklight::Configuration]   The modified configuration.
     #
-    # * If set to an integer, then "f.somefield.facet.limit" will be added to
-    #     Solr request, with actual Solr request being +1 your configured
-    #     limit -- you configure the number of items you actually want
-    #     _displayed_ in a page.
+    # @see Config::Solr#response_models!
+    # @see Config::Base#add_tools!
+    # @see Config::Base#finalize_configuration!
     #
-    # * If set to *true*, then no additional parameters will be sent to Solr,
-    #     but any 'sniffed' request limit parameters will be used for paging,
-    #     with paging at requested limit -1. Can sniff from facet.limit or
-    #     f.specific_field.facet.limit Solr request params. This *true*
-    #     config can be used if you set limits in :default_solr_params, or as
-    #     defaults on the Solr side in the request handler itself. Request
-    #     handler defaults sniffing requires Solr requests to be made with
-    #     "echoParams=all", for app code to actually have it echo'd back to
-    #     see it.
-    #
-    # :show may be set to *false* if you don't want the facet to be drawn in
-    # the facet bar.
-    #
-    # Set :index_range to *true* if you want the facet pagination view to
-    # have facet prefix-based navigation (useful when user clicks "more" on a
-    # large facet and wants to navigate alphabetically across a large set of
-    # results).
-    #
-    # :index_range can be an array or range of prefixes that will be used to
-    # create the navigation (Note: It is case sensitive when searching
-    # values).
-    #
-    # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
+    def configure!(config, controller)
+      # rubocop:disable Metrics/LineLength
 
-    config.add_facet_field 'format',              label: 'Format'
-    config.add_facet_field 'pub_date',            label: 'Publication Year', single: true
-    config.add_facet_field 'subject_topic_facet', label: 'Topic', limit: 20, index_range: 'A'..'Z'
-    config.add_facet_field 'language_facet',      label: 'Language', limit: true
-    config.add_facet_field 'lc_1letter_facet',    label: 'Call Number'
-    config.add_facet_field 'subject_geo_facet',   label: 'Region'
-    config.add_facet_field 'subject_era_facet',   label: 'Era'
+      # Common configuration values.
+      super(config, controller)
 
-    # === Experimental facets
-    config.add_facet_field 'example_pivot_field', label: 'Pivot Field', pivot: %w(format language_facet)
+      # =======================================================================
+      # Lens
+      # =======================================================================
 
-    now = Time.zone.now.year
-    config.add_facet_field 'example_query_facet_field', label: 'Publish Date', query: {
-      years_5:  { label: 'within 5 Years',  fq: "pub_date:[#{now-5}  TO *]" },
-      years_10: { label: 'within 10 Years', fq: "pub_date:[#{now-10} TO *]" },
-      years_25: { label: 'within 25 Years', fq: "pub_date:[#{now-25} TO *]" }
-    }
+      # Default Blacklight Lens for controllers based on this configuration.
+      config.lens_key = :catalog
 
-    # Have BL send all facet field names to Solr, which has been the default
-    # previously. Simply remove these lines if you'd rather use Solr request
-    # handler defaults, or have no facets.
-    config.add_facet_fields_to_solr_request!
+      response_models!(config)
 
-    # === Index (results page) metadata fields ===
-    # Solr fields to be displayed in the index (search results) view.
-    # (The ordering of the field names is the order of the display.)
-    #
-    # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
-    #
-    # ==== Implementation Notes
-    # [1] Blacklight::Lens::IndexPresenter#heading shows 'title_display' so
-    #     it should not be included here.
+      # =======================================================================
+      # Facets
+      # =======================================================================
 
-    config.add_index_field 'title_display',           label: 'Title',          helper_method: :raw_value, if: :json_request?
-    config.add_index_field 'subtitle_display',        label: 'Subtitle',       helper_method: :raw_value, if: :json_request?
-    config.add_index_field 'title_vern_display',      label: 'Title',          helper_method: :raw_value, if: :json_request?
-    config.add_index_field 'subtitle_vern_display',   label: 'Subtitle',       helper_method: :raw_value, if: :json_request?
-    config.add_index_field 'author_display',          label: 'Author',         helper_method: :raw_value, if: :json_request?
-    config.add_index_field 'author_vern_display',     label: 'Author',         helper_method: :raw_value, if: :json_request?
-    config.add_index_field 'format',                  label: 'Format',         helper_method: :format_facet_label
-    config.add_index_field 'language_facet',          label: 'Language'
-    config.add_index_field 'published_display',       label: 'Published'
-    config.add_index_field 'published_vern_display',  label: 'Published'
-    config.add_index_field 'lc_callnum_display',      label: 'Call number'
+      # Solr fields that will be treated as facets by the application.
+      # (The ordering of the field names is the order of display.)
+      #
+      # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
 
-    # === Item details (show page) metadata fields ===
-    # Solr fields to be displayed in the show (single result) view.
-    # (The ordering of the field names is the order of display.)
-    #
-    # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
-    #
-    # ==== Implementation Notes
-    # [1] Blacklight::Lens::ShowPresenter#heading shows 'title_display',
-    #     'title_vern_display', 'subtitle_display', 'subtitle_vern_display',
-    #     'author_display', and 'author_vern_display' so they should be
-    #     included here for JSON but not for HTML.
+      config.add_facet_field 'format',              label: 'Format'
+      config.add_facet_field 'pub_date',            label: 'Publication Year', single: true
+      config.add_facet_field 'subject_topic_facet', label: 'Topic', limit: 20, index_range: 'A'..'Z'
+      config.add_facet_field 'language_facet',      label: 'Language', limit: true
+      config.add_facet_field 'lc_1letter_facet',    label: 'Call Number'
+      config.add_facet_field 'subject_geo_facet',   label: 'Region'
+      config.add_facet_field 'subject_era_facet',   label: 'Era'
 
-    config.add_show_field 'title_display',          label: 'Title',            helper_method: :raw_value, if: :json_request?
-    config.add_show_field 'title_vern_display',     label: 'Title',            helper_method: :raw_value, if: :json_request?
-    config.add_show_field 'subtitle_display',       label: 'Subtitle',         helper_method: :raw_value, if: :json_request?
-    config.add_show_field 'subtitle_vern_display',  label: 'Subtitle',         helper_method: :raw_value, if: :json_request?
-    config.add_show_field 'author_display',         label: 'Author',           helper_method: :raw_value, if: :json_request?
-    config.add_show_field 'author_vern_display',    label: 'Author',           helper_method: :raw_value, if: :json_request?
-    config.add_show_field 'format',                 label: 'Format',           helper_method: :format_facet_label
-    config.add_show_field 'url_fulltext_display',   label: 'URL',              helper_method: :url_link
-    config.add_show_field 'url_suppl_display',      label: 'More Information', helper_method: :url_link
-    config.add_show_field 'language_facet',         label: 'Language'
-    config.add_show_field 'published_display',      label: 'Published'
-    config.add_show_field 'published_vern_display', label: 'Published'
-    config.add_show_field 'lc_callnum_display',     label: 'Call number'
-    config.add_show_field 'isbn_t',                 label: 'ISBN'
+      # === Experimental facets
+      now = Time.zone.now.year
+      config.add_facet_field 'example_query_facet_field', query: {
+        years_5:  { label: 'within 5 Years',  fq: "pub_date:[#{now-5}  TO *]" },
+        years_10: { label: 'within 10 Years', fq: "pub_date:[#{now-10} TO *]" },
+        years_25: { label: 'within 25 Years', fq: "pub_date:[#{now-25} TO *]" }
+      }, label: 'Publication Range'
 
-    # === Search fields ===
-    # "Fielded" search configuration. Used by pulldown among other places.
-    # For supported keys in hash, see rdoc for Blacklight::SearchFields.
-    #
-    # Search fields will inherit the :qt Solr request handler from
-    # config[:default_solr_parameters], OR can specify a different one with a
-    # :qt key/value. Below examples inherit, except for subject that
-    # specifies the same :qt as default for our own internal testing
-    # purposes.
-    #
-    # The :key is what will be used to identify this BL search field
-    # internally, as well as in URLs -- so changing it after deployment may
-    # break bookmarked URLs.  A display label will be automatically
-    # calculated from the :key, or can be specified manually to be different.
-    #
-    # This one uses all the defaults set by the Solr request handler. Which
-    # Solr request handler? The one set in
-    # config[:default_solr_parameters][:qt], since we aren't specifying it
-    # otherwise.
-    #
-    # Now we see how to over-ride Solr request handler defaults, in this case
-    # for a BL "search field", which is really a dismax aggregate of Solr
-    # search fields.
-    #
-    # :solr_parameters are sent to Solr as ordinary URL query params.
-    #
-    # :solr_local_parameters are sent using Solr LocalParams syntax, e.g:
-    # "{! qf=$qf_title }". This is necessary to use Solr parameter
-    # de-referencing like $qf_title.
-    # @see http://wiki.apache.org/solr/LocalParams
-    #
-    # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
-    #
-    # Now we see how to over-ride Solr request handler defaults, in this case
-    # for a BL "search field", which is really a dismax aggregate of Solr
-    # search fields.
-    #
-    # ==== Implementation Notes
-    # "All Fields" is intentionally placed last.
+      config.add_facet_field(
+        'example_pivot_field',
+        label: 'Pivot Field',
+        pivot: %w(format language_facet),
+        unless: :json_request?
+      )
 
-    config.add_search_field('title') do |field|
-      field.solr_local_parameters = {
-        'spellcheck.dictionary': 'title',
-        qf: '${title_qf}',
-        pf: '${title_pf}'
-      }
+      # Have BL send all facet field names to Solr, which has been the default
+      # previously. Simply remove these lines if you'd rather use Solr request
+      # handler defaults, or have no facets.
+      config.add_facet_fields_to_solr_request!
+
+      # =======================================================================
+      # Index pages (search results)
+      # =======================================================================
+
+      # === Index metadata fields ===
+      # Solr fields to be displayed in the index (search results) view.
+      # (The ordering of the field names is the order of the display.)
+      #
+      # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
+      #
+      # ==== Implementation Notes
+      # [1] Blacklight::Lens::IndexPresenter#label shows title and format so
+      #     they should not be included here for HTML -- only for JSON.
+
+      config.add_index_field 'title_display',           label: 'Title',          helper_method: :raw_value, if: :json_request?
+      config.add_index_field 'subtitle_display',        label: 'Subtitle',       helper_method: :raw_value, if: :json_request?
+      config.add_index_field 'title_vern_display',      label: 'Title',          helper_method: :raw_value, if: :json_request?
+      config.add_index_field 'subtitle_vern_display',   label: 'Subtitle',       helper_method: :raw_value, if: :json_request?
+      config.add_index_field 'format',                  label: 'Format',         helper_method: :format_facet_label
+      config.add_index_field 'author_display',          label: 'Author'
+      config.add_index_field 'author_vern_display',     label: 'Author'
+      config.add_index_field 'language_facet',          label: 'Language'
+      config.add_index_field 'published_display',       label: 'Published'
+      config.add_index_field 'published_vern_display',  label: 'Published'
+      config.add_index_field 'lc_callnum_display',      label: 'Call number'
+
+      # =======================================================================
+      # Show pages (item details)
+      # =======================================================================
+
+      # === Show page (item details) metadata fields ===
+      # Solr fields to be displayed in the show (single result) view.
+      # (The ordering of the field names is the order of display.)
+      #
+      # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
+      #
+      # ==== Implementation Notes
+      # [1] Blacklight::Lens::ShowPresenter#heading shows title and author so
+      #     they should not be included here for HTML -- only for JSON.
+
+      config.add_show_field 'title_display',          label: 'Title',            helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'title_vern_display',     label: 'Title',            helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'subtitle_display',       label: 'Subtitle',         helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'subtitle_vern_display',  label: 'Subtitle',         helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'author_display',         label: 'Author',           helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'author_vern_display',    label: 'Author',           helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'format',                 label: 'Format',           helper_method: :format_facet_label
+      config.add_show_field 'url_fulltext_display',   label: 'URL',              helper_method: :url_link
+      config.add_show_field 'url_suppl_display',      label: 'More Information', helper_method: :url_link
+      config.add_show_field 'language_facet',         label: 'Language'
+      config.add_show_field 'published_display',      label: 'Published'
+      config.add_show_field 'published_vern_display', label: 'Published'
+      config.add_show_field 'lc_callnum_display',     label: 'Call number'
+      config.add_show_field 'isbn_t',                 label: 'ISBN'
+
+      # =======================================================================
+      # Search fields
+      # =======================================================================
+
+      # "Fielded" search configuration. Used by pulldown among other places.
+      # For supported keys in hash, see rdoc for Blacklight::SearchFields.
+      #
+      # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
+      #
+      # ==== Implementation Notes
+      # "All Fields" is intentionally placed last.
+
+      config.add_search_field('title') do |field|
+        field.solr_local_parameters = {
+          'spellcheck.dictionary': 'title',
+          qf: '${title_qf}',
+          pf: '${title_pf}'
+        }
+      end
+
+      config.add_search_field('author') do |field|
+        field.solr_local_parameters = {
+          'spellcheck.dictionary': 'author',
+          qf: '${author_qf}',
+          pf: '${author_pf}'
+        }
+      end
+
+      config.add_search_field('subject') do |field|
+        field.solr_local_parameters = {
+          'spellcheck.dictionary': 'subject',
+          qf: '${subject_qf}',
+          pf: '${subject_pf}'
+        }
+        # Specifying a :qt only to show it's possible, and so our internal
+        # automated tests can test it. In this case it's the same as
+        # config[:default_solr_parameters][:qt], so isn't actually necessary.
+        field.qt = 'search'
+      end
+
+      # "All Fields" search selection is intentionally placed last so that the
+      # user will be encouraged to arrive at a more appropriate search type
+      # before falling-back on a generic keyword search.  It is indicated as
+      # "default" only to ensure that other search types are properly labeled
+      # in search constraints and history.
+      config.add_search_field 'all_fields', label: 'All Fields', default: true
+
+      # =======================================================================
+      # Sort fields
+      # =======================================================================
+
+      # "Sort results by" select (pulldown)
+      # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
+
+      config.add_sort_field 'relevance',  sort: BY_RELEVANCE,      label: 'Relevance'
+      config.add_sort_field 'newest',     sort: BY_NEWEST,         label: 'Date'
+      config.add_sort_field 'oldest',     sort: BY_OLDEST,         label: 'Date (oldest first)'
+      config.add_sort_field 'title',      sort: IN_TITLE_ORDER,    label: 'Title'
+      config.add_sort_field 'title_rev',  sort: IN_TITLE_REVERSE,  label: 'Title (reverse)'
+      config.add_sort_field 'author',     sort: IN_AUTHOR_ORDER,   label: 'Author'
+      config.add_sort_field 'author_rev', sort: IN_AUTHOR_REVERSE, label: 'Author (reverse)'
+
+      # =======================================================================
+      # Search parameters
+      # =======================================================================
+
+      # TODO: ???
+
+      # =======================================================================
+      # Blacklight Advanced Search
+      # =======================================================================
+
+      # TODO: ???
+
+      # =======================================================================
+      # Finalize and return the modified configuration
+      # =======================================================================
+
+      add_tools!(config)
+      semantic_fields!(config)
+      finalize_configuration!(config)
+
+      # rubocop:enable Metrics/LineLength
     end
 
-    config.add_search_field('author') do |field|
-      field.solr_local_parameters = {
-        'spellcheck.dictionary': 'author',
-        qf: '${author_qf}',
-        pf: '${author_pf}'
-      }
+    # Define per-repository response model values and copy them to the top
+    # level of the configuration where Blacklight expects to see them.
+    #
+    # @param [Blacklight::Configuration]                       config
+    # @param [Hash, Blacklight::OpenStructWithHashAccess, nil] added_values
+    #
+    # @return [void]
+    #
+    # @see Config::Base#response_models!
+    #
+    def response_models!(config, added_values = nil)
+      ::Config::Solr.response_models!(config, added_values)
     end
 
-    config.add_search_field('subject') do |field|
-      field.solr_local_parameters = {
-        'spellcheck.dictionary': 'subject',
-        qf: '${subject_qf}',
-        pf: '${subject_pf}'
-      }
-      # Specifying a :qt only to show it's possible, and so our internal
-      # automated tests can test it. In this case it's the same as
-      # config[:default_solr_parameters][:qt], so isn't actually necessary.
-      field.qt = 'search'
+    # Set mappings of configuration key to repository field for both :index and
+    # :show configurations.
+    #
+    # @param [Blacklight::Configuration]                       config
+    # @param [Hash, Blacklight::OpenStructWithHashAccess, nil] added_values
+    #
+    # @see Config::Base#semantic_fields!!
+    #
+    def semantic_fields!(config, added_values = nil)
+      values = SEMANTIC_FIELDS
+      values = values.merge(added_values) if added_values.present?
+      super(config, values)
     end
 
-    # "All Fields" search selection is intentionally placed last so that the
-    # user will be encouraged to arrive at a more appropriate search type
-    # before falling-back on a generic keyword search.  It is indicated as
-    # "default" only to ensure that other search types are properly labeled
-    # in search constraints and history.
-    config.add_search_field 'all_fields', label: 'All Fields', default: true
-
-    # === Sort fields ===
-    # "Sort results by" select (pulldown)
-    # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
-
-    config.add_sort_field 'relevance',  sort: 'score desc, pub_date_sort desc, title_sort asc', label: 'Relevance'
-    config.add_sort_field 'newest',     sort: 'pub_date_sort desc, title_sort    asc',          label: 'Date'
-    config.add_sort_field 'oldest',     sort: 'pub_date_sort desc, title_sort    desc',         label: 'Date (oldest first)'
-    config.add_sort_field 'title',      sort: 'title_sort    asc,  pub_date_sort desc',         label: 'Title'
-    config.add_sort_field 'title_rev',  sort: 'title_sort    desc, pub_date_sort desc',         label: 'Title (reverse)'
-    config.add_sort_field 'author',     sort: 'author_sort   asc,  title_sort    asc',          label: 'Author'
-    config.add_sort_field 'author_rev', sort: 'author_sort   desc, title_sort    asc',          label: 'Author (reverse)'
-
-    # =========================================================================
-    # Search
-    # =========================================================================
-
-    # If there are more than this many search results, no "did you mean"
-    # suggestion is offered.
-    config.spell_max = 10 # NOTE: was 5
-
-    # Maximum number of results to show per page.
-    # config.max_per_page: 100
-
-    # Items to show per page, each number in the array represent another
-    # option to choose from.
-    # config.per_page = [10, 20, 50, 100]
-
-    # Default :per_page selection
-    # config.default_per_page = nil
-
-    # How many searches to save in session history.
-    # config.search_history_window = 100
-
-    # The default number of items to show in a facet value menu when the
-    # facet field does not specify a :limit.
-    # config.default_facet_limit = 10
-
-    # The facets with more than this number of values get a "more>>" link.
-    # This the number of items per page in the facet modal dialog.
-    config.default_more_limit = config.default_facet_limit # NOTE: was 20
-
-    # Configuration for suggester.
-    config.autocomplete_suggester = 'mySuggester'
-    config.autocomplete_enabled   = true
-    config.autocomplete_path      = 'suggest'
-
-    # =========================================================================
-    # Blacklight Advanced Search
-    # =========================================================================
-
-    config.advanced_search ||= Blacklight::OpenStructWithHashAccess.new
-    # config.advanced_search.qt                 ||= 'search'
-    config.advanced_search.url_key              ||= 'advanced'
-    config.advanced_search.query_parser         ||= 'dismax'
-    config.advanced_search.form_solr_parameters ||= {}
-
-    # === Localization ===
-    # Get field labels from I18n, including labels specific to this lens.
-
-    # =========================================================================
-    # Finalize and return the modified configuration
-    # =========================================================================
-
-    add_tools!(config)
-    finalize_configuration!(config)
-
-    # rubocop:enable Metrics/LineLength
   end
 
+  include ClassMethods
+  extend  ClassMethods
+
   # ===========================================================================
   # :section:
   # ===========================================================================
 
   public
 
-  attr_reader :blacklight_config
-
-  delegate_missing_to(:blacklight_config)
-
+  # Initialize a new configuration as the basis for lenses that access items
+  # from a desktop Solr instance.
+  #
+  # @param [Blacklight::Lens::Controller] controller
+  #
   def initialize(controller)
     production_solr(false)
-    @blacklight_config =
-      Blacklight::Configuration.new do |config|
-        self.class.configure!(config, controller)
-      end
+    @blacklight_config = build_configuration(controller)
+    super(@blacklight_config)
   end
 
 end
