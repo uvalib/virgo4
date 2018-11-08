@@ -2,7 +2,14 @@
 <%-
   # Page header navbar.
 
-  logo ||= link_to(h(application_name), root_path)
+  # The caller may provide additional CSS classes via the :header_css or
+  # :search_bar_css options.
+  header_css =
+    css_classes(header_css ||= nil) { |classes|
+      classes << 'navbar navbar-expand-md navbar-dark bg-dark topbar'
+    }
+
+  logo ||= link_to(h(application_name), root_path, class: 'navbar-logo')
   lens ||= current_lens_key
   lens &&=
     if request.path.start_with?("/#{lens}")
@@ -11,20 +18,18 @@
       ' &ndash; '.html_safe << link_to(label, path, class: 'navbar-lens')
     end
 
-  # The caller may provide additional CSS classes via the :header_css or
+  menu_id      = 'user-util-collapse'
+  menu_css     = 'collapse navbar-collapse justify-content-md-end'
+
+  toggle_label = t('blacklight.header_links.toggle')
+  toggle_opts  = { label: toggle_label, target: menu_id }
+
+  # The caller may provide additional CSS classes for the search bar via
   # :search_bar_css options.
-  header_css =
-    css_classes(header_css ||= nil) { |classes|
-      classes << 'navbar navbar-expand-md navbar-dark bg-dark topbar'
-    }
   search_bar_css =
     css_classes(search_bar_css ||= nil) { |classes|
       classes << 'navbar navbar-expand-md navbar-light bg-light navbar-search'
-      classes << 'invisible' if params[:controller].to_s.include?('advanced')
     }
-
-  toggle_id   = 'user-util-collapse'
-  toggle_opts = { label: 'Toggle navigation', target: toggle_id }
 
 -%>
 
@@ -33,13 +38,13 @@
   <div class="<%= container_classes -%>">
 
     <%# Logo icon and current lens -%>
-    <span class="mb-0 navbar-brand"><%= logo -%><%= lens -%></span>
+    <span class="navbar-brand"><%= logo -%><%= lens -%></span>
 
     <%# "Hamburger" menu (visible for mobile) -%>
     <%= render 'shared/navbar_toggle', toggle_opts %>
 
     <%# Navbar menu -%>
-    <div id="<%= toggle_id -%>" class="collapse navbar-collapse justify-content-md-end">
+    <div id="<%= menu_id -%>" class="<%= menu_css -%>">
       <%= render 'shared/user_util_links' %>
     </div>
 

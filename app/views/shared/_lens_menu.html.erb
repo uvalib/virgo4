@@ -1,29 +1,45 @@
 <%# app/views/shared/_lens_menu.html.erb -%>
 <%-
   # Links to switch the current lens.
+  #
+  # If this partial is being displayed on an advanced search form page then
+  # then items link to the the advanced search form of the selected lens; in
+  # all other cases, the items link to the home page of the selected lens.
 
   css ||= 'nav-pills'
+  adv ||= params[:controller].to_s.include?('advanced')
 
+  path = request.path
   lens_links = {
-    all:      root_path,
-    catalog:  search_catalog_path,
-    articles: search_articles_path,
-    video:    search_video_path,
-    music:    search_music_path,
+    all:      (root_path unless adv),
+    catalog:  adv ? catalog_advanced_search_path  : search_catalog_path,
+    articles: adv ? articles_advanced_search_path : search_articles_path,
+    video:    adv ? video_advanced_search_path    : search_video_path,
+    music:    adv ? music_advanced_search_path    : search_music_path
   }.map { |lens, url|
-    next unless url
-    at_main_page = (url == root_path)
-    in_lens      = !at_main_page && request.path.start_with?(url)
-    at_lens_home = (url == (at_main_page ? request.fullpath : request.path))
-    content_tag(:li, class: 'nav-item') {
-      link_css  = %w(nav-link)
-      link_css << 'active'   if in_lens
-      link_css << 'disabled' if at_lens_home
-      link_css  = link_css.join(' ')
-      link_tip  = t("blacklight.#{lens}.tooltip")
-      link_to(lens.to_s.capitalize, url, class: link_css, title: link_tip)
-    }
-  }.compact.join("\n").html_safe
-
+    active    = url && ((url == path) || path.start_with?("#{url}/"))
+    disabled  = !url || (url == request.fullpath)
+    link_css  = %w(nav-link)
+    link_css << 'active'   if active
+    link_css << 'disabled' if disabled
+    lens_name = lens.to_s.capitalize
+    link_tip =
+      if adv
+        t("blacklight.#{lens}.advanced.tooltip", default: '').presence ||
+        t('blacklight.lens.advanced.tooltip', lens: lens_name, default: '')
+      else
+        t("blacklight.#{lens}.tooltip", default: '').presence ||
+        t('blacklight.lens.tooltip', lens: lens_name, default: '')
+      end
+    link_opt = { class: link_css.join(' ') }
+    link_opt[:title]    = link_tip if link_tip.present?
+    link_opt[:tabindex] = -1       if disabled
+    link_to(lens_name, url, link_opt)
+  }
 -%>
-<ul class="nav <%= css -%> lens-menu"><%= lens_links %></ul>
+
+<ul class="nav <%= css -%> lens-menu">
+  <%- lens_links.each do |lens_link| -%>
+    <li class="nav-item"><%= lens_link -%></li>
+  <%- end -%>
+</ul>

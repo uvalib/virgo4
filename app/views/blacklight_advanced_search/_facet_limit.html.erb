@@ -3,42 +3,24 @@
   facet = display_facet ||= nil
   return unless facet.present?
 
-  field    = facet.name
   partial  = advanced_search_facet_partial_name(facet)
-  advanced = (params[:controller].to_s == 'advanced')
-  if advanced
+  if params[:controller].to_s.include?('advanced')
     partial = 'advanced/facet_limit' if partial == 'catalog/facet_limit'
-    remove_path =
-      proc { |value|
-        path_params = remove_advanced_facet_param(field, value, params)
-        advanced_search_path(path_params)
-      }
   else
     partial = 'catalog/facet_limit' if partial == 'advanced/facet_limit'
-    remove_path =
-      proc { |value|
-        path_params = remove_advanced_facet_param(field, value, params)
-        search_catalog_path(path_params)
-      }
   end
 
 -%>
 <div class="advanced_facet_limit">
-  <%- unless advanced -%>
-    <div class="inclusive_or well">
-      <h4>Any of:</h4>
-      <ul class="list-unstyled facet-values">
-        <%- advanced_query.filters[field].each do |value| -%>
-          <li>
-            <span class="selected"><%= h(value) %></span>
-            <%= link_to(remove_path.call(value), class: 'remove') do %>
-              <span class="glyphicon glyphicon-remove">✖</span>
-              <span class="sr-only">[remove]</span>
-            <%- end -%>
-          </li>
-        <%- end -%>
-      </ul>
-    </div>
-  <%- end -%>
-  <%= render_facet_limit(facet, partial: partial, layout: nil) %>
+  <div class="inclusive_or well">
+    <h5>Any of:</h5>
+    <ul class="list-unstyled facet-values">
+      <%- advanced_query.filters[facet.name].each do |value| -%>
+        <li>
+          <%= render_selected_facet_value(facet, value) %>
+        </li>
+      <%- end -%>
+    </ul>
+  </div>
 </div>
+<%= render_facet_limit(facet, partial: partial, layout: nil) %>

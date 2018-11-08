@@ -5,10 +5,16 @@
   lens ||= current_lens_key
   url  ||= search_action_url
 
+  # If this partial is being displayed on an advanced search form page then
+  # the search box and advanced search button are both made invisible; the
+  # lens menu remains visible in the usual location.
+  in_advanced_search_form = params[:controller].to_s.include?('advanced')
+
   # The caller may provide additional CSS classes via the :css_class option.
   css_class =
     css_classes(css_class ||= nil) { |classes|
       classes << 'search-query-form'
+      classes << 'invisible' if in_advanced_search_form
     }
 
   hidden_fields =
@@ -27,7 +33,8 @@
     id:     'search_field',
     class:  'custom-select search_field',
     prompt: 'Select type of search',
-    title:  t('blacklight.search.form.search_field.title')
+    title:  t('blacklight.search.form.search_field.title',
+              all_fields: t('blacklight.search_field.all_fields'))
   }
 
   q_label = t('blacklight.search.form.search.label')
@@ -45,10 +52,22 @@
 
   submit_label = t('blacklight.search.form.submit')
 
-  adv_label = 'More options'
-  adv_path  = search_state.to_h.except(:controller, :action)
-  adv_path  = advanced_search_path(lens, adv_path)
-  adv_opt   = { class: 'advanced_search btn btn-outline-secondary' }
+  # The caller may provide additional CSS classes via the :adv_class option.
+  adv_class =
+    css_classes(adv_class ||= nil) { |classes|
+      classes << 'navbar-form'
+      classes << 'invisible' if in_advanced_search_form
+    }
+  adv_label =
+    t("blacklight.#{lens}.advanced.label", default: '').presence ||
+    t('blacklight.lens.advanced.label', lens: lens, default: 'More options')
+  adv_tip =
+    t("blacklight.#{lens}.advanced.tooltip", default: '').presence ||
+    t('blacklight.lens.advanced.tooltip', lens: lens, default: '')
+  adv_path = search_state.to_h.except(:controller, :action)
+  adv_path = advanced_search_path(lens, adv_path)
+  adv_opt  = { class: 'advanced_search btn btn-outline-secondary' }
+  adv_opt[:title] = adv_tip if adv_tip.present?
 
 -%>
 <%= form_tag url, method: :get, class: css_class, role: 'search' do %>
@@ -73,7 +92,7 @@
   </div>
 <%- end -%>
 
-<div class="navbar-form">
+<div class="<%= adv_class -%>">
   <%= link_to(adv_label, adv_path, adv_opt) %>
 </div>
 

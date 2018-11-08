@@ -32,6 +32,16 @@ body {
     @extend .d-none;
 }
 
+.disabled {
+    cursor: default;
+    &:active { pointer-events: none; }
+}
+
+.forbidden {
+    cursor: not-allowed;
+    &:active { pointer-events: none; }
+}
+
 // Prevent pages with little content (like empty bookmarks or saved searches)
 // from allowing the footer to hike up to the middle of the screen on a desktop
 // display.
@@ -76,12 +86,15 @@ body {
     color: #3c763d;
 
     .constraint-connector {
-        margin-left:  0.25em;
-        margin-right: 0.25em;
+        margin-left:  0.25rem;
+        margin-right: 0.25rem;
     }
 }
 
 .applied-filter {
+
+    margin: 0 0.5rem 0.5rem 0;
+
     // Fix Blacklight definitions.
     .constraint-value {
         &:hover, &:active {
@@ -107,9 +120,4 @@ body {
 .tt-selectable {
     cursor: pointer;
     &:hover { background-color: whitesmoke; }
-}
-
-.nav-link.disabled {
-    cursor:         pointer;
-    pointer-events: none;
 }

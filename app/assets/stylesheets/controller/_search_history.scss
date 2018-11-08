@@ -15,4 +15,9 @@ body.blacklight-search_history {
         width: 90%;
     }
 
+    // Make focus outline the entire link rather than the individual lines.
+    .table td.query a {
+        display: inline-block;
+    }
+
 }

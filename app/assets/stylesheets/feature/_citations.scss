@@ -1,0 +1,27 @@
+// app/assets/stylesheets/feature/_citations.scss
+
+//=============================================================================
+// Bibliographic citations
+//=============================================================================
+
+// Document title followed by multiple citation formats.
+.citation-title {
+    margin-bottom: 1rem;
+    font-size:     1.5rem;
+}
+
+// The bibliographic citation in a specific citation format.
+.citation.card {
+
+    margin-bottom: 1rem;
+    padding:       0.5rem;
+
+    .citation-heading {
+        margin-bottom: 0.25rem;
+        font-size:     1.25rem;
+    }
+
+    .citation-content {
+        margin-top: 0.25rem;
+    }
+}

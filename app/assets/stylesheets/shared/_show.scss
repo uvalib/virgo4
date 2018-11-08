@@ -4,6 +4,22 @@
 // Common definitions for item detail (show) pages
 //=============================================================================
 
+.pagination-search-widgets {
+
+    display: flex;
+    margin:  1rem 0;
+
+    .page_links {
+        margin: auto 0;
+        flex:   1 1 auto;
+    }
+
+    .constraints-container {
+        flex:         0 1 auto;
+        justify-self: flex-end;
+    }
+}
+
 body.blacklight-show .document {
 
     // In item details, scale the thumbnail to limit its width.
@@ -11,8 +27,8 @@ body.blacklight-show .document {
 
         float:         right;
         width:         180px;
-        margin-left:   3em;
-        margin-bottom: 2em;
+        margin-left:   3rem;
+        margin-bottom: 2rem;
         object-fit:    contain;
 
         a {

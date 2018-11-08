@@ -1,17 +1,17 @@
 <%# app/views/catalog/_facet_limit.html.erb -%>
 <%-
-  display_facet ||= @display_facet
-  field_name    ||= display_facet.name
-  facet_field   ||= facet_configuration_for_field(field_name)
-  paginator = facet_paginator(facet_field, display_facet)
+  facet = display_facet ||= @display_facet
+  return unless facet.present?
+  facet_cfg = facet_configuration_for_field(facet.name)
+  paginator = facet_paginator(facet_cfg, facet)
 -%>
 <ul class="facet-values list-unstyled">
-  <%= render_facet_limit_list(paginator, facet_field.key) %>
+  <%= render_facet_limit_list(paginator, facet_cfg.key) %>
   <%- unless paginator.last_page? || (params[:action] == 'facet') -%>
-    <%- name  = facet_field.label -%>
+    <%- name  = facet_cfg.label -%>
     <%- t_opt = { scope: 'blacklight.search.facets', default: :more_html } -%>
     <%- label = t("more_#{name}_html", t_opt) -%>
-    <%- path  = search_facet_path(id: facet_field.key) -%>
+    <%- path  = search_facet_path(id: facet_cfg.key) -%>
     <li class="more-facets">
       <%= link_to(label, path, data: { blacklight_modal: 'trigger' }) %>
     </li>

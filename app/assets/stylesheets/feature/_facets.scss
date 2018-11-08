@@ -1,12 +1,30 @@
 // app/assets/stylesheets/shared/_facets.scss
 
 //=============================================================================
-// Facet sidebar
+// General facet styles
 //=============================================================================
 
-.facets-heading {
-    margin-right: -1rem;
+.facet-limit-active {
+    .card-header {
+        :focus {
+            outline-color: white;
+        }
+    }
 }
+
+.facet-values {
+    .selected { padding-right: $spacer / 2; }
+    .remove   { padding-left:  0; }
+}
+
+// Make focus outline the entire link rather than the individual lines.
+.facet-select {
+    display: inline-block;
+}
+
+//=============================================================================
+// Facet sidebar
+//=============================================================================
 
 .facets-collapse {
 

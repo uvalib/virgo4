@@ -6,7 +6,7 @@
   current_sort ||= current_sort_field&.key
 
   sort_menu      = options_for_select(sort_fields, h(current_sort))
-  current_search = blacklight_config.advanced_search[:url_key]
+  current_search = blacklight_config.advanced_search.url_key
 
   start_over_label ||= t('blacklight_advanced_search.form.start_over')
   start_over_path  ||= advanced_search_path

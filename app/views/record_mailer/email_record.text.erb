@@ -5,7 +5,8 @@
   message   ||= @message        || ''
 -%>
 <%- documents.each do |doc| -%>
+<%-   url = full_url_for(url_for_document(doc, url_opt)) -%>
 <%=   doc.to_email_text %>
-<%=   t('blacklight.email.text.url', url: full_url_for(url_for_document(doc, url_opt))) %>
+<%=   t('blacklight.email.text.url', url: url) %>
 <%- end -%>
 <%= t('blacklight.email.text.message', message: message) %>

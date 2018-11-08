@@ -4,12 +4,29 @@
 // Common definitions for search result (index) pages.
 //=============================================================================
 
-#sortAndPerPage {
+.search-constraints-container {
+
+    display: flex;
+    margin:  1rem 0;
+
+    .constraints-container {
+        flex: 1 1 auto;
+    }
+
+    .start-over-container {
+        margin:       auto 0 1rem;
+        flex:         0 0 auto;
+        justify-self: flex-end;
+    }
+}
+
+// Page links and search widgets
+.sort-pagination {
     .tools.btn-group {
         .rss-link,
         .atom-link,
         .print-view-link {
-            margin-left: 0.5em;
+            margin-left: 0.5rem;
             > * {
                 font-size:   150%;
                 line-height: 150%;
@@ -24,50 +41,70 @@
 }
 
 // Document list
-#documents .document {
+.documents-list {
 
-    .document-title-heading {
+    margin-bottom: 2rem;
 
-        display:   flex;
-        font-size: larger;
+    .document {
 
-        .document-counter {
-            display:        inline-block;
-            margin-right:   0.25em;
-            vertical-align: top;
-        }
+        .document-title-heading {
 
-        a {
-            display: inline-block;
-        }
-    }
+            display:   flex;
+            font-size: larger;
 
-    // In search results, scale the thumbnail to limit its height.
-    .document-thumbnail {
+            .document-counter {
+                display:        inline-block;
+                margin-right:   0.25rem;
+                vertical-align: top;
+            }
 
-        width:      180px;
-        max-height: 120px;
-        object-fit: contain;
-
-        a {
-            max-height: inherit;
-            max-width:  inherit;
-            object-fit: inherit;
-
-            img {
-                float:      right;
-                max-height: inherit;
-                border:     1px solid lightgray;
+            a {
+                display: inline-block;
             }
         }
-    }
 
-    &.blacklight-coin {
+        .index-document-functions {
+
+            padding-left: 0;
+
+            .bookmark-toggle {
+
+                text-align: right;
+
+                .toggle-bookmark {
+                    min-width: unset;
+                }
+            }
+        }
+
+        // In search results, scale the thumbnail to limit its height.
         .document-thumbnail {
+
+            width:      180px;
+            max-height: 120px;
+            margin-top: 0.25rem;
+            object-fit: contain;
+
             a {
+                max-height: inherit;
+                max-width:  inherit;
+                object-fit: inherit;
+
                 img {
-                    border:        none;
-                    border-radius: 50%;
+                    float:      right;
+                    max-height: inherit;
+                    border:     1px solid lightgray;
+                }
+            }
+        }
+
+        &.blacklight-coin {
+            .document-thumbnail {
+                a {
+                    img {
+                        border:        none;
+                        border-radius: 50%;
+                    }
                 }
             }
         }

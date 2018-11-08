@@ -1,17 +1,67 @@
 // app/assets/stylesheets/controllers/_advanced_search.scss
 
+// Do something to set apart the 'OR'ed facet selections of advanced search.
+// TODO: These elements should use .card not .well.
+.inclusive_or.well:not(.appliedFilter) {
+
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid gray;
+
+    .remove:not(.forbidden) {
+        &:hover, &:active {
+            @extend .btn-danger;
+        }
+    }
+}
+
 //=============================================================================
 // Advanced Search form
 //=============================================================================
 
 .advanced-search-form {
+
     .constraints {
+
         margin-bottom: 2rem;
+
+        .constraint-value {
+
+            display:       inline-flex;
+            max-width:     100%;
+            margin-bottom: 0.5rem;
+            cursor:        default;
+
+            .filter-name {
+
+                flex:         0 0 auto;
+                margin-right: 0.25rem;
+
+                &:after { content: none; }
+            }
+
+            .filter-values {
+
+                display:         flex;
+                justify-content: space-between;
+                flex:            1 1 auto;
+
+                .filter-value {
+                    display:     block;
+                    white-space: normal;
+                    flex:        1 1 0;
+                }
+
+                .filter-separator {
+                    display:     block;
+                    flex:        1 1 auto;
+                }
+            }
+        }
     }
 }
 
 .blacklight-advanced-facet-select {
     .label-and-count {
-        padding-left: 1.25em;
+        padding-left: 1.25rem;
     }
 }

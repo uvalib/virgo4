@@ -9,12 +9,14 @@
 
     display:         block;
     width:           auto;
+    margin-bottom:   0.2rem;
     text-indent:     0;
     text-decoration: none;
     font-size:       xx-large;
     font-weight:     bold;
     font-variant:    small-caps;
     color:           whitesmoke;
+    overflow:        visible; // For focus outline
     flex:            0 0 auto;
 
     @if $logo-image {
@@ -23,10 +25,18 @@
         background: transparent;
     }
 
+    .navbar-logo {
+        margin-left: 1rem;
+    }
+
     // Make the current lens less prominent than the application name.
     .navbar-lens {
+
+        margin-right: 1rem;
         font-size:    smaller;
         font-variant: none;
+
+        &:focus { outline-offset: 3px }
     }
 
     a {
@@ -36,6 +46,13 @@
             color:           #337ab7;
             text-decoration: none;
         }
+    }
+}
+
+// Account links (bookmarks, history, etc).
+.navbar-nav {
+    .nav-link:focus {
+        outline-offset: -2px;
     }
 }
 
@@ -57,12 +74,20 @@
 
         // Search input box.
         .twitter-typeahead {
-            flex: 3 1 auto;
+            flex: 2 1 auto;
         }
 
         // Search submit button.
         .input-group-append {
             flex: 0 0 auto;
+        }
+
+        .search_field,
+        .search-btn {
+            &:hover,
+            &:focus {
+                z-index: $zindex-typeahead + 1;
+            }
         }
     }
 
@@ -72,10 +97,32 @@
     }
 
     .lens-menu {
-        margin:     0.5rem 0 -0.5rem;
-        flex-wrap:  nowrap;
-        flex:       1 1 auto;
-        align-self: flex-end;
-    }
 
+        margin:      -0.5rem 0 -0.5rem 0.5rem;
+        line-height: 2.5;
+        flex-wrap:   nowrap;
+        flex:        1 1 auto;
+        align-self:  flex-end;
+
+        @media (max-width: breakpoint-max(sm)) {
+            margin-top:  0;
+            margin-left: 0;
+            line-height: 1.5;
+        }
+
+        .nav-link {
+
+            position: relative;
+
+            &:not(.disabled) {
+                &:hover,
+                &:focus {
+                    color:           $link-hover-color;
+                    text-decoration: underline;
+                    outline-offset:  -3px;
+                    z-index:         100;
+                }
+            }
+        }
+    }
 }

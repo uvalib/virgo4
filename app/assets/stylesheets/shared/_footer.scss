@@ -15,17 +15,39 @@
 
     .footer-content {
 
-        margin-top:    1em;
-        margin-bottom: 1em;
+        margin-top:    1rem;
+        margin-bottom: 1rem;
         padding:       0;
         color:         $navbar-dark-color;
 
-        // Restore link colors // TODO: why?
+        // Restore link colors but add decoration to indicate links.
         a {
-                         color: $navbar-dark-color;
+            display:                 inline-block;
+            margin:                  -4px;
+            padding:                 1px 6px 3px;
+            color:                   $navbar-dark-color;
+            text-decoration:         underline dotted;
+            text-underline-position: under;
+
             &:active   { color: $navbar-dark-active-color; }
-            &:hover    { color: $navbar-dark-hover-color; }
             &:disabled { color: $navbar-dark-disabled-color; }
+
+            &:hover {
+                color:                 $navbar-dark-hover-color;
+                text-decoration-style: solid;
+            }
+
+            &:focus {
+                outline-color:   $navbar-dark-hover-color;
+                outline-offset:  -4px;
+                text-decoration: none;
+            }
+        }
+
+        .federal-lib-logo {
+            a:focus {
+                outline-offset: 0;
+            }
         }
 
         .address {
