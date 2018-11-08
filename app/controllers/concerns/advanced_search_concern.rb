@@ -71,14 +71,33 @@ module AdvancedSearchConcern
   #
   # @param [Hash] options
   #
+  # @option options [Symbol]  :lens       Specify the controlling lens; default
+  #                                         is `current_lens_key`.
+  #
+  # @option options [Boolean] :canonical  If *true* return the path for the
+  #                                         canonical controller related to
+  #                                         the current controller or to :lens.
+  #
   # @return [String]
   #
   # This method overrides:
   # @see BlacklightAdvancedSearch::AdvancedController#search_action_url
   #
+  # == Implementation Notes
+  # The controller must be given as an absolute path so that #url_for does not
+  # replace :controller with the Devise controller within 'account' pages.
+  #
+  # TODO: super is not Blacklight::Lens::Controller#search_action_url
+  # @see Blacklight::Lens::Controller#search_action_url
+  # @see Blacklight::Lens::Catalog#search_action_url
+  # @see Blacklight::Lens::Bookmarks#search_action_url
+  #
   def search_action_url(options = nil)
-    opt = { controller: current_lens_key, action: 'index' }
-    opt.reverse_merge!(options) if options.is_a?(Hash)
+    opt = (options || {}).merge(action: 'index')
+    lens = opt.delete(:lens) || current_lens_key
+    canonical = opt.delete(:canonical)
+    canonical &&= Blacklight::Lens.canonical_for(lens)
+    opt[:controller] = "/#{canonical || lens}"
     url_for(opt)
   end
 

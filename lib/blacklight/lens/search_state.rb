@@ -40,7 +40,8 @@ module Blacklight::Lens
     # @param [Blacklight::Document] doc
     # @param [Hash, nil]            opt
     #
-    # @option options [Symbol] :lens
+    # @option opt [Symbol]  :lens       Return the URL as from another lens.
+    # @option opt [Boolean] :canonical  Return the canonical URL.
     #
     # @return [Hash, Blacklight::Document]
     #
@@ -48,21 +49,19 @@ module Blacklight::Lens
     # @see Blacklight::SearchState#url_for_document
     #
     def url_for_document(doc, opt = nil)
-      opt = opt ? opt.dup : {}
+      opt   = opt ? opt.dup : {}
+      canon = opt.delete(:canonical)
       lens  = opt.delete(:lens)
-      route = doc.is_a?(Blacklight::Document)
-      route &&= blacklight_config_for(doc).show.route
-      if route.is_a?(Hash)
-        route = route.merge(action: :show, id: doc.id).merge(opt)
-        current = (route[:controller] == :current)
-        route[:controller] = params[:controller] if current
-        route
-      elsif lens || doc.is_a?(Blacklight::Document)
-        lens ||= doc.lens          if doc.is_a?(Blacklight::Lens::Document)
-        lens ||= lens_key_for(doc) if doc.is_a?(Blacklight::Document)
-        { controller: lens, action: :show, id: doc.id }.merge(opt)
-      else
+      lens  = Blacklight::Lens.canonical_for(lens || doc) if canon
+      if !lens && !doc.is_a?(Blacklight::Document)
         doc
+      elsif !lens && (rte = blacklight_config_for(doc).show.route).is_a?(Hash)
+        rte = rte.merge(action: :show, id: doc.id).merge(opt)
+        rte[:controller] = params[:controller] if rte[:controller] == :current
+        rte
+      else
+        lens ||= lens_key_for(doc)
+        { controller: lens, action: :show, id: doc.id }.merge(opt)
       end
     end
 
