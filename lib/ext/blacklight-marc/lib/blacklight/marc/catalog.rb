@@ -9,7 +9,11 @@ __loading_begin(__FILE__)
 
 require 'blacklight/marc/catalog'
 
-override Blacklight::Marc::Catalog do
+# Override Blacklight::Marc definitions.
+#
+# @see Blacklight::Marc::Catalog
+#
+module Blacklight::Marc::CatalogExt
 
   # ===========================================================================
   # :section: Blacklight::Marc::Catalog overrides
@@ -17,8 +21,17 @@ override Blacklight::Marc::Catalog do
 
   public
 
-  def single_endnote_catalog_path(options = nil)
-    endnote_document_path(options)
+  # single_endnote_catalog_path
+  #
+  # @param [Hash, nil] opt
+  #
+  # @return [String]
+  #
+  # This method overrides:
+  # @see Blacklight::Marc::Catalog#single_endnote_catalog_path
+  #
+  def single_endnote_catalog_path(opt = nil)
+    endnote_document_path(opt)
   end
 
   # ===========================================================================
@@ -34,7 +47,7 @@ override Blacklight::Marc::Catalog do
   #
   # @options opt [String, Array<String>] :document
   #
-  # Compare with:
+  # This method overrides:
   # @see Blacklight::Marc::Catalog#render_librarian_view_control?
   #
   def render_librarian_view_control?(_config = nil, opt = nil)
@@ -48,7 +61,7 @@ override Blacklight::Marc::Catalog do
   #
   # @options opt [String, Array<String>] :document
   #
-  # Compare with:
+  # This method overrides:
   # @see Blacklight::Marc::Catalog#render_refworks_action?
   #
   def render_refworks_action?(_config = nil, opt = nil)
@@ -62,7 +75,7 @@ override Blacklight::Marc::Catalog do
   #
   # @options opt [String, Array<String>] :document
   #
-  # Compare with:
+  # This method overrides:
   # @see Blacklight::Marc::Catalog#render_endnote_action?
   #
   def render_endnote_action?(_config = nil, opt = nil)
@@ -70,5 +83,11 @@ override Blacklight::Marc::Catalog do
   end
 
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override Blacklight::Marc::Catalog => Blacklight::Marc::CatalogExt
 
 __loading_end(__FILE__)

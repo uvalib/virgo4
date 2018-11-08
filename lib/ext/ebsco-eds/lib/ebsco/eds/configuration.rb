@@ -4,9 +4,11 @@
 
 __loading_begin(__FILE__)
 
-override EBSCO::EDS:: Configuration do
-
-  #override Configuration do
+# Override EBSCO::EDS definitions.
+#
+# @see EBSCO::EDS::Configuration
+#
+module EBSCO::EDS::ConfigurationExt
 
   DEFAULT_CONFIG_FILE = 'eds.yml'
 
@@ -46,12 +48,15 @@ override EBSCO::EDS:: Configuration do
   }.freeze
 
   # ===========================================================================
-  # :section: Replacement methods
+  # :section: EBSCO::EDS::Configuration overrides
   # ===========================================================================
 
   public
 
   # Configuration defaults.
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Configuration#initialize
   #
   def initialize
     @config = DEFAULT_CONFIG.deep_dup
@@ -62,6 +67,9 @@ override EBSCO::EDS:: Configuration do
   # @param [Hash, nil] opts
   #
   # @return [Hash]
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Configuration#configure
   #
   def configure(opts = nil)
     opts = opts&.symbolize_keys&.select { |k, _| DEFAULT_CONFIG.include?(k) }
@@ -75,6 +83,9 @@ override EBSCO::EDS:: Configuration do
   #
   # @return [Hash, nil]
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Configuration#configure_with
+  #
   def configure_with(file)
     config = YAML.load_file(file || DEFAULT_CONFIG_FILE)
     configure(config)
@@ -84,8 +95,12 @@ override EBSCO::EDS:: Configuration do
     Log.warn "#{file}: invalid syntax -- using defaults."
   end
 
-  #end
-
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override EBSCO::EDS::Configuration => EBSCO::EDS::ConfigurationExt
 
 __loading_end(__FILE__)

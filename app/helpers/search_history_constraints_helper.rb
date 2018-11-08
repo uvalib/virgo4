@@ -53,6 +53,7 @@ module SearchHistoryConstraintsHelper
     end
     label = (search && label_for_search_field(search)) || ''
     value = render_filter_value(query)
+    $stderr.puts ">>> #{__method__} query: #{label.inspect} = #{value.inspect}"
     render_search_to_s_element(label, value)
   end
 
@@ -73,6 +74,7 @@ module SearchHistoryConstraintsHelper
       label  = facet_field_label(field)
       values = values.map { |value| render_filter_value(value, field) }
       values = values.join(and_operator).html_safe
+      $stderr.puts ">>> #{__method__} filter: #{label.inspect} = #{values.inspect}"
       render_search_to_s_element(label, values)
     }.join("\n").html_safe
   end
@@ -90,6 +92,7 @@ module SearchHistoryConstraintsHelper
   #
   def render_search_to_s_element(key, value, opt = nil)
     shc_set(opt)
+    $stderr.puts ">>> #{__method__}: #{key.inspect} = #{value.inspect} / caller #{caller.pretty_inspect}"
     text = render_filter_name(key) + render_item(value, class: 'filter-values')
     css_class = shc_opt[:element_class] || 'constraint'
     render_item(text, class: css_class)

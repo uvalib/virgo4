@@ -10,7 +10,11 @@ __loading_begin(__FILE__)
 require 'blacklight/solr'
 require 'blacklight/solr/response'
 
-override Blacklight::Solr::Response do
+# Override Blacklight definitions.
+#
+# @see Blacklight::Solr::Response
+#
+module Blacklight::Solr::ResponseExt
 
   # ===========================================================================
   # :section: Blacklight::Solr::Response overrides
@@ -18,10 +22,24 @@ override Blacklight::Solr::Response do
 
   public
 
+  # document_factory
+  #
+  # @return [Class] (Blacklight::Lens::DocumentFactory)
+  #
+  # This method overrides:
+  # @see Blacklight::Solr::Response#document_factory
+  #
+  def document_factory
+    blacklight_config&.document_factory || Blacklight::Solr::DocumentFactory
+  end
+
   # If an array of documents were passed in through the initializer options,
   # use that instead of constructing documents from hash data.
   #
   # @return [Array<Blacklight::Document>]
+  #
+  # This method overrides:
+  # @see Blacklight::Solr::Response#documents
   #
   def documents
     @documents ||=
@@ -56,7 +74,7 @@ override Blacklight::Solr::Response do
         value.each { |v| force_to_utf8(v) }
       when String
         unless value.encoding == Encoding::UTF_8
-          Blacklight.logger.warn {
+          Log.warn {
             "Found a non UTF-8 value in #{self.class} with encoding " \
               "#{value.encoding} - #{value.inspect}"
           }
@@ -67,5 +85,11 @@ override Blacklight::Solr::Response do
   end
 
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override Blacklight::Solr::Response => Blacklight::Solr::ResponseExt
 
 __loading_end(__FILE__)

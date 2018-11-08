@@ -9,9 +9,19 @@ __loading_begin(__FILE__)
 
 require 'blacklight/lens'
 
-override Blacklight::Configurable do
+# Override Blacklight definitions.
+#
+# @see Blacklight::Configurable
+#
+module Blacklight::ConfigurableExt
 
   include Blacklight::Lens
+
+  # ===========================================================================
+  # :section: Blacklight::Configurable overrides
+  # ===========================================================================
+
+  public
 
   # Instance methods for blacklight_config, so get a deep copy of the
   # class-level config.
@@ -131,5 +141,14 @@ override Blacklight::Configurable do
   end
 
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override Blacklight::Configurable => Blacklight::ConfigurableExt
+
+override Blacklight::Configurable::ClassMethods =>
+         Blacklight::ConfigurableExt::ClassMethods
 
 __loading_end(__FILE__)

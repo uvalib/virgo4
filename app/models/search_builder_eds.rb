@@ -13,7 +13,7 @@ require 'blacklight/eds/search_builder_behavior'
 # @see SearchBuilder
 # @see Blacklight::Eds::SearchBuilderBehavior
 #
-class SearchBuilderEds < ::SearchBuilder
+class SearchBuilderEds < SearchBuilder
   include Blacklight::Eds::SearchBuilderBehavior
 end
 

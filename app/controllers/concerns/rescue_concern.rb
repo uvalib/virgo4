@@ -108,7 +108,7 @@ module RescueConcern
   def handle_request_error(exception, i18n = nil)
     # If there are errors coming from the index page, we want to trap those
     # sensibly.
-    flash_notice = i18n && I18n.t(i18n, default: nil)
+    flash_notice = i18n && I18n.t(i18n, default: '').presence
     flash_notice ||= I18n.t('blacklight.search.errors.request_error')
     handle_generic_error(exception, flash_notice, search_action_path)
   end
@@ -136,6 +136,7 @@ module RescueConcern
       flash.now[:notice] = flash_notice
     else
       Log.error(exception)
+      load 'lib/uva' unless Rails.env.production?
       redirect_to redirect_path, notice: flash_notice
     end
   end

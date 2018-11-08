@@ -7,10 +7,10 @@ __loading_begin(__FILE__)
 
 require 'blacklight/solr'
 
-# Filters added to this controller apply to all controllers in the
-# hosting application as this module is mixed-in to the application controller
-# in the hosting app on installation.
+# An extension of Blacklight::Controller supporting Blacklight Lens for
+# controllers that work with index items (SolrDocument).
 #
+# Compare with:
 # @see Blacklight::Controller
 #
 module Blacklight::Solr::Controller

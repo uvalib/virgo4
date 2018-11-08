@@ -7,7 +7,7 @@ __loading_begin(__FILE__)
 
 require 'blacklight/lens'
 
-# An extension to Blacklight::Base.
+# Extensions to Blacklight to support Blacklight Lens.
 #
 # Compare with:
 # @see Blacklight::Base

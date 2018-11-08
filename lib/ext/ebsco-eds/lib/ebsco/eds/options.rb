@@ -4,12 +4,14 @@
 
 __loading_begin(__FILE__)
 
-override EBSCO::EDS::Options do
-
-  #override Options do
+# Override EBSCO::EDS definitions.
+#
+# @see EBSCO::EDS::Options
+#
+module EBSCO::EDS::OptionsExt
 
   # ===========================================================================
-  # :section: Replacement methods
+  # :section: EBSCO::EDS::Options overrides
   # ===========================================================================
 
   public
@@ -19,7 +21,7 @@ override EBSCO::EDS::Options do
   # @param [Hash]             options
   # @param [EBSCO::EDS::Info] info
   #
-  # This method replaces:
+  # This method overrides:
   # @see EBSCO::EDS::Options#initialize
   #
   # == Usage Notes
@@ -63,6 +65,9 @@ override EBSCO::EDS::Options do
   #
   # @return [void]
   #
+  # This method overrides:
+  # @see EBSCO::EDS::Options#add_actions
+  #
   def add_actions(actions, info)
     @Actions ||= []
     @Actions += Array.wrap(actions)
@@ -72,6 +77,9 @@ override EBSCO::EDS::Options do
   # Caution: experimental, not ready for production.
   #
   # @return [String]
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Options#to_query_string
   #
   # @example query-1=AND,volcano&sort=relevance&includefacets=y&searchmode=all&autosuggest=n&view=brief&resultsperpage=20&pagenumber=1&highlight=y
   #
@@ -121,8 +129,12 @@ override EBSCO::EDS::Options do
 
   end
 
-  #end
-
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override EBSCO::EDS::Options => EBSCO::EDS::OptionsExt
 
 __loading_end(__FILE__)

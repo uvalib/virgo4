@@ -7,7 +7,10 @@ __loading_begin(__FILE__)
 
 require 'blacklight'
 require 'blacklight_advanced_search'
-require_subdir(__FILE__, 'lens/configuration', 'lens', 'solr')
+require_subdir(__FILE__, 'lens/configuration')
+require_subdir(__FILE__, 'lens')
+require_subdir(__FILE__, 'solr')
+require 'blacklight/eds'
 
 module Blacklight
 

@@ -9,6 +9,9 @@ __loading_begin(__FILE__)
 
 require 'blacklight'
 
+# Hook up logger.
+Log ||= Blacklight.logger
+
 # As of Blacklight 7, Blacklight::BlacklightHelperBehavior and
 # Blacklight::CatalogHelperBehavior require modules that are not specified by
 # a full namespace.  Because of the way that the gem overrides are occuring,

@@ -7,7 +7,11 @@ __loading_begin(__FILE__)
 
 require 'blacklight_advanced_search/render_constraints_override'
 
-override BlacklightAdvancedSearch::RenderConstraintsOverride do
+# Override BlacklightAdvancedSearch definitions.
+#
+# @see BlacklightAdvancedSearch::RenderConstraintsOverride
+#
+module BlacklightAdvancedSearch::RenderConstraintsOverrideExt
 
   include Blacklight::Lens::SearchFields
 
@@ -22,6 +26,9 @@ override BlacklightAdvancedSearch::RenderConstraintsOverride do
   # @param [ActionController::Parameters, Hash] params
   #
   # @return [ActiveSupport::SafeBuffer]
+  #
+  # This method overrides:
+  # @see BlacklightAdvancedSearch::RenderConstraintsOverride#render_search_to_s_q
   #
   # Compare with:
   # @see SearchHistoryConstraintsHelper#render_search_to_s_q
@@ -57,6 +64,9 @@ override BlacklightAdvancedSearch::RenderConstraintsOverride do
   #
   # @return [ActiveSupport::SafeBuffer]
   #
+  # This method overrides:
+  # @see BlacklightAdvancedSearch::RenderConstraintsOverride#render_search_to_s_filters
+  #
   # Compare with:
   # @see SearchHistoryConstraintsHelper#render_search_to_s_filters
   #
@@ -87,5 +97,20 @@ override BlacklightAdvancedSearch::RenderConstraintsOverride do
   end
 
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+# For "super" to work as intended from the override of :render_search_to_s_q
+# we have to eliminate the method defined in the original module.  Otherwise,
+# "super" will refer to that method definition and not the one further along
+# the ancestor chain.
+BlacklightAdvancedSearch::RenderConstraintsOverride.send(
+  :remove_method, :render_search_to_s_q
+)
+
+override BlacklightAdvancedSearch::RenderConstraintsOverride =>
+         BlacklightAdvancedSearch::RenderConstraintsOverrideExt
 
 __loading_end(__FILE__)

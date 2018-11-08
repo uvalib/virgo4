@@ -92,7 +92,7 @@ module SearchConcern
     srv_params[:session_token] ||= session[:eds_session_token]
 
     # Create the search service with search parameters and context info.
-    search_service_class.new(blacklight_config, usr_params, context)
+    controller.search_service_class.new(blacklight_config, usr_params, context)
   end
 
 end

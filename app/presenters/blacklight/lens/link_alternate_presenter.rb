@@ -30,6 +30,11 @@ module Blacklight::Lens
     #
     # @return [String]
     #
+    # @see Blacklight::Lens::SearchState#url_for_document
+    #
+    # This method overrides:
+    # @see Blacklight::LinkAlternatePresenter#href
+    #
     def href(format)
       view_context.search_state.url_for_document(document, format: format)
     end

@@ -10,7 +10,11 @@ __loading_begin(__FILE__)
 require 'blacklight/marc/routes'
 require 'blacklight/lens'
 
-override Blacklight::Marc::Routes do
+# Override Blacklight::Marc definitions.
+#
+# @see Blacklight::Marc::Routes
+#
+module Blacklight::Marc::RoutesExt
 
   DEFAULT_ROUTE_SETS = Blacklight::Lens::Configuration::Keys.lens_keys
 
@@ -44,22 +48,38 @@ override Blacklight::Marc::Routes do
     only - except
   end
 
+  # ===========================================================================
+  # :section: Blacklight::Marc::Routes overrides
+  # ===========================================================================
+
+  protected
+
+  # Blacklight::Marc::RoutesExt::RouteSets
+  #
+  # == Usage Notes
+  # Because this is 'included' after Blacklight::Marc::Routes::RouteSets, it
+  # results in replacing Blacklight::Marc::Routes#catalog along with defining:
+  #
+  #   Blacklight::Marc::Routes#articles
+  #   Blacklight::Marc::Routes#video
+  #   Blacklight::Marc::Routes#music
+  #
   module RouteSets
 
     DEFAULT_ROUTE_SETS.each do |lens|
       lv_opt =
         ", to: '#{lens}#librarian_view'" \
         ", as: 'librarian_view_#{lens}'"
-      rw_opt =
+      rw_opt = # TODO: remove?
         ", to: '#{lens}#refworks'" \
         ", as: 'refworks_#{lens}'" \
         ''
         #", defaults: { format: 'refworks_marc_txt' }"
-      en_opt =
+      en_opt = # TODO: remove?
         ", to: '#{lens}#endnote'" \
         ", as: 'endnote_#{lens}'" \
         ", defaults: { format: 'endnote' }"
-      zo_opt =
+      zo_opt = # TODO: remove?
         ", to: '#{lens}#zotero'" \
         ", as: 'zotero_#{lens}'" \
         ", defaults: { format: 'ris' }"
@@ -67,10 +87,10 @@ override Blacklight::Marc::Routes do
         def #{lens}
           add_routes do
             get '#{lens}/:id/librarian_view' #{lv_opt}
-            #get '#{lens}/refworks'           #{rw_opt}
-            #get '#{lens}/refworks?id=:id'           #{rw_opt}
-            #get '#{lens}/:id/endnote'        #{en_opt}
-            #get '#{lens}/:id/zotero'         #{zo_opt}
+            # get '#{lens}/refworks'         #{rw_opt} # TODO: remove?
+            # get '#{lens}/refworks?id=:id'  #{rw_opt} # TODO: remove?
+            # get '#{lens}/:id/endnote'      #{en_opt} # TODO: remove?
+            # get '#{lens}/:id/zotero'       #{zo_opt} # TODO: remove?
           end
         end
       EOS
@@ -81,5 +101,11 @@ override Blacklight::Marc::Routes do
   include RouteSets
 
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override Blacklight::Marc::Routes => Blacklight::Marc::RoutesExt
 
 __loading_end(__FILE__)

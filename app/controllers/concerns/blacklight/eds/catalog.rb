@@ -7,9 +7,10 @@ __loading_begin(__FILE__)
 
 require 'blacklight/eds'
 
-# An extension of Blacklight::Catalog for controllers that work with
-# articles (EdsDocument).
+# An extension of Blacklight::Catalog supporting Blacklight Lens for
+# controllers that work with articles (EdsDocument).
 #
+# Compare with:
 # @see Blacklight::Catalog
 #
 module Blacklight::Eds::Catalog
@@ -35,9 +36,9 @@ module Blacklight::Eds::Catalog
     redirect_to fulltext_url, status: 303 if fulltext_url
   end
 
-  # =========================================================================
+  # ===========================================================================
   # :section: Blacklight::Catalog overrides
-  # =========================================================================
+  # ===========================================================================
 
   protected
 

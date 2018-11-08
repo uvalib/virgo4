@@ -7,8 +7,9 @@ __loading_begin(__FILE__)
 
 require 'blacklight/lens'
 
-# Blacklight::Lens::SearchFields
+# Extensions to Blacklight to support Blacklight Lens.
 #
+# Compare with:
 # @see Blacklight::SearchFields
 #
 module Blacklight::Lens::SearchFields
@@ -41,21 +42,6 @@ module Blacklight::Lens::SearchFields
     blacklight_config_for(lens).search_fields.values
   end
 
-  # Looks up a search field blacklight_config hash from search_field_list
-  # having a certain supplied :key.
-  #
-  # @param [Symbol, String] key
-  # @param [Object, nil]    lens      Default: `current_lens`.
-  #
-  # @return [Blacklight::Configuration::SearchField, nil]
-  #
-  # This method overrides:
-  # @see Blacklight::SearchFields#search_field_def_for_key
-  #
-  def search_field_def_for_key(key, lens = nil)
-    blacklight_config_for(lens).search_fields[key.to_s]
-  end
-
   # Returns the search field marked as default, or the first field if none was
   # marked as default.
   #
@@ -72,6 +58,28 @@ module Blacklight::Lens::SearchFields
   #
   def default_search_field(lens = nil)
     blacklight_config_for(lens).default_search_field
+  end
+
+  # ===========================================================================
+  # :section: Blacklight 7 transition
+  # ===========================================================================
+
+  public
+
+  # Looks up a search field blacklight_config hash from search_field_list
+  # having a certain supplied :key.
+  #
+  # @param [Symbol, String] key
+  # @param [Object, nil]    lens      Default: `current_lens`.
+  #
+  # @return [Blacklight::Configuration::SearchField, nil]
+  #
+  # == Implementation Notes
+  # This method has been removed in Blacklight 7, but the currently-available
+  # version of Blacklight Advanced Search still uses it.
+  #
+  def search_field_def_for_key(key, lens = nil)
+    blacklight_config_for(lens).search_fields[key.to_s]
   end
 
 end

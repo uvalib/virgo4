@@ -5,8 +5,6 @@
 
 __loading_begin(__FILE__)
 
-require_relative '../document'
-
 module Blacklight::Lens::Document
 
   # Extensions to Blacklight::Document::Export.
