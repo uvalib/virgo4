@@ -1,5 +1,5 @@
 FROM ruby:2.5.1-alpine
-RUN apk add --no-cache build-base sqlite-dev nodejs bash tzdata
+RUN apk add --no-cache build-base sqlite-dev nodejs bash tzdata git
 
 # Create the run user and group.
 RUN addgroup webservice && adduser -D -G webservice webservice
