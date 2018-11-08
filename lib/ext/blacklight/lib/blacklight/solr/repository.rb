@@ -11,7 +11,11 @@ require 'blacklight/solr'
 require 'blacklight/solr/repository'
 require 'blacklight/lens'
 
-override Blacklight::Solr::Repository do
+# Override Blacklight definitions.
+#
+# @see Blacklight::Solr::Repository
+#
+module Blacklight::Solr::RepositoryExt
 
   include Blacklight::Lens
 
@@ -52,6 +56,15 @@ override Blacklight::Solr::Repository do
     show_only_discoverable_records
     show_only_lens_records
   )
+
+  # The number of suggestions to request for autosuggest.
+  #
+  # @type [Numeric]
+  #
+  # This should agree with:
+  # @see app/assets/javascripts/blacklight/autocomplete.js
+  #
+  SUGGESTION_COUNT = 7
 
   # ===========================================================================
   # :section: Blacklight::Solr::Repository overrides
@@ -107,20 +120,27 @@ override Blacklight::Solr::Repository do
     send_and_receive(path, solr_params)
   end
 
-  # suggestions
+  # Query Solr for suggested matches for the given search terms.
   #
   # @param [SearchBuilder, Hash, nil] url_params
   #
   # @return [Blacklight::Suggest::Response]
   #
+  # This method overrides:
+  # @see Blacklight::Solr::Repository#suggestions
+  #
   def suggestions(url_params)
-    path = suggest_handler_path
-    suggester = url_params[:suggester] || suggester_name
-    sb_filters  = { only: SUGGEST_FILTERS + CATALOG_FILTERS }
-    solr_params = base_solr_params(url_params, sb_filters)
-    solr_params[:'suggest.dictionary'] = suggester
-    result = solr_send_and_receive(:get, suggest_handler_path, solr_params)
-    Blacklight::Suggest::Response.new(result, url_params, path, suggester)
+    search_type = url_params[:search_field].presence
+    suggester   = search_type ? "#{search_type}Suggester" : suggester_name
+    suggester   = 'titleSuggest' if suggester == 'titleSuggester' # TODO: fix in solrconfig.xml
+    solr_params =
+      Blacklight::Solr::Request.new(
+        suggest:              true,
+        'suggest.q':          url_params[:q],
+        'suggest.count':      SUGGESTION_COUNT,
+        'suggest.dictionary': suggester
+      )
+    send_and_receive(suggest_handler_path, solr_params, suggester)
   end
 
   # Execute a Solr query.
@@ -129,6 +149,7 @@ override Blacklight::Solr::Repository do
   #   Execute a solr query at the given path with the parameters
   #   @param [String] path          Default: `blacklight_config.solr_path`.
   #   @param [Blacklight::Solr::Request, Hash]   solr_params
+  #   @param [String, nil]                       suggester
   #
   # @overload send_and_receive(solr_params)
   #   @param [Blacklight::Solr::Request, Hash]   solr_params
@@ -140,7 +161,7 @@ override Blacklight::Solr::Repository do
   # This method overrides:
   # @see Blacklight::Solr::Repository#send_and_receive
   #
-  def send_and_receive(path, solr_params = nil)
+  def send_and_receive(path, solr_params = nil, suggester = nil)
     benchmark('Solr fetch', level: :debug) do
 
       # Send to Solr.
@@ -150,10 +171,24 @@ override Blacklight::Solr::Repository do
       rsolr_response = solr_send_and_receive(http, path, solr_params)
 
       # Create a response object.
-      opt = { document_model: cfg.document_model, blacklight_config: cfg }
-      cfg.response_model.new(rsolr_response, solr_params, opt).tap do |r|
-        Log.debug { "Solr response: #{r.inspect}" } if VERBOSE_LOGGING
+      if suggester
+        Blacklight::Solr::Suggest::Response.new(
+          rsolr_response,
+          solr_params,
+          path,
+          suggester
+        )
+      else
+        cfg.response_model.new(
+          rsolr_response,
+          solr_params,
+          document_model:    cfg.document_model,
+          blacklight_config: cfg
+        )
       end
+        .tap do |result|
+          Log.debug { "Solr response: #{result.inspect}" } if VERBOSE_LOGGING
+        end
 
     end
 
@@ -287,5 +322,11 @@ override Blacklight::Solr::Repository do
   end
 
 end
+
+# =============================================================================
+# Override gem definitions
+# =============================================================================
+
+override Blacklight::Solr::Repository => Blacklight::Solr::RepositoryExt
 
 __loading_end(__FILE__)

@@ -41,6 +41,17 @@ module Blacklight::Eds
       published:   %i(eds_publisher),
     }.stringify_keys.freeze
 
+    # The number of suggestions to request for autosuggest.
+    #
+    # @type [Numeric]
+    #
+    # This should agree with:
+    # @see app/assets/javascripts/blacklight/autocomplete.js
+    #
+    # TODO: share with Blacklight::Eds::Suggest::ResponseEds
+    #
+    SUGGESTION_COUNT = 7
+
     # =========================================================================
     # :section: Blacklight::AbstractRepository overrides
     # =========================================================================
@@ -125,7 +136,7 @@ module Blacklight::Eds
     def suggestions(req_params)
       url_params = req_params.slice(*SUGGEST_PARAMS)
       url_params[:facet] = 'false'
-      url_params[:rows]  = 25
+      url_params[:rows]  = SUGGESTION_COUNT
       sf = url_params.delete(:search_field).to_s
       if sf.present? && !%w(advanced all_fields).include?(sf)
         fields = SUGGEST_FIELDS[sf].presence || SUGGEST_FIELDS.values.flatten

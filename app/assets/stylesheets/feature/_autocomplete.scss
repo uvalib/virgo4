@@ -1,0 +1,47 @@
+// app/assets/stylesheets/feature/_autocomplete.scss
+
+//=============================================================================
+// Styling for the "Twitter Typeahead" suggestions menu.
+//=============================================================================
+
+.tt-menu {
+
+    // Suggestion data entry.
+
+    .tt-suggestion {
+
+        // Prevent results from Solr (which already have <b></b>) from
+        // "over-bolding" what Twitter Typeahead may already have marked for
+        // highlighting.
+        b strong { font-weight: bold; }
+    }
+
+    // Additional informational entries (that may or may not be configured to
+    // appear in the menu).
+
+    .tt-info {
+        margin-left: 0.5rem;
+        font-style:  italic;
+    }
+
+    .tt-header {
+        color: green;
+    }
+
+    .tt-footer {
+        color: green;
+    }
+
+    .tt-notFound {
+        margin-top:    -5px;
+        margin-bottom: -5px;
+        margin-left:   0.75rem;
+        color:         red;
+    }
+
+    .tt-pending {
+        margin-top:    -5px;
+        margin-bottom: -5px;
+        margin-left:   0.75rem;
+    }
+}

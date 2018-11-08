@@ -16,13 +16,22 @@
 //= require activestorage
 //= require turbolinks
 //
-// Required by Blacklight
+//  Required by Blacklight
+//
 //= require jquery
-//= require popper
-// Twitter Typeahead for autocomplete
-//= require twitter/typeahead
 //= require bootstrap
-//= require blacklight/blacklight
+//
+//  Blacklight
+//
+//  The standard 'require blacklight/blacklight' cannot be used because it does
+//  not allow the code to be overridden properly.  For the sake of the modified
+//  autocomplete.js, all of the other Blacklight JavaScript source files had to
+//  be copied locally (which are loaded with the 'Local sources' below).
+//  Note that blacklight/core must be loaded first to define Blacklight.
+//
+//= require blacklight/core
 //= require blacklight_advanced_search
+//
+//  Local sources
 //
 //= require_tree .

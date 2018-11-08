@@ -7,6 +7,7 @@ __loading_begin(__FILE__)
 
 require 'sanitize'
 require 'blacklight/eds'
+require_relative '../../lens/suggest/response'
 
 module Blacklight::Eds
 
@@ -14,9 +15,9 @@ module Blacklight::Eds
 
     # Blacklight::Eds::Suggest::Response
     #
-    # @see Blacklight::Suggest::Response
+    # @see Blacklight::Lens::Suggest::Response
     #
-    class Response < Blacklight::Suggest::Response
+    class Response < Blacklight::Lens::Suggest::Response
 
       # TODO: share with Blacklight::Eds::SuggestSearch
       SUGGEST_FIELDS = {
@@ -30,6 +31,17 @@ module Blacklight::Eds
         call_number: nil,
         published:   %w(eds_publisher),
       }.stringify_keys.freeze
+
+      # The number of suggestions to request for autosuggest.
+      #
+      # @type [Numeric]
+      #
+      # This should agree with:
+      # @see app/assets/javascripts/blacklight/autocomplete.js
+      #
+      # TODO: share with Blacklight::Eds::Suggest::ResponseEds
+      #
+      SUGGESTION_COUNT = 7
 
       # =======================================================================
       # :section: Blacklight::Suggest::Response overrides
@@ -80,6 +92,7 @@ module Blacklight::Eds
           .uniq
           .select { |term| query.any? { |qt| term.include?(qt) } }
           .sort_by { |t| query.size - query.count { |qt| t.include?(qt) } }
+          .first(SUGGESTION_COUNT)
           .map { |term| { 'term' => term, 'weight' => 1, 'payload' => '' } }
       end
 

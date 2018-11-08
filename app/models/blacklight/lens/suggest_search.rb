@@ -13,7 +13,22 @@ module Blacklight::Lens
   #
   class SuggestSearch < Blacklight::SuggestSearch
 
-    # TODO: ???
+    # =========================================================================
+    # :section: Blacklight::SuggestSearch overrides
+    # =========================================================================
+
+    public
+
+    # Initialize a new instance.
+    #
+    # @param [ActionController::Parameters, Hash] params
+    # @param [Blacklight::AbstractRepository]     repository
+    #
+    def initialize(params, repository)
+      params = params.to_unsafe_h if params.is_a?(ActionController::Parameters)
+      @request_params = params.slice(:q, :search_field)
+      @repository     = repository
+    end
 
   end
 
