@@ -1,18 +1,19 @@
 <%# app/views/catalog/_constraints.html.erb -%>
 <%-
+  has_constraints  ||= query_has_constraints?
+  aria_hidden      ||= (' aria-hidden="true"' unless has_constraints)
   label            ||= t('blacklight.search.filters.title')
   start_over_label ||= t('blacklight.search.start_over')
   start_over_opt   ||= { class: 'catalog_startOverLink btn btn-primary' }
 -%>
 
 <div class="clearfix search-constraints-container">
-  <%- if query_has_constraints? -%>
-    <h2 class="sr-only"><%= label -%></h2>
-    <div id="appliedParams" class="clearfix constraints-container">
+  <div id="appliedParams" class="constraints-container"<%= aria_hidden -%>>
+    <%- if has_constraints -%>
       <span class="constraints-label sr-only"><%= label -%></span>
       <%= render_constraints(params) %>
-    </div>
-  <%- end -%>
+    <%- end -%>
+  </div>
   <div class="start-over-container">
     <%= link_to start_over_label, start_over_path, start_over_opt %>
   </div>
