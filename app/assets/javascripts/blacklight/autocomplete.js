@@ -5,6 +5,7 @@
 //
 // Twitter Typeahead for autocomplete
 //= require twitter/typeahead
+//= require shared/assets
 
 // Overrides the provided Blacklight code in order to change to the arguments
 // to "suggest" based on the type of search selected.
@@ -227,7 +228,9 @@ Blacklight.onLoad(function() {
      */
     function ttPending(content) {
         if (typeof content !== 'string') {
-            content = '<img src="/assets/loading-balls.gif" alt="Looking...">';
+            var src = LOADING_IMAGE;
+            var alt = 'Looking...';
+            content = '<img src="' + src + '" alt="' + alt + '">';
         }
         return ttInfo(content, 'tt-pending', true);
     }
