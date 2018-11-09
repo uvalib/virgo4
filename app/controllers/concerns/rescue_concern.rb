@@ -136,7 +136,6 @@ module RescueConcern
       flash.now[:notice] = flash_notice
     else
       Log.error(exception)
-      load 'lib/uva' unless Rails.env.production?
       redirect_to redirect_path, notice: flash_notice
     end
   end
