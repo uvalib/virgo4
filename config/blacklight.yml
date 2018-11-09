@@ -1,23 +1,46 @@
 # config/blacklight.yml
-#
-# = jetty_path key
-# each environment can have a jetty_path with absolute or relative
-# (to app root) path to a jetty/solr install. This is used
-# by the rake tasks that start up solr automatically for testing
-# and by rake solr:marc:index.
-#
-# jetty_path is not used by a running Blacklight application
-# at all. In general you do NOT need to deploy solr in Jetty, you can deploy it
-# however you want.
-# jetty_path is only required for rake tasks that need to know
-# how to start up solr, generally for automated testing.
 
-development:
-  adapter: solr
-  url: <%= ENV['SOLR_URL'] || "http://127.0.0.1:8983/solr/blacklight-core" %>
-test: &test
-  adapter: solr
-  url: <%= ENV['SOLR_URL'] || "http://127.0.0.1:#{ENV['TEST_JETTY_PORT'] || 8983}/solr/blacklight-core" %>
-production:
-  adapter: solr
-  url: <%= ENV['SOLR_URL'] || "http://127.0.0.1:8983/solr/blacklight-core" %>
+# =============================================================================
+# Settings not directly related to a specific Rails environment.
+# =============================================================================
+
+_solr:                                                                    &SOLR
+  adapter:      solr
+  http_adapter: httpclient
+
+# Production Solr instance (UVa on-Grounds or via VPN).
+_solr_uva_prod:                                                  &SOLR_UVA_PROD
+  <<: *SOLR
+  url: http://junco.lib.virginia.edu:8080/solr/test_core
+
+# Development Solr instance (UVa on-Grounds or via VPN).
+_solr_uva_dev:                                                    &SOLR_UVA_DEV
+  <<: *SOLR
+  url: http://junco.lib.virginia.edu:8080/solr/test_core
+
+# Local development fake Solr instance.
+_solr_local:                                                        &SOLR_LOCAL
+  <<: *SOLR
+  url: <%=
+    ENV['SOLR_URL'] ||
+    "http://127.0.0.1:#{ENV['TEST_JETTY_PORT'] || 8983}/solr/blacklight-core"
+  %>
+
+  # =============================================================================
+# Desktop development configurations (UVa on-Grounds or via VPN)
+# =============================================================================
+
+# For the 'production' Rails environment (local).
+production:                                                    &SOLR_LOCAL_PROD
+  <<: *SOLR_UVA_PROD
+  #<<: *SOLR_LOCAL
+
+# For the 'development' Rails environment (local).
+development:                                                    &SOLR_LOCAL_DEV
+  <<: *SOLR_UVA_PROD
+  #<<: *SOLR_LOCAL
+
+# For the 'test' Rails environment (local).
+test:                                                          &SOLR_LOCAL_TEST
+  <<: *SOLR_UVA_PROD
+  #<<: *SOLR_LOCAL
