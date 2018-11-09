@@ -1,40 +1,71 @@
+# Dockerfile
+#
+# The mix of packages to add are based on the needs of various gems:
+# @see https://github.com/exAspArk/docker-alpine-ruby/blob/master/Dockerfile
+
 FROM ruby:2.5.1-alpine
-RUN apk add --no-cache build-base sqlite-dev nodejs bash tzdata git
+RUN apk add --no-cache \
+    bash \
+    build-base \
+    g++ \
+    gcc \
+    git \
+    libc-dev \
+    libffi-dev \
+    libxml2 \
+    libxslt-dev \
+    nodejs \
+    sqlite-dev \
+    tzdata \
+    yarn
 
-# Create the run user and group.
-RUN addgroup webservice && adduser -D -G webservice webservice
+# =============================================================================
+# :section: System setup
+# =============================================================================
 
-# Set the timezone appropriately.
-ENV TZ='America/New_York'
-RUN ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && \
-    echo "$TZ" > /etc/timezone
+ENV USER=webservice \
+    GROUP=webservice \
+    LANG='en_US.UTF-8' \
+    LC_ALL='en_US.UTF-8' \
+    LANGUAGE='en_US:en' \
+    TZ='America/New_York'
 
-# Set the locale correctly.
-ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
+# Set the timezone; create the user and group for the process.
+RUN ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime; \
+    echo "$TZ" > /etc/timezone; \
+    addgroup $GROUP && \
+    adduser -D -G $USER $GROUP
+
+# =============================================================================
+# :section: Platform setup
+# =============================================================================
+
+ENV APP_HOME=/virgo4 \
+    RAILS_ENV=production
 
 # Copy the Gemfile and Gemfile.lock into the image.
 # Temporarily set the working directory to where they are.
 WORKDIR /tmp
-ADD Gemfile Gemfile
-ADD Gemfile.lock Gemfile.lock
-RUN bundle install
+ADD Gemfile .
+ADD Gemfile.lock .
+RUN bundle install --retry=2 --jobs=4
 
-# Create work directory.
-ENV APP_HOME /virgo4
+# Create work directory and copy the application to it.
 WORKDIR $APP_HOME
-
-# Copy the application.
 ADD . $APP_HOME
 
 # Generate the assets.
-RUN RAILS_ENV=production SECRET_KEY_BASE=x rake assets:precompile
+RUN SECRET_KEY_BASE=x rake assets:precompile
 
-# Update permissions.
-RUN chown -R webservice "$APP_HOME" /home/webservice
-RUN chgrp -R webservice "$APP_HOME" /home/webservice
+# Update permissions on the application and user home directory.
+RUN chown -R $USER:$GROUP $APP_HOME /home/$USER
 
-# Specify the user.
-USER webservice
+# =============================================================================
+# :section: Launch the application
+# =============================================================================
+
+# Set the user for the process.
+USER $USER:$GROUP
 
 # Define port and startup script.
 EXPOSE 3000
