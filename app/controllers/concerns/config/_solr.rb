@@ -557,6 +557,8 @@ class Config::Solr < Config::Base
       # Search parameters
       # =======================================================================
 
+      search_builder_processors!(config)
+
       # Configuration for suggester.
       # TODO: Cope with different suggesters for different search fields...
       config.autocomplete_enabled   = true
@@ -601,6 +603,20 @@ class Config::Solr < Config::Base
         search_builder_class: SearchBuilderSolr,
       }
       values = values.merge(added_values) if added_values.present?
+      super(config, values)
+    end
+
+    # Set the filter query parameters for the lens.
+    #
+    # @param [Blacklight::Configuration] config
+    # @param [Array<Symbol>]             values
+    #
+    # @return [void]
+    #
+    # @see SearchBuilderSolr#
+    #
+    def search_builder_processors!(config, *values)
+      values += %i(public_only discoverable_only)
       super(config, values)
     end
 

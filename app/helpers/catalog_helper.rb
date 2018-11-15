@@ -296,6 +296,27 @@ module CatalogHelper
     outlink(label, url, opt)
   end
 
+  # Select the proper polymorphic search path based on the lens.
+  #
+  # @param [Symbol, String, nil] lens
+  # @param [Hash, nil]           opt    Path options.
+  #
+  # @return [String]
+  #
+  # Duplicate of:
+  # @see LensHelper#advanced_search_path
+  #
+  # @see LensHelper#lens_path
+  #
+  # TODO: Why is the LensHelper method not taking precedence over route helper?
+  # It shouldn't be necessary to have this definition copied to here, but
+  # without it app/catalog/_search_form.html.erb picks up the Rails route
+  # helper definition rather than the override defined in LensHelper.
+  #
+  def advanced_search_path(lens = nil, opt = nil)
+    lens_path('%s_advanced_search_path', lens, opt)
+  end
+
   # ===========================================================================
   # :section: Blacklight configuration "helper_methods"
   # ===========================================================================

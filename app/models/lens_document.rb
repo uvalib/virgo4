@@ -13,8 +13,8 @@ __loading_begin(__FILE__)
 #
 class LensDocument
   include Blacklight::Document
-  include Blacklight::Lens::Document
   include Blacklight::Document::Base
+  include Blacklight::Lens::Document
 end
 
 __loading_end(__FILE__)

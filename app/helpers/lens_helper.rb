@@ -72,93 +72,88 @@ module LensHelper
   # Select the proper polymorphic search path based on the lens.
   #
   # @param [Symbol, String, nil] lens
-  # @param [Hash, nil]           opt    Path options.
+  # @param [Hash, nil]           opt
   #
   # @return [String]
+  #
+  # @see LensHelper#lens_path
   #
   def document_path(lens = nil, opt = nil)
-    if lens.is_a?(Hash)
-      opt  = lens
-      lens = nil
-    else
-      opt ||= {}
-    end
-    lens = Blacklight::Lens.key_for(lens, false) || current_lens_key
-    case lens
-      when :catalog  then catalog_path(opt)
-      when :articles then articles_path(opt)
-      when :video    then video_path(opt)
-      when :music    then music_path(opt)
-    end
+    lens_path('%s_path', lens, opt)
   end
 
   # Select the proper polymorphic search path based on the lens.
   #
   # @param [Symbol, String, nil] lens
-  # @param [Hash, nil]           opt    Path options.
+  # @param [Hash, nil]           opt
   #
   # @return [String]
+  #
+  # @see LensHelper#lens_path
   #
   def search_path(lens = nil, opt = nil)
-    if lens.is_a?(Hash)
-      opt  = lens
-      lens = nil
-    else
-      opt ||= {}
-    end
-    lens = Blacklight::Lens.key_for(lens, false) || current_lens_key
-    case lens
-      when :catalog  then search_catalog_path(opt)
-      when :articles then search_articles_path(opt)
-      when :video    then search_video_path(opt)
-      when :music    then search_music_path(opt)
-    end
+    lens_path('search_%s_path', lens, opt)
   end
 
   # Select the proper polymorphic search path based on the lens.
   #
   # @param [Symbol, String, nil] lens
-  # @param [Hash, nil]           opt    Path options.
+  # @param [Hash, nil]           opt
   #
   # @return [String]
+  #
+  # @see LensHelper#lens_path
   #
   def advanced_search_path(lens = nil, opt = nil)
-    if lens.is_a?(Hash)
-      opt  = lens
-      lens = nil
-    else
-      opt ||= {}
-    end
-    lens = Blacklight::Lens.key_for(lens, false) || current_lens_key
-    case lens
-      when :catalog  then catalog_advanced_search_path(opt)
-      when :articles then articles_advanced_search_path(opt)
-      when :video    then video_advanced_search_path(opt)
-      when :music    then music_advanced_search_path(opt)
-    end
+    lens_path('%s_advanced_search_path', lens, opt)
   end
 
   # Select the proper polymorphic search path based on the lens.
   #
   # @param [Symbol, String, nil] lens
-  # @param [Hash, nil]           opt    Path options.
+  # @param [Hash, nil]           opt
   #
   # @return [String]
   #
+  # @see LensHelper#lens_path
+  #
   def suggest_index_path(lens = nil, opt = nil)
+    lens_path('suggest_index_%s_path', lens, opt)
+  end
+
+  # Generate a route path from a template and a lens.
+  #
+  # @param [String] base                The route name template; if it contains
+  #                                       "%s" then the lens is inserted at
+  #                                       that point; otherwise "#{lens}_" is
+  #                                       prepended to the template.
+  #
+  # @param [Symbol, String, nil] lens   If *nil*, opt[:lens] is used, else
+  #                                       `current_lens_key` is used.
+  #
+  # @param [Hash, nil] opt              Options passed to the route helper
+  #                                       (except for the options below).
+  #
+  # @options opt [Symbol,String] :lens  This will be removed and used as then
+  #                                       the lens value if present.
+  #
+  # @options opt [Boolean] :only_path   If *false* then the result is a full
+  #                                       URL rather than a relative path.
+  #
+  # @return [String]
+  #
+  def lens_path(base, lens = nil, opt = nil)
     if lens.is_a?(Hash)
       opt  = lens
       lens = nil
-    else
-      opt ||= {}
     end
-    lens = Blacklight::Lens.key_for(lens, false) || current_lens_key
-    case lens
-      when :catalog  then suggest_index_catalog_path(opt)
-      when :articles then suggest_index_articles_path(opt)
-      when :video    then suggest_index_video_path(opt)
-      when :music    then suggest_index_music_path(opt)
-    end
+    opt    = opt ? opt.dup : {}
+    lens ||= opt.delete(:lens)
+    lens   = Blacklight::Lens.key_for(lens, false) || current_lens_key
+    path   = base.include?('%') ? (base % lens) : "#{lens}_#{base}"
+    extent = opt.delete(:only_path).is_a?(FalseClass) ? '_url' : '_path'
+    path.sub!(/(_path|_url)?$/, extent) unless path.end_with?(extent)
+    send(path, opt)
   end
 
 end

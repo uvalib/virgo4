@@ -19,6 +19,7 @@
 //  Required by Blacklight
 //
 //= require jquery
+//= require popper
 //= require bootstrap
 //
 //  Blacklight

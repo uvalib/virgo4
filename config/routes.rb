@@ -12,21 +12,6 @@ Rails.application.routes.draw do
   # Add routes from the Blacklight gem config/routes.rb.
   mount Blacklight::Engine => '/'
 
-  # NOTE: Blacklight 7 removed saved searches...
-  resources :saved_search, only: [:index], controller: 'saved_searches', as: 'saved_searches', path: '/saved_searches' do
-    collection do
-      delete 'clear'
-    end
-    member do
-      put    'save',   to: 'saved_searches#save',   as: 'save'
-      delete 'forget', to: 'saved_searches#forget', as: 'forget'
-      post   'forget', to: 'saved_searches#forget'
-    end
-  end
-
-  # Add routes from the BlacklightAdvancedSearch gem config/routes.rb.
-  mount BlacklightAdvancedSearch::Engine => '/'
-
   # Add routes for each search lens as defined in the override of:
   # @see Blacklight::Marc::Routes::RouteSets#catalog
   Blacklight::Marc.add_routes(self)
@@ -35,11 +20,10 @@ Rails.application.routes.draw do
   # @see Blacklight::Lens::Routes::RouteSets#
   Blacklight::Lens.add_routes(self)
 
-  Blacklight::Lens::lens_keys.each do |lens|
-    get "#{lens}/advanced", to: "#{lens}_advanced#index", controller: "#{lens}_advanced"
-    #ctrlr = "#{lens}_advanced"
-    #resource ctrlr, only: [:index], controller: "#{lens}_advanced"
-  end
+  # Assign a route for '/advanced' for backward compatibility.
+  # (The mount of BlacklightAdvancedSearch::Engine is unnecessary, since that
+  # is the only route it adds and it would be overridden here anyway.)
+  get 'advanced', to: 'catalog_advanced#index', as: 'advanced_search'
 
   # ===========================================================================
   # :section: Routing concern definitions
@@ -106,6 +90,22 @@ Rails.application.routes.draw do
       delete 'clear'
     end
     concerns :exportable
+  end
+
+  # ===========================================================================
+  # :section: Saved searches
+  # ===========================================================================
+
+  resources :saved_search, only: [:index], controller: 'saved_searches',
+            as: 'saved_searches', path: '/saved_searches' do
+    collection do
+      delete 'clear'
+    end
+    member do
+      put    'save',   to: 'saved_searches#save',   as: 'save'
+      delete 'forget', to: 'saved_searches#forget', as: 'forget'
+      post   'forget', to: 'saved_searches#forget'
+    end
   end
 
   # ===========================================================================

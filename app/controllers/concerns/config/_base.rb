@@ -468,6 +468,20 @@ class Config::Base
       end
     end
 
+    # Set the filter query parameters for the lens.
+    #
+    # @param [Blacklight::Configuration] config
+    # @param [Array<Symbol>]             values
+    #
+    # @return [void]
+    #
+    # @see SearchBuilderSolr#
+    #
+    def search_builder_processors!(config, *values)
+      config.search_builder_processors ||= []
+      config.search_builder_processors += values.flatten.compact.uniq
+    end
+
     # Set mappings of configuration key to repository field for both :index and
     # :show configurations.
     #
@@ -620,13 +634,6 @@ class Config::Base
     def remove_facets!(config, *names)
       names = names.flatten.flat_map { |type| %W(#{type} #{type}_f) }.uniq
       config.facet_fields.extract!(*names)
-=begin # TODO: remove?
-      config.facet_fields.each_pair do |key, field_cfg|
-        next unless names.include?(key.to_s)
-        field_cfg.helper_method = :raw_value
-        field_cfg.if = :json_request?
-      end
-=end
     end
 
   end
@@ -649,7 +656,7 @@ class Config::Base
     cfg  = cfg.blacklight_config if cfg.respond_to?(:blacklight_config)
     @blacklight_config = cfg
     @key = cfg.lens_key
-    self.class.key = @key
+    self.class.key ||= @key
     Blacklight::Lens.add_new(@key, cfg)
   end
 

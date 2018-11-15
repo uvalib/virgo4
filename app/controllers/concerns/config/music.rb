@@ -59,11 +59,30 @@ class Config::Music < Config::Base
 
       # TODO: ???
 
+      # === Search parameters ===
+
+      search_builder_processors!(config)
+
       # === Finalize ===
 
       finalize_configuration!(config)
 
     end
+  end
+
+  # Set the filter query parameters for the lens.
+  #
+  # @param [Blacklight::Configuration] config
+  # @param [Array<Symbol>]             values
+  #
+  # @return [void]
+  #
+  # @see Config::Solr#search_builder_processors!
+  # @see SearchBuilderSolr#
+  #
+  def self.search_builder_processors!(config, *values)
+    values += %i(music_library)
+    super(config, values)
   end
 
   # ===========================================================================
