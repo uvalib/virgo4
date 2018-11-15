@@ -66,6 +66,9 @@ module Blacklight::Solr::RepositoryExt
   #
   SUGGESTION_COUNT = 7
 
+  DEF_AUTOCOMPLETE_PATH      = 'suggest'
+  DEF_AUTOCOMPLETE_SUGGESTER = 'titleSuggester' # TODO: 'all_fieldsSuggester'?
+
   # ===========================================================================
   # :section: Blacklight::Solr::Repository overrides
   # ===========================================================================
@@ -130,9 +133,7 @@ module Blacklight::Solr::RepositoryExt
   # @see Blacklight::Solr::Repository#suggestions
   #
   def suggestions(url_params)
-    search_type = url_params[:search_field].presence
-    suggester   = search_type ? "#{search_type}Suggester" : suggester_name
-    suggester   = 'titleSuggest' if suggester == 'titleSuggester' # TODO: fix in solrconfig.xml
+    suggester = suggester_name(url_params)
     solr_params =
       Blacklight::Solr::Request.new(
         suggest:              true,
@@ -200,6 +201,43 @@ module Blacklight::Solr::RepositoryExt
   rescue RSolr::Error::Http => e
     raise Blacklight::Exceptions::InvalidRequest, e.message
 
+  end
+
+  # ===========================================================================
+  # :section: Blacklight::Solr::Repository overrides
+  # ===========================================================================
+
+  private
+
+  # suggest_handler_path
+  #
+  # @return [String]
+  #
+  # This method overrides:
+  # @see Blacklight::Solr::Repository#suggest_handler_path
+  #
+  def suggest_handler_path
+    blacklight_config.autocomplete_path || DEF_AUTOCOMPLETE_PATH
+  end
+
+  # suggester_name
+  #
+  # @param [SearchBuilder, Hash, nil] url_params
+  #
+  # @return [String]
+  #
+  # This method overrides:
+  # @see Blacklight::Solr::Repository#suggester_name
+  #
+  def suggester_name(url_params = nil)
+    url_params ||= {}
+    search_type = url_params[:search_field]
+    result =
+      ("#{search_type}Suggester" if search_type.present?) ||
+        blacklight_config.autocomplete_suggester ||
+        DEF_AUTOCOMPLETE_SUGGESTER
+    result = 'titleSuggest' if result == 'titleSuggester' # TODO: fix in solrconfig.xml
+    result
   end
 
   # ===========================================================================

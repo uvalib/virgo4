@@ -25,32 +25,30 @@ module Blacklight::Eds
     # EDS fields to use for suggestions based on the :search_field request
     # parameter.
     #
-    # TODO: share with Blacklight::Eds::Suggest::ResponseEds
+    # @type [Hash{String=>Array<String>}]
     #
     # @see self#suggestions
+    # @see Blacklight::Eds::Suggest::Response#SUGGEST_FIELDS
     #
-    SUGGEST_FIELDS = {
-      title:       %i(eds_title eds_other_titles),
-      author:      %i(eds_authors),
-      journal:     %i(eds_source_title eds_series),
-      subject:     %i(eds_subjects),
-      keyword:     %i(eds_author_supplied_keywords),
-      isbn:        %i(eds_isbns),
-      issn:        %i(eds_issns),
-      call_number: nil,
-      published:   %i(eds_publisher),
-    }.stringify_keys.freeze
+    SUGGEST_FIELDS = Blacklight::Eds::Suggest::Response::SUGGEST_FIELDS
+
+    # EDS fields to use for suggestions.
+    #
+    # @type [Array<String>]
+    #
+    # @see self#suggestions
+    # @see Blacklight::Eds::Suggest::Response#SUGGEST_PARAMETERS
+    #
+    SUGGEST_PARAMETERS = Blacklight::Eds::Suggest::Response::SUGGEST_PARAMETERS
 
     # The number of suggestions to request for autosuggest.
     #
     # @type [Numeric]
     #
-    # This should agree with:
-    # @see app/assets/javascripts/blacklight/autocomplete.js
+    # @see self#suggestions
+    # @see Blacklight::Eds::Suggest::Response#SUGGESTION_COUNT
     #
-    # TODO: share with Blacklight::Eds::Suggest::ResponseEds
-    #
-    SUGGESTION_COUNT = 7
+    SUGGESTION_COUNT = Blacklight::Eds::Suggest::Response::SUGGESTION_COUNT
 
     # =========================================================================
     # :section: Blacklight::AbstractRepository overrides
@@ -134,24 +132,25 @@ module Blacklight::Eds
     # @see Blacklight::Solr::Repository#suggestions
     #
     def suggestions(req_params)
-      url_params = req_params.slice(*SUGGEST_PARAMS)
-      url_params[:facet] = 'false'
-      url_params[:rows]  = SUGGESTION_COUNT
-      sf = url_params.delete(:search_field).to_s
-      if sf.present? && !%w(advanced all_fields).include?(sf)
-        fields = SUGGEST_FIELDS[sf].presence || SUGGEST_FIELDS.values.flatten
-        url_params[:fl] = [:score, *fields].compact.uniq.join(',')
+      url_params  = req_params.slice(*SUGGEST_PARAMS)
+      suggester   = suggester_name(url_params)
+      search_type = url_params.delete(:search_field).to_s
+      if search_type.present? && !%w(advanced all_fields).include?(search_type)
+        fields = SUGGEST_FIELDS[search_type].presence || SUGGEST_PARAMETERS.dup
+        url_params[:fl] = Array.wrap(fields).unshift('score').join(',')
       end
       token = url_params.delete(:eds_session_token)
       url_params[:session_token] = token if token.present?
+      url_params[:facet] = 'false'
+      url_params[:rows]  = SUGGESTION_COUNT
 
       result = search(url_params, debug: false)
 
       Blacklight::Eds::Suggest::Response.new(
         result,
-        url_params,
+        url_params.merge(search_field: suggester),
         suggest_handler_path,
-        suggester_name
+        suggester
       )
     end
 
@@ -207,6 +206,26 @@ module Blacklight::Eds
 
         make_eds_response(result, params)
       end
+    end
+
+    # =========================================================================
+    # :section: Blacklight::Lens::Repository overrides
+    # =========================================================================
+
+    private
+
+    # suggester_name
+    #
+    # @param [SearchBuilder, Hash, nil] url_params
+    #
+    # @return [String]
+    #
+    # Compare with:
+    # @see Blacklight::Solr::Repository#suggester_name
+    #
+    def suggester_name(url_params = nil)
+      url_params ||= {}
+      url_params[:search_field].presence || super
     end
 
     # =========================================================================

@@ -29,6 +29,8 @@ module BlacklightAdvancedSearch::AdvancedSearchBuilderExt
   #
   # @param [Hash] solr_parameters
   #
+  # @return [void]
+  #
   # This method overrides:
   # @see BlacklightAdvancedSearch::AdvancedSearchBuilder#add_advanced_parse_q_to_solr
   #
@@ -55,12 +57,27 @@ module BlacklightAdvancedSearch::AdvancedSearchBuilderExt
     adv_search_params = node.to_single_query_params(solr_local_params)
     BlacklightAdvancedSearch.deep_merge!(solr_parameters, solr_direct_params)
     BlacklightAdvancedSearch.deep_merge!(solr_parameters, adv_search_params)
-  #rescue *PARSLET_FAILED_EXCEPTIONS => e # TODO: Not defined in override...
-  rescue
+
+  rescue *PARSLET_FAILED_EXCEPTIONS_COPY
     # Do nothing, don't merge our input in, keep basic search.
     # Optional TODO, display error message in flash here, but hard to
     # display a good one.
   end
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  private
+
+  # Internal copy of:
+  # BlacklightAdvancedSearch::AdvancedSearchBuilder#PARSLET_FAILED_EXCEPTIONS
+  PARSLET_FAILED_EXCEPTIONS_COPY =
+    if defined?(Parslet::UnconsumedInput)
+      [Parslet::UnconsumedInput]
+    else
+      [Parslet::ParseFailed]
+    end.freeze
 
 end
 

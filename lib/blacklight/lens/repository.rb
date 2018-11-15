@@ -58,12 +58,14 @@ module Blacklight::Lens
 
     # suggester_name
     #
+    # @param [SearchBuilder, Hash, nil]
+    #
     # @return [String]
     #
     # Compare with:
     # @see Blacklight::Solr::Repository#suggester_name
     #
-    def suggester_name
+    def suggester_name(*)
       blacklight_config.autocomplete_suggester || DEF_AUTOCOMPLETE_SUGGESTER
     end
 

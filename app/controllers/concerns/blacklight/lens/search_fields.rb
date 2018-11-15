@@ -17,6 +17,7 @@ module Blacklight::Lens::SearchFields
   extend ActiveSupport::Concern
 
   include Blacklight::SearchFields
+  include Blacklight::Lens
 
   included do |base|
     __included(base, 'Blacklight::Lens::SearchFields')

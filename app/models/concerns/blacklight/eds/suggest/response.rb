@@ -19,7 +19,13 @@ module Blacklight::Eds
     #
     class Response < Blacklight::Lens::Suggest::Response
 
-      # TODO: share with Blacklight::Eds::SuggestSearch
+      # EDS fields to use for suggestions based on the :search_field request
+      # parameter.
+      #
+      # @type [Hash{String=>Array<String>}]
+      #
+      # @see self#suggestions
+      #
       SUGGEST_FIELDS = {
         title:       %w(eds_title eds_other_titles),
         author:      %w(eds_authors),
@@ -32,14 +38,23 @@ module Blacklight::Eds
         published:   %w(eds_publisher),
       }.stringify_keys.freeze
 
+      # EDS fields to use for suggestions.
+      #
+      # @type [Array<String>]
+      #
+      # @see self#suggestions
+      #
+      SUGGEST_PARAMETERS = SUGGEST_FIELDS.values.flatten.uniq.freeze
+
       # The number of suggestions to request for autosuggest.
       #
       # @type [Numeric]
       #
-      # This should agree with:
-      # @see app/assets/javascripts/blacklight/autocomplete.js
+      # @see self#suggestions
       #
-      # TODO: share with Blacklight::Eds::Suggest::ResponseEds
+      # == Implementation Notes
+      # This value should agree with:
+      # @see app/assets/javascripts/blacklight/autocomplete.js
       #
       SUGGESTION_COUNT = 7
 
@@ -65,7 +80,7 @@ module Blacklight::Eds
             .split(' ')
         docs   = response.dig('response', 'docs') || []
         search = request_params[:search_field].to_s
-        fields = SUGGEST_FIELDS[search] || SUGGEST_FIELDS.values.flatten
+        fields = SUGGEST_FIELDS[search].presence || SUGGEST_PARAMETERS
         docs
           .map { |doc|
             # To prepare for sorting by descending order of usefulness,
