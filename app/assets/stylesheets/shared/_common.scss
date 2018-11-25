@@ -4,10 +4,27 @@
 // Common definitions.
 //=============================================================================
 
+// Counteract the effects of .sr-only (except for position and border).
+%not-sr-only {
+    width:       unset;
+    height:      unset;
+    padding:     unset;
+    margin:      unset;
+    white-space: unset;
+    overflow:    unset;
+    clip:        unset;
+}
+
 %dd-item-format {
     .label {
-        display:        inline-block;
-        vertical-align: text-top;
+        display:          inline-block;
+        margin:           2px -2px 0;
+        padding:          0 4px;
+        font-size:        smaller;
+        vertical-align:   text-top;
+        color:            white;
+        background-color: $gray-600;
+        border-radius:    4px;
     }
 }
 

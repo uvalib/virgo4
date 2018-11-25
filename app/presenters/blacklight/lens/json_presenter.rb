@@ -99,6 +99,27 @@ module Blacklight::Lens
     end
 
     # =========================================================================
+    # :section: Blacklight::Lens::PresenterBehaviors overrides
+    # =========================================================================
+
+    public
+
+    # Render a field value.
+    #
+    # @param [String, Symbol, Blacklight::Configuration::Field] field
+    # @param [Hash, nil] opt
+    #
+    # @option opt [Boolean] :raw
+    # @option opt [String]  :value
+    #
+    # @return [Array<String>]
+    #
+    def field_value(field, opt = nil)
+      opt ||= {}
+      super(field, opt.merge(raw: true))
+    end
+
+    # =========================================================================
     # :section: Blacklight::ShowPresenter replacements
     # =========================================================================
 
@@ -125,22 +146,6 @@ module Blacklight::Lens
     # @return [ActionView::Base, nil]
     #
     def view_context
-    end
-
-    # Render a field value.
-    #
-    # @param [String, Symbol] field
-    # @param [Hash, nil]      opt
-    #
-    # @option opt [Boolean] :raw
-    # @option opt [String]  :value
-    #
-    # @return [Array<String>]
-    #
-    def field_value(field, opt = nil)
-      opt = opt ? opt.dup : {}
-      opt[:raw] = true
-      field_values(field_config(field), opt)
     end
 
     # Get the configuration entry for a field.

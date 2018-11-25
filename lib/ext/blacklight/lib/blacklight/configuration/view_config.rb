@@ -17,10 +17,10 @@ require 'blacklight/lens'
 #
 module Blacklight::Configuration::ViewConfigExt
 
-  # Return the configured label for the current field definition.
+  # Return the configured name for the view.
   #
   # @param [String, Symbol] view
-  # @param [Symbol, nil]    lens
+  # @param [String, Symbol, Blacklight::Document, nil] lens
   #
   # @return [String]
   #
@@ -30,15 +30,13 @@ module Blacklight::Configuration::ViewConfigExt
   def display_label(view, lens = nil)
     lens = Blacklight::Lens.key_for(lens)
     keys = []
-    keys << :"blacklight.#{lens}.search.view_title"   if lens
     keys << :"blacklight.#{lens}.search.view.#{view}" if lens
-    keys << :'blacklight.search.view_title'
     keys << :"blacklight.search.view.#{view}"
     keys << label
     keys << title
     keys << view.to_s.titleize
-    keys.delete_if(&:blank?)
-    field_label(*keys)
+    first, *rest = keys.delete_if(&:blank?)
+    I18n.t(first, default: rest)
   end
 
 end

@@ -1,10 +1,10 @@
 // app/assets/javascripts/blacklight/bookmark_toggle.js
 //
-// This code is unchanged from the original Blacklight source.
+// This code is essentially unchanged from the original Blacklight source.
 
 (function($) {
-    //change form submit toggle to checkbox
-    Blacklight.doBookmarkToggleBehavior          = function() {
+    // Change form submit toggle to checkbox.
+    Blacklight.doBookmarkToggleBehavior = function() {
         if (typeof Blacklight.do_bookmark_toggle_behavior == 'function') {
             console.warn('do_bookmark_toggle_behavior is deprecated. Use doBookmarkToggleBehavior instead.');
             return Blacklight.do_bookmark_toggle_behavior();
@@ -15,7 +15,7 @@
             success:  function(checked, response) {
                 if (response.bookmarks) {
                     $('[data-role=bookmark-counter]')
-                    .text(response.bookmarks.count);
+                        .text(response.bookmarks.count);
                 }
             }
         });

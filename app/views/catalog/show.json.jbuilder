@@ -14,10 +14,8 @@ json.data do
   json.type @document[type_field]
   json.attributes do
     doc_presenter = json_presenter(@document)
-    document_show_fields(@document).each do |field_name, field|
-      if should_render_show_field?(@document, field)
-        json.set! field_name, doc_presenter.field_value(field_name)
-      end
+    doc_presenter.fields_to_render.each do |field_name, field|
+      json.set! field_name, doc_presenter.field_value(field_name)
     end
   end
 end

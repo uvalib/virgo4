@@ -26,19 +26,23 @@ module Blacklight::Eds
 
     # initialize
     #
-    # @param [Blacklight::Configuration] config
-    # @param [Hash, nil]                 usr_params
-    # @param [Hash, nil]                 context
+    # @param [Hash] args              Keyword parameters passed to super.
     #
-    # @option eds_params [ActionDispatch::Request::Session] :session
-    # @option eds_params [Boolean]                          :guest
+    # @option args [Blacklight::Configuration] :config Required.
+    # @option args [Hash]   :user_params            Default: {}
+    # @option args [Class]  :search_builder_class   Default:
+    #                                               config.search_builder_class
+    # @option args [Hash]   :context                Default: {}
+    #
+    # @option user_params [ActionDispatch::Request::Session] :session
+    # @option user_params [Boolean]                          :guest
     #
     # @see Blacklight::Lens::SearchService#initialize
     #
-    def initialize(config, usr_params = nil, context = nil)
-      super(config, usr_params, context)
-      eds_params = @user_params.extract!(*EDS_PARAMS)
-      @context[:service_params].merge!(eds_params)
+    def initialize(**args)
+      super(args)
+      eds_params = user_params.extract!(*EDS_PARAMS)
+      context[:service_params].merge!(eds_params)
     end
 
     # Get results from the search service.

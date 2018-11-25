@@ -86,7 +86,7 @@ end
 # =============================================================================
 
 # Blacklight and supporting gems.
-gem 'blacklight', github: 'projectblacklight/blacklight', branch: :master
+gem 'blacklight', '< 8', github: 'RayLubinsky/blacklight'
 gem 'rsolr', '>= 1.0', '< 3'
 gem 'bootstrap', '~> 4.0'
 gem 'jquery-rails'
@@ -96,14 +96,14 @@ gem 'devise'
 gem 'devise-guests', '~> 0.6'
 
 # Blacklight Marc gem.
-gem 'blacklight-marc', '~> 6.1'
+gem 'blacklight-marc', '~> 6.1' # TODO: '7.0.0.rc1'
 
 # Blacklight Advanced Search gem.
 #gem 'blacklight_advanced_search', '>= 6.4'
 gem 'blacklight_advanced_search', '~> 6.4', github: 'RayLubinsky/blacklight_advanced_search'
 
 # EBSCO EDS gem for articles search.
-gem 'ebsco-eds'
+gem 'ebsco-eds', '1.0.0' # TODO: '~> 1.0'
 
 # =============================================================================
 # :section: Blacklight testing and development

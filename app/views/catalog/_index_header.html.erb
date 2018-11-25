@@ -11,9 +11,7 @@
   counter = document_counter_with_offset(document_counter)
 
   # Main title container for do partial view.
-  title_field = document_show_link_field(doc) # Field with the text of label.
-  title_opt   = { counter: counter } #, show_subtitle: true }
-  title       = link_to_document(doc, title_field, title_opt)
+  title = link_to_document(doc, counter: counter)
 
   # Format counter number that comes before the entry title.
   counter &&= t('blacklight.search.documents.counter', counter: counter)

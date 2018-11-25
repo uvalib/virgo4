@@ -30,13 +30,12 @@ json.data do
     json.type doc[type_field]
     json.attributes do
       doc_presenter = index_presenter(doc)
-      index_fields(doc).each do |field_name, field|
-        next unless should_render_index_field?(doc, field)
-        json.set!(field_name) do
-          json.id    "#{doc_url}##{field_name}"
-          json.label field.label
-          json.value doc_presenter.field_value(field_name)
-        end
+      doc_presenter.fields_to_render.each do |field_name, field|
+        json.partial! 'field',
+          field:         field,
+          field_name:    field_name,
+          document_url:  doc_url,
+          doc_presenter: doc_presenter
       end
     end
 

@@ -1,6 +1,6 @@
 // app/assets/javascripts/blacklight/checkbox_submit.js
 //
-// This code is unchanged from the original Blacklight source.
+// This code is essentially unchanged from the original Blacklight source.
 
 /* A JQuery plugin (should this be implemented as a widget instead? not sure)
    that will convert a "toggle" form, with single submit button to add/remove
@@ -22,11 +22,11 @@
 
    Pass in options for your class name and labels:
    $("form.something").blCheckboxSubmit({
-        checked_label: "Selected",
-        unchecked_label: "Select",
-        progress_label: "Saving...",
         //cssClass is added to elements added, plus used for id base
         cssClass: "toggle_my_kinda_form",
+        error: function() {
+          #optional callback
+        },
         success: function(after_success_check_state) {
           #optional callback
         }
@@ -35,48 +35,52 @@
 (function($) {
     $.fn.blCheckboxSubmit = function(argOpts) {
         this.each(function() {
-            var options = $.extend({}, $.fn.blCheckboxSubmit.defaults, argOpts);
+            var options =
+                $.extend({}, $.fn.blCheckboxSubmit.defaults, argOpts);
 
             var form = $(this);
             form.children().hide();
-            //We're going to use the existing form to actually send our
-            // add/removes This works conveneintly because the exact same
+            // We're going to use the existing form to actually send our
+            // add/removes.  This works conveneintly because the exact same
             // action href is used for both bookmarks/$doc_id.  But let's take
             // out the irrelevant parts of the form to avoid any future
             // confusion.
             form.find('input[type=submit]').remove();
 
-            //View needs to set data-doc-id so we know a unique value
-            //for making DOM id
+            // View needs to set data-doc-id so we know a unique value
+            // for making DOM id.
             var uniqueId = form.attr('data-doc-id') || Math.random();
-            // if form is currently using method delete to change state,
-            // then checkbox is currently checked
-            var checked = (form.find('input[name=_method][value=delete]').length !=
-                0);
+            // If form is currently using method delete to change state,
+            // then checkbox is currently checked.
+            var checked =
+                (form.find('input[name=_method][value=delete]').length != 0);
 
-            var checkbox = $('<input type="checkbox">')
-            .addClass(options.cssClass)
-            .attr('id', options.cssClass + '_' + uniqueId);
-            var label    = $('<label>')
-            .addClass(options.cssClass)
-            .attr('for', options.cssClass + '_' + uniqueId)
-            .attr('title', form.attr('title') || '');
-            var span     = $('<span>');
+            var checkbox =
+                $('<input type="checkbox">')
+                    .addClass(options.cssClass)
+                    .attr('id', options.cssClass + '_' + uniqueId);
+            var label =
+                $('<label>')
+                    .addClass(options.cssClass)
+                    .attr('for', options.cssClass + '_' + uniqueId)
+                    .attr('title', form.attr('title') || '');
+            var span = $('<span>');
 
             label.append(checkbox);
             label.append(' ');
             label.append(span);
 
-            var checkboxDiv = $('<div class="checkbox" />')
-            .addClass(options.cssClass)
-            .append(label);
+            var checkboxDiv =
+                $('<div class="checkbox" />')
+                    .addClass(options.cssClass)
+                    .append(label);
 
             function updateStateFor(state) {
                 checkbox.prop('checked', state);
                 label.toggleClass('checked', state);
                 if (state) {
-                    //Set the Rails hidden field that fakes an HTTP verb
-                    //properly for current state action.
+                    // Set the Rails hidden field that fakes an HTTP verb
+                    // properly for current state action.
                     form.find('input[name=_method]').val('delete');
                     span.text(form.attr('data-present'));
                 } else {
@@ -99,25 +103,23 @@
                     type:     form.attr('method').toUpperCase(),
                     data:     form.serialize(),
                     error:    function() {
-                        alert('Error');
-                        updateStateFor(checked);
                         label.removeAttr('disabled');
                         checkbox.removeAttr('disabled');
+                        options.error.call();
                     },
                     success:  function(data, status, xhr) {
-                        //if app isn't running at all, xhr annoyingly
-                        //reports success with status 0.
-                        if (xhr.status != 0) {
+                        // If app isn't running at all, XHR annoyingly
+                        // reports success with status 0.
+                        if (xhr.status !== 0) {
                             checked = !checked;
                             updateStateFor(checked);
                             label.removeAttr('disabled');
                             checkbox.removeAttr('disabled');
                             options.success.call(form, checked, xhr.responseJSON);
                         } else {
-                            alert('Error');
-                            updateStateFor(checked);
                             label.removeAttr('disabled');
                             checkbox.removeAttr('disabled');
+                            options.error.call();
                         }
                     }
                 });
@@ -130,9 +132,9 @@
     };
 
     $.fn.blCheckboxSubmit.defaults = {
-        //cssClass is added to elements added, plus used for id base
+        // cssClass is added to elements added, plus used for id base
         cssClass: 'blCheckboxSubmit',
-        success:  function() {
-        } //callback
+        error:    function() { alert("Error"); },
+        success:  function() { } // callback
     };
 })(jQuery);

@@ -1,6 +1,6 @@
 // app/assets/javascripts/blacklight/core.js
 //
-// This code is unchanged from the original Blacklight source.
+// This code is essentially unchanged from the original Blacklight source.
 
 Blacklight = function() {
     var buffer = new Array;
@@ -34,7 +34,7 @@ Blacklight = function() {
     };
 }();
 
-// turbolinks triggers page:load events on page transition
+// Turbolinks triggers page:load events on page transition.
 // If app isn't using turbolinks, this event will never be triggered, no prob.
 Blacklight.listeners().forEach(function(listener) {
     document.addEventListener(listener, function() {

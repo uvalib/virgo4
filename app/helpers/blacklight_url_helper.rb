@@ -40,15 +40,14 @@ module BlacklightUrlHelper
     search_state.url_for_document(doc, opts)
   end
 
-  # Use the catalog_path RESTful route to create a link to the show page for a
-  # specific item.
+  # Uses the catalog_path route to create a link to the show page for an item.
   #
   # catalog_path accepts a hash. The Solr query params are stored in the
   # session, so we only need the +counter+ param here. We also need to know if
   # we are viewing to document as part of search results.
   #
   # @param [Blacklight::Document] doc
-  # @param [Symbol, Hash]         field_or_opts
+  # @param [Symbol, Hash]         label_or_opts
   # @param [Hash]                 opts
   #
   # @return [ActiveSupport::SafeBuffer]
@@ -56,19 +55,28 @@ module BlacklightUrlHelper
   # This method overrides:
   # @see Blacklight::UrlHelperBehavior#link_to_document
   #
-  def link_to_document(doc, field_or_opts = nil, opts = nil)
-    if field_or_opts.is_a?(Hash)
-      opts  = field_or_opts
-      field = nil
+  def link_to_document(doc, label_or_opts = nil, opts = nil)
+    if label_or_opts.is_a?(Hash)
+      opts = label_or_opts
+      label_or_opts = nil
     else
-      field = field_or_opts
+      opts ||= { counter: nil }
     end
-    field ||= document_show_link_field(doc)
-    opts  ||= { counter: nil }
-    lens  = lens_key_for(opts.delete(:lens) || doc)
-    label = index_presenter(doc).label(field, opts)
-    path  = url_for_document(doc, lens: lens)
-    opts  = document_link_params(doc, opts)
+    label =
+      if label_or_opts.is_a?(Proc) || label_or_opts.is_a?(Symbol)
+        Deprecation.warn(self,
+          "passing a #{label_or_opts.class} (#{label_or_opts.inspect}) " \
+          "to #{__method__} is deprecated and will be removed in Blacklight 8"
+        )
+        Deprecation.silence(Blacklight::IndexPresenter) do
+          index_presenter(doc).label(label_or_opts, opts)
+        end
+      end
+    label ||= label_or_opts
+    label ||= index_presenter(doc).label(document_show_link_field(doc), opts)
+    opts = document_link_params(doc, opts)
+    lens = lens_key_for(opts.delete(:lens) || doc)
+    path = url_for_document(doc, lens: lens)
     link_to(label, path, opts)
   end
 

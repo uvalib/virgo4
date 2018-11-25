@@ -77,14 +77,14 @@ module FacetsHelper
   # @see Blacklight::FacetsHelperBehavior#render_facet_limit
   #
   def render_facet_limit(facet, options = nil)
-    cfg = facet_configuration_for_field(facet.name)
-    return unless should_render_facet?(facet, cfg)
+    facet_config = facet_configuration_for_field(facet.name)
+    return unless should_render_facet?(facet, facet_config)
     options = options ? options.dup : {}
     options[:partial] ||= facet_partial_name(facet)
     options[:layout]  ||= 'facet_layout' unless options.key?(:layout)
     options[:locals]  ||= {}
     options[:locals][:field_name]    ||= facet.name
-    options[:locals][:facet_field]   ||= cfg
+    options[:locals][:facet_field]   ||= facet_config
     options[:locals][:display_facet] ||= facet
     options.except(:partial, :layout, :locals).keys.each do |key|
       options[:locals][key] = options.delete(key)
@@ -139,14 +139,14 @@ module FacetsHelper
   # By default, only render facets with items.
   #
   # @param [Blacklight::Lens::Response::Facets::FacetField] facet
-  # @param [Blacklight::Configuration::FacetField, nil]     facet_cfg
+  # @param [Blacklight::Configuration::FacetField, nil]     facet_config
   #
   # This method overrides:
   # @see Blacklight::FacetsHelperBehavior#should_render_facet?
   #
-  def should_render_facet?(facet, facet_cfg = nil)
-    facet_cfg ||= facet_configuration_for_field(facet.name)
-    facet.items.present? && should_render_field?(facet_cfg, facet)
+  def should_render_facet?(facet, facet_config = nil)
+    facet_config ||= facet_configuration_for_field(facet.name)
+    facet.items.present? && should_render_field?(facet_config, facet)
   end
 
   # Indicate whether a facet should be rendered as collapsed or not.
@@ -155,13 +155,13 @@ module FacetsHelper
   #   - if the facet is configured to collapse (the default), collapse
   #   - if the facet is configured not to collapse, don't collapse
   #
-  # @param [Blacklight::Configuration::FacetField] facet_cfg
+  # @param [Blacklight::Configuration::FacetField] facet_config
   #
   # This method overrides:
   # @see Blacklight::FacetsHelperBehavior#should_collapse_facet?
   #
-  def should_collapse_facet?(facet_cfg)
-    !facet_field_in_params?(facet_cfg.key) && facet_cfg.collapse
+  def should_collapse_facet?(facet_config)
+    !facet_field_in_params?(facet_config.key) && facet_config.collapse
   end
 
   # The name of the partial to use to render a facet field.
@@ -222,9 +222,9 @@ module FacetsHelper
   # @see Blacklight::FacetsHelperBehavior#path_for_facet
   #
   def path_for_facet(facet_field, item, opt = nil)
-    cfg = facet_configuration_for_field(facet_field)
-    if cfg.url_method
-      send(cfg.url_method, facet_field, item)
+    facet_config = facet_configuration_for_field(facet_field)
+    if facet_config.url_method
+      send(facet_config.url_method, facet_field, item)
     else
       path_opt = search_state.add_facet_params_and_redirect(facet_field, item)
       path_opt.merge!(opt) if opt.present?
@@ -355,13 +355,13 @@ module FacetsHelper
   def facet_display_value(field, item)
     value =
       item.respond_to?(:label) ? item.label : facet_value_for_facet_item(item)
-    cfg = facet_configuration_for_field(field)
-    if cfg.helper_method
-      send(cfg.helper_method, value)
-    elsif (qv = cfg.query && cfg.query[value])
+    facet_config = facet_configuration_for_field(field)
+    if facet_config.helper_method
+      send(facet_config.helper_method, value)
+    elsif (qv = facet_config.query && facet_config.query[value])
       qv[:label]
-    elsif (d = cfg.date)
-      localize(value.to_datetime, (d unless d.is_a?(TrueClass)))
+    elsif (d = facet_config.date)
+      localize(Time.zone.parse(value), (d unless d.is_a?(TrueClass)))
     else
       value
     end

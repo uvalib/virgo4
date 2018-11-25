@@ -79,6 +79,17 @@ module Blacklight::Lens::Catalog
     super
   end
 
+  # == GET /catalog/raw/:id
+  # == GET /:lens/raw/:id
+  # Get a single document from the index in JSON format.
+  #
+  # This method overrides:
+  # @see Blacklight::Catalog#raw
+  #
+  def raw
+    super
+  end
+
   # == POST /catalog/:id/track
   # == POST /:lens/:id/track
   # Updates the search counter (allows the show view to paginate).

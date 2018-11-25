@@ -36,7 +36,7 @@ module Blacklight::Configuration::FieldExt
   # Return the configured label for the current field definition.
   #
   # @param [String, nil] context    The view context ('show', 'facet', etc).
-  # @param [Symbol, nil] lens
+  # @param [String, Symbol, Blacklight::Document, nil] lens
   #
   # @return [String]
   #

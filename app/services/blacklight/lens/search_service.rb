@@ -30,18 +30,18 @@ module Blacklight::Lens
 
     # initialize
     #
-    # @param [Blacklight::Configuration] config
-    # @param [Hash, nil]                 usr_params
-    # @param [Hash, nil]                 context
+    # @param [Hash] args              Keyword parameters passed to super.
+    # @param [Hash] context           @see self#context
     #
-    # @option eds_params [ActionDispatch::Request::Session] :session
-    # @option eds_params [Boolean]                          :guest
+    # @option args [Blacklight::Configuration] :config Required.
+    # @option args [Hash]   :user_params            Default: {}
+    # @option args [Class]  :search_builder_class   Default:
+    #                                               config.search_builder_class
     #
     # @see Blacklight::SearchService#initialize
     #
-    def initialize(config, usr_params = nil, context = nil)
-      usr_params ||= {}
-      super(config, usr_params)
+    def initialize(context: nil, **args)
+      super(args)
       @context = context || {}
       @context[:service_params] ||= {}
     end

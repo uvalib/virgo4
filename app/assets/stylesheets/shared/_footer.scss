@@ -44,12 +44,6 @@
             }
         }
 
-        .federal-lib-logo {
-            a:focus {
-                outline-offset: 0;
-            }
-        }
-
         .address {
             // TODO: ?
         }
@@ -59,12 +53,20 @@
         }
 
         .federal-lib-logo {
+
             width:         auto;
             padding-right: 0;
+            flex:          0 0 4.166666666666667%;
+            max-width:     4.166666666666667%;
+
+            a:focus {
+                outline-offset: 0;
+            }
         }
 
         .federal-lib-text {
-            // TODO: ?
+            margin-left: 1em;
+            flex:        1 1 auto;
         }
     }
 }

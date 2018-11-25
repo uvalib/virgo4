@@ -26,7 +26,7 @@ module BlacklightConfigurationHelper
 
   # Index fields to display for a type of document.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [OrderedHash{String=>Blacklight::Configuration::Field}]
   #
@@ -34,13 +34,18 @@ module BlacklightConfigurationHelper
   # @see Blacklight::ConfigurationHelperBehavior#index_fields
   #
   def index_fields(lens = nil)
+    Deprecation.warn(
+      self,
+      "#{__method__} is deprecated and will be removed in Blacklight 8. " \
+      'Use IndexPresenter#fields instead'
+    )
     blacklight_config_for(lens).index_fields
   end
 
   # Used in the document_list partial (search view) for building a select
   # element.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [Array<Array<(String,Symbol)>>]
   #
@@ -55,7 +60,7 @@ module BlacklightConfigurationHelper
 
   # active_sort_fields
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [OrderedHash{String=>Blacklight::Configuration::SortField}]
   #
@@ -69,7 +74,7 @@ module BlacklightConfigurationHelper
 
   # Used in the search form partial for building a select tag.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [Array<Array<(String, Symbol)>>]
   #
@@ -83,7 +88,7 @@ module BlacklightConfigurationHelper
 
   # active_search_fields
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [OrderedHash{String=>Blacklight::Configuration::SearchField}]
   #
@@ -97,7 +102,7 @@ module BlacklightConfigurationHelper
   #
   # Skips search_fields marked with :include_in_simple_select => *false*
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [Array<Array<(String, Symbol)>>]
   #
@@ -110,7 +115,7 @@ module BlacklightConfigurationHelper
 
   # Used in the "app/views/catalog/_show_default.html.erb" partial.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [OrderedHash{String=>Blacklight::Configuration::Field}]
   #
@@ -118,45 +123,50 @@ module BlacklightConfigurationHelper
   # @see Blacklight::ConfigurationHelperBehavior#document_show_fields
   #
   def document_show_fields(lens = nil)
+    Deprecation.warn(
+      self,
+      "#{__method__} is deprecated and will be removed in Blacklight 8. " \
+      'Use ShowPresenter#fields instead'
+    )
     blacklight_config_for(lens).show_fields
   end
 
   # Look up the label for the index field.
   #
-  # @param [Object, nil]    lens      Default: `current_lens`.
-  # @param [String, Symbol] field
+  # @param [Blacklight::Document] doc
+  # @param [String, Symbol]       field
   #
   # @return [String]
   #
   # This method overrides:
   # @see Blacklight::ConfigurationHelperBehavior#index_field_label
   #
-  def index_field_label(lens, field)
-    lens ||= current_lens.key
-    cfg = index_fields(lens)[field]
-    cfg&.display_label(:index, lens) || ''
+  def index_field_label(doc, field)
+    field_config   = blacklight_config_for(doc).index_fields[field]
+    field_config ||= Blacklight::Configuration::NullField.new(key: field)
+    field_config.display_label(:index, doc)
   end
 
   # Look up the label for the show field
   #
-  # @param [Object]         lens      Default: `current_lens`.
-  # @param [String, Symbol] field
+  # @param [Blacklight::Document] doc
+  # @param [String, Symbol]       field
   #
   # @return [String]
   #
   # This method overrides:
   # @see Blacklight::ConfigurationHelperBehavior#document_show_field_label
   #
-  def document_show_field_label(lens, field)
-    lens ||= current_lens.key
-    cfg = document_show_fields(lens)[field]
-    cfg&.display_label(:show, lens) || ''
+  def document_show_field_label(doc, field)
+    field_config   = blacklight_config_for(doc).show_fields[field]
+    field_config ||= Blacklight::Configuration::NullField.new(key: field)
+    field_config.display_label(:show, doc)
   end
 
   # Look up the label for the facet field.
   #
   # @param [String, Symbol] field
-  # @param [Symbol, nil]    lens      Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [String]
   #
@@ -165,14 +175,15 @@ module BlacklightConfigurationHelper
   #
   def facet_field_label(field, lens = nil)
     lens ||= current_lens.key
-    cfg = blacklight_config_for(lens).facet_fields[field]
-    cfg&.display_label(:facet, lens) || ''
+    field_config   = blacklight_config_for(lens).facet_fields[field]
+    field_config ||= Blacklight::Configuration::NullField.new(key: field)
+    field_config.display_label(:facet, lens)
   end
 
   # Look up the label for the view.
   #
   # @param [String, Symbol] view
-  # @param [Symbol, nil]    lens      Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [String]
   #
@@ -180,47 +191,49 @@ module BlacklightConfigurationHelper
   # @see Blacklight::ConfigurationHelperBehavior#view_label
   #
   def view_label(view, lens = nil)
+    return '?' unless view.present?
     lens ||= current_lens.key
-    cfg = view && blacklight_config_for(lens).view[view]
-    cfg&.display_label(view, lens) || ''
+    blacklight_config_for(lens).view[view].display_label(view, lens)
   end
 
   # Shortcut for commonly needed operation, look up display label for the key
   # specified. Returns "Keyword" if a label can't be found.
   #
-  # @param [String, Symbol] field
-  # @param [Symbol, nil]    lens      Default: `current_lens`.
+  # @param [String, Symbol] key
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [String]
   #
   # This method overrides:
   # @see Blacklight::ConfigurationHelperBehavior#label_for_search_field
   #
-  def label_for_search_field(field, lens = nil)
+  def label_for_search_field(key, lens = nil)
     lens ||= current_lens.key
-    cfg = field && blacklight_config_for(lens).search_fields[field]
-    cfg&.display_label(:search, lens) || ''
+    field_config   = blacklight_config_for(lens).search_fields[key]
+    field_config ||= Blacklight::Configuration::NullField.new(key: key)
+    field_config.display_label(:search, lens)
   end
 
   # Look up the label for the sort field.
   #
-  # @param [String, Symbol] field
-  # @param [Symbol, nil]    lens      Default: `current_lens`.
+  # @param [String, Symbol] key
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [String]
   #
   # This method overrides:
   # @see Blacklight::ConfigurationHelperBehavior#sort_field_label
   #
-  def sort_field_label(field, lens = nil)
-    lens ||= current_lens.key
-    cfg = field && blacklight_config_for(lens).sort_fields[field]
-    cfg&.display_label(:sort, lens) || ''
+  def sort_field_label(key, lens = nil)
+    lens  ||= current_lens.key
+    field_config   = blacklight_config_for(lens).sort_fields[key]
+    field_config ||= Blacklight::Configuration::NullField.new(key: key)
+    field_config.display_label(:sort, lens)
   end
 
   # document_index_views
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [OrderedHash{String=>Blacklight::Configuration::ViewConfig}]
   #
@@ -235,7 +248,7 @@ module BlacklightConfigurationHelper
   # Filter #document_index_views to just views that should display in the view
   # type control.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [OrderedHash{String=>Blacklight::Configuration::ViewConfig}]
   #
@@ -252,7 +265,7 @@ module BlacklightConfigurationHelper
 
   # Get the default index view type.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [Symbol]
   #
@@ -267,7 +280,7 @@ module BlacklightConfigurationHelper
 
   # Indicate whether there are alternative views configured.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # This method overrides:
   # @see Blacklight::ConfigurationHelperBehavior#has_alternative_views?
@@ -278,7 +291,7 @@ module BlacklightConfigurationHelper
 
   # Maximum number of results for spell-checking.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [Integer]
   #
@@ -309,7 +322,7 @@ module BlacklightConfigurationHelper
 
   # Default sort field.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [Blacklight::Configuration::SortField]
   #
@@ -317,7 +330,6 @@ module BlacklightConfigurationHelper
   # @see Blacklight::ConfigurationHelperBehavior#default_sort_field
   #
   def default_sort_field(lens = nil)
-    Blacklight::Configuration.new.default_search_field.
     fields = active_sort_fields(lens)
     fields.find { |_, cfg| return cfg if cfg.default.present? }
     fields.values.first
@@ -325,7 +337,7 @@ module BlacklightConfigurationHelper
 
   # The default value for search results per page.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [Integer]
   #
@@ -341,7 +353,7 @@ module BlacklightConfigurationHelper
   # The available options for results per page, in the style of
   # #options_for_select.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [Array<Array<(ActiveSupport::SafeBuffer, Integer)>>]
   #
@@ -364,7 +376,7 @@ module BlacklightConfigurationHelper
   # The sort key for the first sort field entry of the current Blacklight
   # configuration.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [String]
   #
@@ -375,7 +387,7 @@ module BlacklightConfigurationHelper
   # The sort key associated with relevance sort for the current Blacklight
   # configuration.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [String, nil]
   #
@@ -386,7 +398,7 @@ module BlacklightConfigurationHelper
   # The sort key associated with date-received sort for the current
   # Blacklight configuration.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
   #
   # @return [String, nil]
   #
@@ -403,8 +415,8 @@ module BlacklightConfigurationHelper
   # The sort key for the first matching sort entry for the current Blacklight
   # configuration.
   #
-  # @param [Object, nil] lens         Default: `current_lens`.
-  # @param [Array, nil]  targets
+  # @param [String, Symbol, Blacklight::Document] lens Default: `current_lens`.
+  # @param [Array, nil] targets
   #
   # @return [String, nil]
   #

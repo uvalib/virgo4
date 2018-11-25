@@ -35,7 +35,12 @@ module Blacklight::Lens
     # @see Blacklight::FieldPresenter#render
     #
     def render
-      options[:raw] ? retrieve_values : super
+      if options[:raw]
+        retrieve_values
+      else
+        options[:value] &&= Array.wrap(options[:value]).map(&:html_safe)
+        super
+      end
     end
 
     # =========================================================================
