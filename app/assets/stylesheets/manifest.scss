@@ -4,6 +4,7 @@
 // Bootstrap and local defaults
 //=============================================================================
 
+@import 'bootstrap-sprockets'; // NOTE: Transitional for Blacklight 7
 @import 'bootstrap';
 @import 'shared/variables';
 

@@ -102,6 +102,9 @@ gem 'blacklight-marc', '~> 6.1' # TODO: '7.0.0.rc1'
 #gem 'blacklight_advanced_search', '>= 6.4'
 gem 'blacklight_advanced_search', '~> 6.4', github: 'RayLubinsky/blacklight_advanced_search'
 
+# Blacklight::Gallery
+gem 'blacklight-gallery', '~> 0.11'
+
 # EBSCO EDS gem for articles search.
 gem 'ebsco-eds', '1.0.0' # TODO: '~> 1.0'
 

@@ -331,7 +331,7 @@ module Blacklight::Lens::Controller
   # Indicate whether the sort control should be displayed.
   #
   # @param [Blacklight::Configuration::Field] _config Unused.
-  # @param [Hash]                             opt
+  # @param [Hash]                             _opt    Unused.
   #
   def render_sort_widget?(_config, _opt)
     !disabled?(:sort)

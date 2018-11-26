@@ -1,10 +1,21 @@
 // app/assets/stylesheets/controllers/_bookmarks.scss
 
+// NOTE: The bookmarks page does not support multiple views at this time.
+$bookmark-gallery: false;
+
 //=============================================================================
 // Bookmarks page
 //=============================================================================
 
 body.blacklight-bookmarks-index {
+
+    @if not($bookmark-gallery) {
+        .documents-gallery,
+        .documents-masonry,
+        .documents-slideshow {
+            @extend .documents-list;
+        }
+    }
 
     // Make metadata values wrap so that text does not encroach on the side of
     // the display with the bookmark controls.
@@ -14,6 +25,11 @@ body.blacklight-bookmarks-index {
         @extend .col-lg-10;
 
         width:        auto;
+        margin-left:  1.5rem;
         padding-left: 0;
+
+        dt {
+            text-align: left;
+        }
     }
 }

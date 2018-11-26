@@ -26,6 +26,9 @@ module Blacklight::Lens::Document
   include Blacklight::Lens::Document::Export
   include Blacklight::Lens::Document::SchemaOrg
 
+  # For Blacklight::Gallery
+  include Blacklight::Gallery::OpenseadragonSolrDocument
+
   # ===========================================================================
   # :section: Blacklight::Document overrides
   # ===========================================================================

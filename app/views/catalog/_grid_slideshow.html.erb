@@ -1,0 +1,19 @@
+<%# app/views/catalog/_grid_slideshow.html.erb -%>
+<%-
+  doc = document   ||= @document
+  document_counter ||= nil
+  presenter        ||= doc && thumbnail_presenter(doc)
+  return unless document_counter.present? && presenter&.exists?
+
+  image = presenter.thumbnail_tag({}, suppress_link: true)
+  data  = {
+    'slide-to': document_counter,
+    toggle:     'modal',
+    target:     '#slideshow-modal'
+  }
+-%>
+<div class="document">
+  <div class="thumbnail">
+    <%= link_to(image, '#', data: data) %>
+  </div>
+</div>

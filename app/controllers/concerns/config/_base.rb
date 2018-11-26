@@ -429,16 +429,18 @@ class Config::Base
           response_model:             Blacklight::Lens::Response,
           repository_class:           Blacklight::Lens::Repository,
           search_builder_class:       SearchBuilder,
-          facet_paginator_class:      Blacklight::Solr::FacetPaginator, # TODO: ???
-          index: {
-            document_presenter_class: Blacklight::Lens::IndexPresenter,
-            field_presenter_class:    Blacklight::Lens::FieldPresenter
-          },
-          show: {
-            document_presenter_class: Blacklight::Lens::ShowPresenter,
-            field_presenter_class:    Blacklight::Lens::FieldPresenter
-          },
+          facet_paginator_class:      Blacklight::Solr::FacetPaginator,
           thumbnail_presenter_class:  Blacklight::Lens::ThumbnailPresenter,
+          index:
+            Blacklight::Configuration::ViewConfig::Index.new(
+              document_presenter_class: Blacklight::Lens::IndexPresenter,
+              field_presenter_class:    Blacklight::Lens::FieldPresenter
+            ),
+          show:
+            Blacklight::Configuration::ViewConfig::Show.new(
+              document_presenter_class: Blacklight::Lens::ShowPresenter,
+              field_presenter_class:    Blacklight::Lens::FieldPresenter
+            ),
         )
       values.deep_merge!(added_values) if added_values.present?
       config.lens = values
@@ -520,7 +522,7 @@ class Config::Base
     #
     # @param [Blacklight::Configuration] config
     #
-    # @return [Blacklight::Configuration]   The modified configuration.
+    # @return [void]
     #
     # @see Blacklight::ActionBuilder#build
     #
@@ -547,6 +549,18 @@ class Config::Base
       config.add_results_collection_tool :view_type_group,                                                                if: :render_view_type_group?
 
       # rubocop:enable Metrics/LineLength
+    end
+
+    # Add configuration for Blacklight::Gallery
+    #
+    # @param [Blacklight::Configuration] config
+    #
+    # @return [void]
+    #
+    def blacklight_gallery!(config)
+      config.view.list.partials    = config.index.partials
+      config.view.gallery.partials = %i(index_header index_details)
+      config.view.masonry.partials = %i(index_details)
     end
 
     # Get field labels from I18n, including labels specific to this lens and

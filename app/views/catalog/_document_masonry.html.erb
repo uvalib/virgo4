@@ -1,0 +1,14 @@
+<%# app/views/catalog/_document_masonry.html.erb -%>
+<%-
+  # Container for all documents in masonry view.
+  docs = documents ||= @documents
+  template_opts = {
+    collection: docs,
+    as:         :document,
+    partial:    'index_masonry',
+    locals:     { total: docs.size }
+  }
+-%>
+<div id="documents" class="row masonry" data-behavior="masonry-gallery">
+  <%= render template_opts %>
+</div>

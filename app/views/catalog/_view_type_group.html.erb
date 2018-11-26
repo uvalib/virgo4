@@ -1,0 +1,24 @@
+<%# app/views/catalog/_view_type_group.html.erb -%>
+<%-
+  return unless show_sort_and_per_page? && has_alternative_views?
+  css_class ||= 'btn btn-outline-secondary'
+  search_params = search_state.to_h
+  view_type     = document_index_view_type
+-%>
+<div class="view-type">
+  <span class="sr-only"><%= t('blacklight.search.view_title') -%></span>
+  <div class="view-type-group btn-group">
+    <%- document_index_view_controls.each do |view, _config| -%>
+      <%- url     = url_for(search_params.merge(view: view)) -%>
+      <%- caption = view_label(view) -%>
+      <%- classes = css_classes(css_class) do |css| -%>
+        <%- css << "view-type-#{view.to_s.parameterize}" -%>
+        <%- css << 'active' if view_type == view -%>
+      <%- end -%>
+      <%= link_to(url, title: caption, class: classes) do %>
+        <span class="caption"><%= caption -%></span>
+        <%= render_view_type_group_icon(view) %>
+      <%- end -%>
+    <%- end -%>
+  </div>
+</div>

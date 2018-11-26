@@ -25,6 +25,12 @@ class Config::Eds < Config::Base
   #
   # @see self#semantic_fields!
   #
+  # NOTE: Use of these field associations is inconsistent in Blacklight and
+  # related gems (and in this application).  Some places expect only a single
+  # metadata field name to be associated with the semantic field; others expect
+  # (or tolerate) multiple metadata field names (to allow fallback fields to be
+  # accessed if the main metadata field is missing or empty).
+  #
   SEMANTIC_FIELDS = {
     display_type_field: 'eds_publication_type', # TODO: Could remove to avoid partial lookups by display type if "_default" is the only appropriate partial.
     title_field:        'eds_title',
@@ -307,6 +313,7 @@ class Config::Eds < Config::Base
 
       add_tools!(config)
       semantic_fields!(config)
+      blacklight_gallery!(config)
       finalize_configuration!(config)
 
       # rubocop:enable Metrics/LineLength
@@ -323,13 +330,14 @@ class Config::Eds < Config::Base
     # @see Config::Base#response_models!
     #
     def response_models!(config, added_values = nil)
-      values = {
-        document_model:       EdsDocument,
-        document_factory:     Blacklight::Eds::DocumentFactory,
-        response_model:       Blacklight::Eds::Response,
-        repository_class:     Blacklight::Eds::Repository,
-        search_builder_class: SearchBuilderEds,
-      }
+      values =
+        Blacklight::OpenStructWithHashAccess.new(
+          document_model:       EdsDocument,
+          document_factory:     Blacklight::Eds::DocumentFactory,
+          response_model:       Blacklight::Eds::Response,
+          repository_class:     Blacklight::Eds::Repository,
+          search_builder_class: SearchBuilderEds,
+        )
       values = values.merge(added_values) if added_values.present?
       super(config, values)
     end

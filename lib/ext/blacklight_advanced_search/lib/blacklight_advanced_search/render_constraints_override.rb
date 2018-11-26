@@ -46,12 +46,11 @@ module BlacklightAdvancedSearch::RenderConstraintsOverrideExt
               h("#{label}: #{query}")
             }.join(' ; ').html_safe
           label = t('blacklight_advanced_search.op.OR.filter_label').capitalize
-          opt = (opt || {}).merge(escape_value: false)
-          render_search_to_s_element(label, values, opt)
+          render_search_to_s_element(label, values, escape_value: false)
         else
           adv_queries.map { |field, query|
             label = search_field_def_for_key(field)[:label]
-            render_search_to_s_element(label, query, opt)
+            render_search_to_s_element(label, query)
           }.join('').html_safe
         end
     end

@@ -41,45 +41,19 @@ module Blacklight::Lens::Bookmarks
     self.blacklight_config =
     ::Config::Catalog.new.deep_copy(self).tap do |config|
 
+      # Ensure Solr gets arguments from :data instead of :params.
+      config.http_method = Blacklight::Engine.config.bookmarks_http_method
+
       config.add_results_collection_tool(:clear_bookmarks_widget)
       # config.add_results_collection_tool(:citation) # TODO: bookmarks export
       # config.add_results_collection_tool(:email)    # TODO: bookmarks email
 
-      config.show.document_actions.clear
-
-      config.lens = Blacklight::OpenStructWithHashAccess.new(
-        document_model:         LensDocument,
-        document_factory:       Blacklight::Lens::DocumentFactory,
-        response_model:         Blacklight::Lens::Response,
-        repository_class:       Blacklight::Lens::Repository,
-        search_builder_class:   SearchBuilder,
-        facet_paginator_class:  Blacklight::Solr::FacetPaginator
-      )
-
-      # Class for sending and receiving requests from a search index.
-      config.repository_class = config.lens.repository_class
-
-      # Class for converting Blacklight's URL parameters into request
-      # parameters for the search index via repository_class.
-      config.search_builder_class = config.lens.search_builder_class
-
-      # Model that maps search index responses to Blacklight responses.
-      config.response_model = config.lens.response_model
-
-      # Use unspecified document types.
-      config.document_model = config.lens.document_model
-
-      # Use the generic document factory.
-      config.document_factory = config.lens.document_factory
-
-      # Class for paginating long lists of facet fields.
-      config.facet_paginator_class = config.lens.facet_paginator_class
-
-      # Ensure Solr gets arguments from :data instead of :params.
-      config.http_method = Blacklight::Engine.config.bookmarks_http_method
-
-      Log.debug do
-        "CONFIG for BookmarksController:\n#{config_inspect(config)}"
+      # Ensure that the current (index) view does not affect the bookmark
+      # display.  TODO: Gallery views for bookmarks.
+      config.view.each_pair do |_, view_config|
+        next if !view_config.if.nil? && !view_config.if
+        next if !view_config.unless.nil? && view_config.unless
+        view_config.partials = config.index.partials
       end
 
     end

@@ -1,0 +1,231 @@
+// app/assets/stylesheets/feature/_gallery.scss
+
+//=============================================================================
+// Shared Blacklight::Gallery definitions.
+//=============================================================================
+
+// For these views, display the document title without the index number or
+// bookmark control.
+%gallery-documentHeader {
+
+    .index_title {
+
+        font-size:  large;
+        text-align: left;
+
+        .document-counter {
+            @extend .hidden;
+        }
+    }
+
+    .index-document-functions {
+        @extend .hidden;
+    }
+
+}
+
+// Definitions for a popup element displaying item metadata.
+// @see app/assets/javascripts/feature/gallery.js
+%gallery-details {
+
+    @extend %not-sr-only;
+
+    display:        flex;
+    flex-direction: column;
+    width:          166%;
+    margin-top:     -0.66rem;
+    margin-left:    -0.66rem;
+    padding:        0.5rem;
+    position:       absolute;
+    top:            0;
+    z-index:        100;
+    border-radius:  8px;
+    border:         2px solid gray;
+    background:     whitesmoke;
+
+    .documentHeader {
+
+        @extend %gallery-documentHeader;
+
+        width:      auto;
+        max-height: unset;
+        margin:     0;
+        padding:    0;
+
+        .index_title {
+            max-height:  unset;
+            padding:     0;
+            white-space: normal;
+            overflow:    visible;
+        }
+    }
+
+    .document-metadata {
+
+        margin: 0;
+
+        dt, dd {
+            padding:    0;
+            text-align: left;
+        }
+    }
+}
+
+// Common styles for 'gallery' and 'masonry' views.
+#documents.gallery,
+#documents.masonry {
+
+    .thumbnail {
+
+        width: 100%;
+
+        .caption {
+
+            display:  block;
+            position: relative;
+
+            a {
+                color:       $link-color;
+                text-shadow: none;
+            }
+
+            .index-details {
+
+                @extend .sr-only;
+
+                &.visible {
+                    @extend %gallery-details;
+                }
+            }
+        }
+    }
+}
+
+//=============================================================================
+// Index entries within Blacklight::Gallery 'gallery' view.
+//=============================================================================
+
+// This seems like a more appropriate view-type icon than the one defined by
+// the blacklight-gallery gem.
+.view-icon-gallery {
+    &:before { content: "\e138"; }
+}
+
+// When title is hovered over in gallery view, the metadata appears.
+// @see app/assets/javascripts/feature/gallery.js
+#documents.gallery .thumbnail {
+    .caption {
+
+        margin-top:    0.25rem;
+        margin-bottom: 1rem;
+
+        .documentHeader {
+
+            @extend %gallery-documentHeader;
+
+            width: 130%;
+
+            .index_title {
+                max-height:    2.75rem;
+                white-space:   nowrap;
+                overflow:      hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+    }
+}
+
+//=============================================================================
+// Index entries within Blacklight::Gallery 'masonry' view.
+//=============================================================================
+
+// This provides the view-type icon definition intended by the
+// blacklight-gallery gem which is implemented using Bootstrap 3.
+.view-icon-masonry {
+
+    @mixin local-img-retina($file-1x, $file-2x, $width-1x, $height-1x) {
+        $img:
+            if($bootstrap-sass-asset-helper,
+                twbs-image-path("#{$file-1x}"),
+                "#{$file-1x}"
+            );
+        @media only screen and (min-resolution: 192dpi),
+        only screen and (min-resolution: 2dppx) {
+            $img:
+                if($bootstrap-sass-asset-helper,
+                    twbs-image-path("#{$file-2x}"),
+                    "#{$file-2x}"
+                );
+            background-size: $width-1x $height-1x;
+        }
+        background-image: url($img);
+    }
+
+    @include local-img-retina(
+        "blacklight/gallery/view-icon-masonry.png",
+        "blacklight/gallery/view-icon-masonry@2x.png",
+        13px, 13px
+    );
+}
+
+// Change the view-type icon image when hovered.
+.view-type-masonry:hover {
+    .view-icon-masonry {
+        background-blend-mode: screen;
+    }
+}
+
+// When the thumbnail is hovered over in masonry view, the metadata appears.
+// @see app/assets/javascripts/feature/gallery.js
+#documents.masonry .thumbnail {
+
+    .caption {
+
+        @extend .sr-only;
+
+        background-color: unset;
+    }
+
+    &:hover .caption {
+        @extend %not-sr-only;
+    }
+}
+
+//=============================================================================
+// Index entries within Blacklight::Gallery 'slideshow' view.
+//=============================================================================
+
+.slideshow-documents {
+    .grid {
+        .document {
+            margin-bottom: 20px;
+        }
+    }
+}
+
+.slideshow-modal {
+    .modal-dialog {
+        .modal-header {
+            flex: 1 0 auto;
+        }
+    }
+}
+
+.slideshow-presenter {
+    .slideshow-inner {
+        .item {
+            .frame {
+
+                img {
+                    display: block;
+                    margin:  0 auto;
+                }
+
+                .counter {
+                    display: inline-block;
+                }
+            }
+        }
+    }
+}

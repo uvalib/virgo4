@@ -25,6 +25,12 @@ class Config::SolrFake < Config::Base
   #
   # @see #semantic_fields!
   #
+  # NOTE: Use of these field associations is inconsistent in Blacklight and
+  # related gems (and in this application).  Some places expect only a single
+  # metadata field name to be associated with the semantic field; others expect
+  # (or tolerate) multiple metadata field names (to allow fallback fields to be
+  # accessed if the main metadata field is missing or empty).
+  #
   SEMANTIC_FIELDS = {
     display_type_field: 'format',
     title_field:        'title_display',
@@ -257,6 +263,7 @@ class Config::SolrFake < Config::Base
 
       add_tools!(config)
       semantic_fields!(config)
+      blacklight_gallery!(config)
       finalize_configuration!(config)
 
       # rubocop:enable Metrics/LineLength
@@ -282,12 +289,34 @@ class Config::SolrFake < Config::Base
     # @param [Blacklight::Configuration]                       config
     # @param [Hash, Blacklight::OpenStructWithHashAccess, nil] added_values
     #
-    # @see Config::Base#semantic_fields!!
+    # @return [void]
+    #
+    # @see Config::Base#semantic_fields!
     #
     def semantic_fields!(config, added_values = nil)
       values = SEMANTIC_FIELDS
       values = values.merge(added_values) if added_values.present?
       super(config, values)
+    end
+
+    # Add configuration for Blacklight::Gallery
+    #
+    # @param [Blacklight::Configuration] config
+    #
+    # @return [void]
+    #
+    # @see Config::Base#blacklight_gallery!
+    #
+    # == Usage Note
+    # This holds the engine-generated code that would be specific to the Solr
+    # search repository, however the parts relating to OpenSeaDragon are unused
+    # and currently untested.
+    #
+    def blacklight_gallery!(config)
+      super(config)
+      config.view.slideshow.partials = %i(index_header)
+      config.show.tile_source_field  = :content_metadata_image_iiif_info_ssm
+      config.show.partials.insert(1, :openseadragon)
     end
 
   end

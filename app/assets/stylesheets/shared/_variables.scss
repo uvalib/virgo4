@@ -11,22 +11,15 @@ $logo-image: false;
 // Blacklight 7 transition
 //=============================================================================
 
-// These outmoded definitions are required by blacklight_marc.scss
-$padding-xs-horizontal: $spacer / 2;
-$nav-link-padding:      $nav-link-padding-y;
+// Outmoded Bootstrap definitions are required by Blacklight or its gems.
+// Note that the definitions here are specifically redefinitions in terms of
+// current Bootstrap 4 values.  For Bootstrap 3 transitional values see:
+// @see vendor/assets/stylesheets/bootstrap-sprockets.scss
+
+$nav-link-padding: $nav-link-padding-y;
 
 //=============================================================================
 // Common settings
 //=============================================================================
 
-$font-size-base:    1rem !default;
-
-$font-size-large:   ceil(($font-size-base * 1.25)) !default;    // ~18px
-$font-size-small:   ceil(($font-size-base * 0.85)) !default;    // ~12px
-
-$font-size-h1:      floor(($font-size-base * 2.0))  !default;   // ~28px
-$font-size-h2:      floor(($font-size-base * 1.75)) !default;   // ~24.5px
-$font-size-h3:      ceil(($font-size-base * 1.5))   !default;   // ~21px
-$font-size-h4:      $font-size-large !default;                  // ~18px
-$font-size-h5:      $font-size-base  !default;                  // ~14px
-$font-size-h6:      $font-size-small !default;                  // ~12px
+// TBD

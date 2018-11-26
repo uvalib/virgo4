@@ -1,0 +1,8 @@
+<%# app/views/catalog/_document_gallery.html.erb -%>
+<%-
+  # Container for all documents in gallery view.
+  docs = documents ||= @documents
+-%>
+<div id="documents" class="row gallery">
+  <%= render_gallery_collection(docs) %>
+</div>

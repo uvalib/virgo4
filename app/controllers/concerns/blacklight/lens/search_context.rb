@@ -30,7 +30,7 @@ module Blacklight::Lens::SearchContext
   #
   PARAM_NOT_PERSISTED = %i(
     commit counter total search_id page per_page
-    sort
+    sort view
   ).freeze
 
   # A list of query parameters that are persisted as part of a search but do

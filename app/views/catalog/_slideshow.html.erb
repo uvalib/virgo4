@@ -1,0 +1,27 @@
+<%# app/views/catalog/_slideshow.html.erb -%>
+<%-
+  docs = documents ||= @documents
+  return unless docs.present?
+
+  template_opts = {
+    collection: docs,
+    as:         :document,
+    partial:    'index_slideshow',
+    locals:     { total: docs.size }
+  }
+  reverse_icon = blacklight_icon('chevron-left')
+  forward_icon = blacklight_icon('chevron-right')
+-%>
+<div id="slideshow" class="slideshow-presenter">
+  <%# === Wrapper for slides === -%>
+  <div class="slideshow-inner">
+    <%= render template_opts %>
+  </div>
+  <%# === Controls === -%>
+  <a class="left carousel-control-prev" href="#slideshow" data-slide="prev">
+    <%= reverse_icon %>
+  </a>
+  <a class="right carousel-control-next" href="#slideshow" data-slide="next">
+    <%= forward_icon %>
+  </a>
+</div>

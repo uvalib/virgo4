@@ -33,6 +33,14 @@
 //= require blacklight/core
 //= require blacklight_advanced_search
 //
+//  Blacklight::Gallery
+//
+//= require blacklight_gallery/default
+//= require openseadragon/openseadragon
+//= require openseadragon/rails
+//
 //  Local sources
 //
+//= require_tree ./shared
+//= require_tree ./feature
 //= require_tree .

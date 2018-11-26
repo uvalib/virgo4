@@ -1,0 +1,41 @@
+// vendor/assets/stylesheets/bootstrap-sprockets/_variables.scss
+//
+// This contains values cherry-picked from
+// bootstrap-sass/assets/stylesheets/bootstrap/_variables.scss to ease the
+// transition to Blacklight 7 using Bootstrap 4.
+
+$bootstrap-sass-asset-helper: false !default;
+
+//== Colors
+
+$gray-base:                 #000 !default;
+$gray-lighter:              lighten($gray-base, 93.5%) !default; // #eee
+
+//== Iconography
+
+// If $bootstrap-sass-asset-helper if used, provide path relative to the assets
+// load path.  This is because some asset helpers, such as Sprockets, do not
+// work with file-relative paths.
+$icon-font-path:
+    if($bootstrap-sass-asset-helper,
+        "bootstrap/",
+        "../fonts/bootstrap/"
+    ) !default;
+
+//** File name for all font files.
+$icon-font-name:            "glyphicons-halflings-regular" !default;
+//** Element ID within SVG icon file.
+$icon-font-svg-id:          "glyphicons_halflingsregular" !default;
+
+//== Components
+
+$padding-large-vertical:    10px !default;
+$padding-xs-horizontal:     5px !default;
+
+//== Navs
+
+$nav-link-padding:          10px 15px !default;
+
+//== Carousel
+
+$carousel-text-shadow:      0 1px 2px rgba(0,0,0,.6) !default;

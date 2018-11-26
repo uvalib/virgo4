@@ -1,0 +1,21 @@
+# config/locales/blacklight-gallery.en.yml
+
+en:
+
+  blacklight:
+
+    search:
+      view:
+        gallery:          'Gallery'
+        slideshow:        'Slideshow'
+        masonry:          'Masonry'
+
+  blacklight_gallery:
+
+    catalog:
+      grid_slideshow:
+        missing_image:    'No image available'
+      document_slideshow:
+        header:           'Select an image to start the slideshow'
+      modal_slideshow:
+        counter:          '%{counter} of %{count}'

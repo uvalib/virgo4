@@ -3,3 +3,7 @@
 @import 'blacklight/blacklight';
 @import 'blacklight_marc';
 @import 'blacklight_advanced_search';
+
+// Blacklight::Gallery
+@import 'blacklight_gallery/default';
+@import 'openseadragon/openseadragon';

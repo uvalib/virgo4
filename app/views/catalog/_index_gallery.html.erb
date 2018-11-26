@@ -1,0 +1,22 @@
+<%# app/views/catalog/_index_gallery.html.erb -%>
+<%-
+  view             ||= :gallery
+  doc = document   ||= @document
+  document_counter ||= nil
+  return unless doc.present? && document_counter.present?
+
+  counter = document_counter_with_offset(document_counter)
+  image   = thumbnail_presenter(doc).thumbnail_tag({}, counter: counter)
+
+  partials = blacklight_config.view_config(view).partials.presence
+  partials &&=
+    render_document_partials(doc, partials, document_counter: document_counter)
+-%>
+<div class="<%= view -%> document col-xs-6 col-md-3">
+  <div class="thumbnail">
+    <%= image %>
+    <div class="caption">
+      <%= partials %>
+    </div>
+  </div>
+</div>

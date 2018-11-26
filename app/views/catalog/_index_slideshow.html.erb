@@ -1,0 +1,33 @@
+<%# app/views/catalog/_index_slideshow.html.erb -%>
+<%-
+  doc = document   ||= @document
+  document_counter ||= nil
+  total            ||= 1
+  presenter        ||= doc && thumbnail_presenter(doc)
+
+  return unless document_counter.present? && presenter&.exists?
+
+  css_class =
+    css_classes(css_class ||= nil) { |classes|
+      classes << 'item'
+      classes << 'active' if document_counter.zero?
+    }
+
+  image   = presenter.thumbnail_tag({}, suppress_link: true)
+
+  field   = document_show_link_field(doc)
+  caption = index_presenter(doc).field_value(field)
+
+  n_of_m  = t(
+    'blacklight_gallery.catalog.modal_slideshow.counter',
+    counter:  document_counter + 1,
+    count:    total
+  )
+-%>
+<div class="<%= css_class -%>">
+  <div class="frame">
+    <%= image %>
+    <div class="caption"><%= caption -%></div>
+    <span class="counter"><%= n_of_m -%></span>
+  </div>
+</div>

@@ -55,8 +55,8 @@ module BlacklightAdvancedSearch::AdvancedSearchBuilderExt
     qp = blacklight_config.advanced_search[:query_parser]
     node = ParsingNesting::Tree.parse(q, qp)
     adv_search_params = node.to_single_query_params(solr_local_params)
-    BlacklightAdvancedSearch.deep_merge!(solr_parameters, solr_direct_params)
-    BlacklightAdvancedSearch.deep_merge!(solr_parameters, adv_search_params)
+    BlacklightAdvancedSearch.deep_merge(solr_parameters, solr_direct_params)
+    BlacklightAdvancedSearch.deep_merge(solr_parameters, adv_search_params)
 
   rescue *PARSLET_FAILED_EXCEPTIONS_COPY
     # Do nothing, don't merge our input in, keep basic search.

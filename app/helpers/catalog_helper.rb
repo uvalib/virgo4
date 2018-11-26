@@ -90,81 +90,26 @@ module CatalogHelper
     render_template('show_main_content', locals)
   end
 
-=begin # TODO: ...
-  # Does the document have a thumbnail to render?
+  # Render the view type icon for the results view picker.
   #
-  # @param [Blacklight::Document, nil] doc
+  # @param [String] view
   #
-  # This method overrides:
-  # @see Blacklight::CatalogHelperBehavior#has_thumbnail?
-  #
-  def has_thumbnail?(doc = nil)
-    doc ||= @document
-    return unless doc.is_a?(Blacklight::Document)
-    view_cfg = index_view_config(doc)
-    view_cfg.thumbnail_method.present? || doc.has?(view_cfg.thumbnail_field)
-  end
-=end
-
-=begin # TODO: ...
-  # Render the thumbnail, if available, for a document and link it to the
-  # document record.
-  #
-  # @param [Blacklight::Document]  doc          Default: @document.
-  # @param [Hash, nil]             image_opt    For #image_tag.
-  # @param [Hash, FalseClass, nil] url_opt      For #link_to_document.
-  #
-  # @options url_opt [Boolean] :suppress_link   If *true* then just show the
-  #                                               thumbnail image.
-  #
-  # @return [ActiveSupport::SafeBuffer, String, nil]
+  # @return [String]
   #
   # This method overrides:
-  # @see Blacklight::CatalogHelperBehavior#render_thumbnail_tag
+  # @see Blacklight::CatalogHelperBehavior#render_view_type_group_icon
   #
-  def render_thumbnail_tag(doc = nil, image_opt = nil, url_opt = nil)
-    doc ||= @document
-    return unless doc.is_a?(Blacklight::Document)
-    image_opt ||= {}
-    url_opt =
-      if url_opt.is_a?(FalseClass)
-        Deprecation.warn(self,
-                         'passing false as the second argument to render_thumbnail_tag is ' \
-          'deprecated. Use suppress_link: true instead. This behavior will ' \
-          'be removed in Blacklight 7'
-        )
-        { suppress_link: true }
-      elsif url_opt.is_a?(Hash)
-        url_opt.dup
-      end
-    url_opt ||= {}
-    image =
-      if (method = index_view_config(doc).thumbnail_method)
-        send(method, doc, image_opt)
-      elsif (url = thumbnail_url(doc))
-        image_tag(url, image_opt)
-      end
-    suppress_link = url_opt.delete(:suppress_link) || image.blank?
-    suppress_link ? image : link_to_document(doc, image, url_opt)
+  # == Implementation Notes
+  # If there is no SVG icon for the view, this method falls back on the logic
+  # of the deprecated #default_view_type_group_icon_classes method to construct
+  # a glyph.  (The method itself is not called to avoid deprecation warnings.)
+  #
+  def render_view_type_group_icon(view)
+    blacklight_icon(view, raise: true)
+  rescue Blacklight::Exceptions::IconNotFound
+    view = view.to_s.parameterize
+    content_tag(:span, '', class: "glyphicon-#{view} view-icon-#{view}")
   end
-=end
-
-=begin # TODO: ...
-  # Get the URL to a document's thumbnail image.
-  #
-  # @param [Blacklight::Document, nil] doc    Default: @document.
-  #
-  # @return [String, nil]
-  #
-  # This method overrides:
-  # @see Blacklight::CatalogHelperBehavior#thumbnail_url
-  #
-  def thumbnail_url(doc = nil)
-    doc ||= @document
-    return unless doc.is_a?(Blacklight::Document)
-    doc.first(index_view_config(doc).thumbnail_field)
-  end
-=end
 
   # current_bookmarks
   #

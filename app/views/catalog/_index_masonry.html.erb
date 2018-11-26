@@ -1,0 +1,9 @@
+<%# app/views/catalog/_index_masonry.html.erb -%>
+<%-
+  template_opts = {
+    view:             :masonry,
+    document:         (document ||= @document),
+    document_counter: (document_counter ||= nil)
+  }
+-%>
+<%= render 'index_gallery', template_opts %>

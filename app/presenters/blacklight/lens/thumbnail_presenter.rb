@@ -70,7 +70,7 @@ module Blacklight::Lens
     # @Blacklight::ThumbnailPresenter#default_thumbnail
     #
     def default_thumbnail
-      DEFAULT_THUMBNAIL
+      view_config.default_thumbnail || DEFAULT_THUMBNAIL
     end
 
   end

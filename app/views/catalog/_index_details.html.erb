@@ -1,0 +1,13 @@
+<%# app/views/catalog/_index_details.html.erb -%>
+<%-
+  # Item details displayed in Blacklight::Gallery popups.
+  doc = document   ||= @document
+  document_counter ||= nil
+  return unless doc.present? && document_counter.present?
+
+  template_opt = { document: doc, document_counter: document_counter }
+-%>
+<div class="index-details">
+  <%= render 'index_header', template_opt %>
+  <%= render 'index', template_opt %>
+</div>

@@ -1,0 +1,12 @@
+// vendor/assets/stylesheets/bootstrap-sprockets.scss
+//
+// This was created to ease the transition to Blacklight 7 using Bootstrap 4.
+// Also, this satisfies blacklight_gallery/default.scss, which expects to be
+// able to import this by name.
+//
+// Bootstrap 4 has eliminated glyphicons, however Blacklight and a number of
+// related gems still reference them.
+
+@import "bootstrap-sprockets/bootstrap-sprockets";
+@import "bootstrap-sprockets/variables";
+@import "bootstrap-sprockets/glyphicons";

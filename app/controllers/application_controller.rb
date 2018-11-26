@@ -17,6 +17,9 @@ class ApplicationController < ActionController::Base
   include RescueConcern
   include SessionConcern
 
+  # For Blacklight::Gallery
+  helper Openseadragon::OpenseadragonHelper
+
   protect_from_forgery with: :exception
 
   add_flash_types :error, :success
