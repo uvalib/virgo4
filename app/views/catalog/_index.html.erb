@@ -1,21 +1,21 @@
-<%# app/views/catalog/_show.html.erb -%>
+<%# app/views/catalog/_index.html.erb -%>
 <%-
-  # Default partial to display Blacklight::Document item details.
+  # Default partial to display a Blacklight::Document in search results.
   doc = document ||= @document
   return unless doc.present?
 
   # :dt_width may be passed in to adjust the relative width of the columns.
-  dt_width ||= 4
+  dt_width ||= 3
   dd_width = 12 - dt_width
 
-  doc_presenter = show_presenter(doc)
+  doc_presenter = index_presenter(doc)
 
 -%>
-<dl class="row dl-invert document-metadata">
+<dl class="document-metadata dl-invert row">
   <%- doc_presenter.fields_to_render.each do |field_name, field_config| -%>
     <%- field_class = "blacklight-#{field_name.parameterize}" -%>
     <dt class="<%= field_class -%> col-md-<%= dt_width -%>">
-      <%= render_document_show_field_label(doc, field: field_name) %>
+      <%= render_index_field_label(doc, field: field_name) %>
     </dt>
     <dd class="<%= field_class -%> col-md-<%= dd_width -%>">
       <%= doc_presenter.field_value(field_config) %>

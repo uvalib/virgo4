@@ -8,6 +8,6 @@
   template_opt = { document: doc, document_counter: document_counter }
 -%>
 <div class="index-details">
-  <%= render 'index_header', template_opt %>
-  <%= render 'index', template_opt %>
+  <%= render 'index_header', template_opt.merge(actions_width: 0) %>
+  <%= render 'index',        template_opt.merge(dt_width: 4) %>
 </div>

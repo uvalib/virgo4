@@ -32,7 +32,7 @@
 
     display:        flex;
     flex-direction: column;
-    width:          166%;
+    width:          175%;
     margin-top:     -0.66rem;
     margin-left:    -0.66rem;
     padding:        0.5rem;
@@ -67,6 +67,19 @@
         dt, dd {
             padding:    0;
             text-align: left;
+        }
+
+        .break-all {
+            word-break: break-all;
+        }
+
+        // TODO: Replace with server-side logic.
+        // Ideally the server side should be able to add the 'break-all' class
+        // only in the cases where the URL label is the URL itself.  (If the
+        // link label is text, then it shouldn't need this since there will be
+        // spaces to break on.)
+        dd.blacklight-url_a {
+            @extend .break-all;
         }
     }
 }

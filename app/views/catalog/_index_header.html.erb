@@ -8,28 +8,67 @@
 
   # Position of the document in search results.
   document_counter ||= -1
-  counter = document_counter_with_offset(document_counter)
-
-  # Main title container for do partial view.
-  title = link_to_document(doc, counter: counter)
+  document_counter = document_counter_with_offset(document_counter)
 
   # Format counter number that comes before the entry title.
-  counter &&= t('blacklight.search.documents.counter', counter: counter)
-  counter &&= content_tag(:span, counter, class: 'document-counter')
+  #
+  # The caller may provide additional CSS classes to the counter element via
+  # the :counter_class option or eliminate the element with
+  # "counter_class: :none".
+  #
+  counter_class ||= nil
+  counter =
+    unless counter_class == :none
+      counter_class =
+        css_classes(counter_class) { |classes| classes << 'document-counter' }
+      content_tag(:span, class: counter_class) {
+        t('blacklight.search.documents.counter', counter: document_counter)
+      }
+    end
 
-  # The caller may provide additional CSS classes via the :css_class option.
-  css_class =
-    css_classes(css_class ||= nil) { |classes|
-      classes << 'index-document-functions col-sm-3 col-lg-2'
-    }
+  # Bookmark functions for items/docs.
+  #
+  # The caller may provide additional CSS classes to the document actions
+  # element via the :actions_class option or eliminate the element with
+  # "actions_class: :none" or "actions_width: 0".
+  #
+  actions_class ||= nil
+  actions_width ||= 3
+  document_actions =
+    unless (actions_class == :none) || actions_width.zero?
+      actions_class =
+        css_classes(actions_class) { |classes|
+          classes << 'index-document-functions'
+          classes << "col-sm-#{actions_width}"
+          classes << "col-lg-#{actions_width - 1}"
+        }
+      render_index_doc_actions(doc, wrapping_class: actions_class)
+    end
 
-  # Bookmark functions for items/docs; if present, the width of the entry is
-  # reduced to make room for them.
-  document_actions = render_index_doc_actions(doc, wrapping_class: css_class)
-  width = document_actions.present? ? 'col-sm-9 col-lg-10' : 'col-md-12'
+  # Main title container for document partial.
+  #
+  # The caller may provide additional CSS classes to the title via the
+  # :title_class option.  If document action(s) are present, the width of the
+  # title is reduced to make room for them.
+  #
+  title_class ||= nil
+  title_class =
+    unless title_class == :none
+      css_classes(title_class) { |classes|
+        if document_actions.present?
+          title_width = 12 - actions_width
+          classes << "col-sm-#{title_width}"
+          classes << "col-lg-#{title_width + 1}"
+        else
+          classes << 'col-md-12'
+        end
+      }
+    end
+  title = link_to_document(doc, counter: document_counter)
+
 -%>
 <div class="documentHeader row">
-  <h3 class="index_title document-title-heading <%= width %>">
+  <h3 class="index_title document-title-heading <%= title_class %>">
     <%= counter %>
     <%= title %>
   </h3>
