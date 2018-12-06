@@ -1,0 +1,29 @@
+<%# app/views/about/_log_controls.html.erb -%>
+<%-
+  # Controls for the log file viewer.
+  return unless authorized?
+  log ||= "#{Rails.env} Rails log"
+  controls = {
+    Refresh: {
+      action:         'log',
+      form_class:     'log-button refresh',
+      title:          "Get the current end of the #{log}",
+      method:         'get'
+    },
+    Wipe: {
+      action:         'log_wipe',
+      form_class:     'log-button wipe',
+      title:          "Clear the #{log} - for emergencies only",
+      method:         'delete',
+      'data-confirm': "Are you sure you want to clear the #{log}?",
+    }
+  }.compact
+-%>
+
+<li class="about-sidebar-link log-controls">
+  <%- controls.each_pair do |label, opt| -%>
+    <%- options      = opt.slice(:action) -%>
+    <%- html_options = opt.except(*options.keys) -%>
+    <%= button_to label, options, html_options %>
+  <%- end -%>
+</li>

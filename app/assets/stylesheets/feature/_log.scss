@@ -1,0 +1,169 @@
+// app/assets/stylesheets/feature/_log.scss
+
+//=============================================================================
+// ANSI colors
+//
+// These classes are associated with ANSI terminal escape sequences like the
+// ones that appear in the log files.
+//
+// @see ApplicationHelper#colorize_lines
+//=============================================================================
+
+// Font styles
+
+.c0m { // All attributes off
+    font-weight:      inherit;
+    font-style:       inherit;
+    text-decoration:  inherit;
+    color:            inherit;
+    background-color: inherit;
+}
+
+.c1m    { font-weight:     bold; }                      // Bold
+.c2m    { font-weight:     lighter; }                   // Faint
+.c3m    { font-style:      italic; }                    // Italic
+.c4m    { text-decoration: underline; }                 // Underline
+.c5m    { @extend .c1m; }                               // Slow blink
+.c6m    { @extend .c1m; }                               // Rapid blink
+.c7m    { color: $body-bg; background-color: $body-color; } // Reverse video
+.c8m    { color:           transparent; }               // Conceal
+.c9m    { text-decoration: line-through; }              // Crossed-out
+.c10m   { font:            inherit; }                   // Primary font
+.c11m, .c12m, .c13m, .c14m,
+.c15m, .c16m, .c17m, .c18m, .c19m { }                   // Alternate fonts
+.c20m   { }                                             // Fraktur
+.c21m   { text-decoration: double underline; }          // Double underline
+.c22m   { font-weight:     normal; }                    // Normal intensity
+.c23m   { font-style:      normal; }                    // Normal style
+.c24m   { text-decoration: none; }                      // Underline off
+.c25m   { @extend .c22m; }                              // Blink off
+.c27m   { color: inherit; background-color: inherit; }  // Inverse off
+.c28m   { color:           inherit; }                   // Reveal
+.c29m   { text-decoration: inherit; }                   // Not crossed-out
+
+// Normal foreground colors
+
+.c30m   { color: black; }                               // black    \e[30m
+.c31m   { color: red; }                                 // red      \e[31m
+.c32m   { color: green; }                               // green    \e[32m
+.c33m   { color: darken(yellow, 20%); }                 // yellow   \e[33m
+.c34m   { color: blue; }                                // blue     \e[34m
+.c35m   { color: magenta; }                             // magenta  \e[35m
+.c36m   { color: darken(cyan, 20%); }                   // cyan     \e[36m
+.c37m   { color: lightgray; }                           // white    \e[37m
+.c38m   { }                                             // set foreground
+.c39m   { color: unset; }                               // default foreground
+
+// "Bright" foreground colors
+
+.c30_1m { @extend .c1m; @extend .c30m; }                // black    \e[1;30m
+.c31_1m { @extend .c1m; @extend .c31m; }                // red      \e[1;31m
+.c32_1m { @extend .c1m; @extend .c32m; }                // green    \e[1;32m
+.c33_1m { @extend .c1m; @extend .c33m; }                // yellow   \e[1;33m
+.c34_1m { @extend .c1m; @extend .c34m; }                // blue     \e[1;34m
+.c35_1m { @extend .c1m; @extend .c35m; }                // magenta  \e[1;35m
+.c36_1m { @extend .c1m; @extend .c36m; }                // cyan     \e[1;36m
+.c37_1m { @extend .c1m; @extend .c37m; }                // white    \e[1;37m
+
+// Normal background colors
+
+.c40m   { background-color: lighten(black,   40%); }    // black    \e[40m
+.c41m   { background-color: lighten(red,     40%); }    // red      \e[41m
+.c42m   { background-color: lighten(green,   40%); }    // green    \e[42m
+.c43m   { background-color: lighten(yellow,  40%); }    // yellow   \e[43m
+.c44m   { background-color: lighten(blue,    40%); }    // blue     \e[44m
+.c45m   { background-color: lighten(magenta, 40%); }    // magenta  \e[45m
+.c46m   { background-color: lighten(cyan,    40%); }    // cyan     \e[46m
+.c47m   { background-color: lighten(gray,    40%); }    // white    \e[47m
+.c48m   { }                                             // set background
+.c49m   { background-color: unset; }                    // default background
+
+// "Bright" background colors
+
+.c40_1m { background-color: black; }                    // black    \e[1;40m
+.c41_1m { background-color: red; }                      // red      \e[1;41m
+.c42_1m { background-color: green; }                    // green    \e[1;42m
+.c43_1m { background-color: yellow; }                   // yellow   \e[1;43m
+.c44_1m { background-color: blue; }                     // blue     \e[1;44m
+.c45_1m { background-color: magenta; }                  // magenta  \e[1;45m
+.c46_1m { background-color: cyan; }                     // cyan     \e[1;46m
+.c47_1m { background-color: ghostwhite; }               // white    \e[1;47m
+
+// Other
+
+.c51m   { border: 1px solid; }                          // Framed
+.c52m   { border: 1px solid; border-radius: 50%; }      // Encircled
+.c53m   { text-decoration: overline; }                  // Overlined
+.c54m   { border: none; }                               // Not framed/encircled
+.c55m   { text-decoration: none; }                      // Not overlined
+
+//=============================================================================
+// Log file viewer
+//=============================================================================
+
+.log-content {
+    display:        flex;
+    flex-direction: row;
+    width:          105%;
+}
+
+.log-scroller {
+
+    display:          block;
+    height:           75vh;
+    padding-left:     0.5rem;
+    font-family:      monospace;
+    white-space:      pre;
+    overflow:         auto;
+    color:            black;
+    background-color: #fdfdfd;
+    border:           1px solid gray;
+    flex:             1 1 auto;
+
+    .log-highlight { @extend .c1m; @extend .c42m; }
+    .log-success   { @extend .c1m; @extend .c46m; }
+    .log-error     { @extend .c1m; @extend .c41m; }
+}
+
+.log-controls {
+
+    display:         flex;
+    flex-direction:  column;
+
+    // For buttons based on <form>, ensure that the focus outline is on the
+    // "button" (<form> element) rather than the "label" (<input> element).
+    .log-button {
+
+        @extend .btn;
+        @extend .btn-secondary;
+
+        &:focus-within {
+            @extend .focus;
+        }
+
+        input[type="submit"] {
+            margin:      0;
+            font-family: sans-serif;
+            color:       inherit;
+            border:      none;
+            background:  inherit;
+            cursor:      inherit;
+
+            &:focus {
+                outline: none;
+            }
+        }
+    }
+
+    .refresh {
+        @extend .btn-info;
+        @extend .glyphicon;
+        @extend .glyphicon-refresh;
+    }
+
+    .wipe {
+        @extend .btn-warning;
+        @extend .glyphicon;
+        @extend .glyphicon-alert;
+    }
+}

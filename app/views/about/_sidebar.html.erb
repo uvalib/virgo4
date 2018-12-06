@@ -6,6 +6,7 @@
     'Library Codes':  about_list_path(:library),
     'Location Codes': about_list_path(:location),
   }
+  pages[:'Rails Log'] = about_log_path if authorized?
 -%>
 
 <%- pages.each_pair do |label, path| -%>
@@ -15,3 +16,5 @@
     <%= link_to(label, path, link_opt) %>
   </li>
 <%- end -%>
+
+<%= render 'about/log_controls' if request.path == about_log_path %>

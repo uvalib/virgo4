@@ -20,6 +20,7 @@ module AboutHelper
 
   include AboutHelper::Internal
   include AboutHelper::List
+  include AboutHelper::Log
 
   # ===========================================================================
   # :section:

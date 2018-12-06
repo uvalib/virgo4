@@ -65,6 +65,53 @@ module AboutConcern
   end
 
   # ===========================================================================
+  # :section: Log
+  # ===========================================================================
+
+  public
+
+  # Return an HTTP error response.
+  #
+  # @param [Symbol, Array<String>] arg
+  # @param [Hash, nil]             opt
+  #
+  # @return [void]
+  #
+  def respond_with(arg, opt = nil)
+    opt ||= {}
+    if arg.is_a?(Symbol)
+      opt.reverse_merge!(layout: false, status: arg)
+      msg = error_message(arg)
+      respond_to do |format|
+        format.html { opt.merge!(html: msg) }
+        format.json { opt.merge!(json: msg.to_json) }
+        format.xml  { opt.merge!(xml:  { error: msg }.to_xml) }
+      end
+    else
+      opt = opt.dup
+      @lines = Array.wrap(arg)
+      respond_to do |format|
+        format.html { opt.merge!(layout: determine_layout) }
+        format.json { opt.merge!(json:   decolorize_lines(@lines).to_json) }
+        format.xml  { opt.merge!(xml:    decolorize_lines(@lines).to_xml) }
+      end
+    end
+    render opt
+  end
+
+  # Translate a symbolic error code into an error message.
+  #
+  # @param [Symbol] code
+  #
+  # @return [String]
+  #
+  def error_message(code)
+    code    = Rack::Utils::status_code(code)
+    message = Rack::Utils::HTTP_STATUS_CODES[code]
+    "#{code} #{message}"
+  end
+
+  # ===========================================================================
   # :section:
   # ===========================================================================
 

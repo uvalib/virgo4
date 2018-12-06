@@ -130,7 +130,9 @@ Rails.application.routes.draw do
 
   resources :about, only: [:index]
 
-  get    'about/list/:topic', to: 'about#list', as: 'about_list'
+  get    'about/log',         to: 'about#log',      as: 'about_log'
+  delete 'about/log',         to: 'about#log_wipe', as: 'about_log_wipe'
+  get    'about/list/:topic', to: 'about#list',     as: 'about_list'
   get    'about/:topic',      to: 'about#list'
 
   # ===========================================================================

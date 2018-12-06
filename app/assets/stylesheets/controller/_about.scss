@@ -41,6 +41,23 @@ body.blacklight-about {
         }
     }
 
+    .log-controls {
+
+        margin: 0;
+        border: none;
+
+        .log-button {
+
+            display:         inline-flex;
+            margin-bottom:   $sidebar-separation;
+            justify-content: left;
+
+            &:before {
+                line-height: 1.5;
+            }
+        }
+    }
+
     //=========================================================================
     // About pages
     //=========================================================================
@@ -96,5 +113,13 @@ body.blacklight-about {
     .about-topic-table {
         width: -moz-available;
         width: available;
+    }
+
+    //=========================================================================
+    // About log page
+    //=========================================================================
+
+    .log-scroller {
+        // TODO: ?
     }
 }
