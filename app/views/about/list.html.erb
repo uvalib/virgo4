@@ -1,0 +1,23 @@
+<%# app/views/about/list.html.erb -%>
+<%-
+  topic ||= @topic
+  items ||= @topic_list
+
+  title, description, heading_row, rows = topic_components(topic, items)
+
+  page_title ||= t('blacklight.about.library.page_title', default: title)
+
+-%>
+<%= render 'about/common', page_title: page_title %>
+
+<h1 class="about-topic-title"><%= title %></h1>
+<div class="about-topic-description"><%= description %></div>
+
+<table class="about-topic-table">
+  <thead><%= heading_row -%></thead>
+  <tbody>
+    <%- rows.each do |topic_row| -%>
+      <%= topic_row %>
+    <%- end -%>
+  </tbody>
+</table>

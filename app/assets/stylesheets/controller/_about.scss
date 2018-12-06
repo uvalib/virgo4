@@ -1,0 +1,100 @@
+// app/assets/stylesheets/controllers/_about.scss
+
+//=============================================================================
+// About pages
+//=============================================================================
+
+body.blacklight-about {
+
+    $sidebar-width: 2; // columns
+    $content-width: 12 - $sidebar-width;
+
+    $sidebar-separation:  0.25rem;
+    $sidebar-selected-bg: whitesmoke;
+
+    //=========================================================================
+    // Sidebar and page layout
+    //=========================================================================
+
+    #content {
+        @extend .col-md-#{$content-width};
+    }
+
+    .page-sidebar {
+        @extend .col-md-#{$sidebar-width};
+    }
+
+    .about-sidebar-link {
+
+        @extend .card;
+
+        margin-bottom: $sidebar-separation;
+
+        &.disabled {
+            background-color: $sidebar-selected-bg;
+        }
+
+        a {
+            @extend .btn;
+
+            text-align: left;
+        }
+    }
+
+    //=========================================================================
+    // About pages
+    //=========================================================================
+
+    p {
+        margin-bottom: 0.25rem;
+    }
+
+    .featured {
+        background-color: lightcyan;
+    }
+
+    .about-section {
+        margin-top: 2rem;
+    }
+
+    .about-entry {
+        margin-bottom: 0;
+    }
+
+    .about-item {
+        display:     inline-block;
+        font-weight: bold;
+    }
+
+    .about-value {
+
+        display:     inline;
+        margin-left: 0.25rem;
+
+        &:before { content: "= "; }
+    }
+
+    .about-listing {
+        padding:     0.25rem 0.5rem;
+        white-space: pre;
+        overflow:    auto;
+        border:      1px solid black;
+    }
+
+    //=========================================================================
+    // About list pages
+    //=========================================================================
+
+    .about-topic-title {
+        // TODO: ?
+    }
+
+    .about-topic-description {
+        margin-bottom: 1rem;
+    }
+
+    .about-topic-table {
+        width: -moz-available;
+        width: available;
+    }
+}

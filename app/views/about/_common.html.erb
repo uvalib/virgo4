@@ -1,0 +1,14 @@
+<%# app/views/about/_common.html.erb -%>
+<%-
+  # Common elements for all About pages
+
+  page_title ||= t(
+    'blacklight.about.page_title',
+    app:     application_name,
+    default: [:'blacklight.about.title' , 'About']
+  )
+  content_for(:page_title, page_title)
+
+  @sidebar_tab_first = true
+  content_for(:sidebar) { render 'about/sidebar' } unless request.xhr?
+-%>

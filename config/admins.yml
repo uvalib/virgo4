@@ -16,20 +16,37 @@
 # =============================================================================
 # :section: Privilege group 'about'
 #
-# Users who have the privilege to see detail data on the /about page.
+# Users who have the privilege to see internal information on the /about page.
 # =============================================================================
 
 about:
+  cl9eb:  Carla Lee
   cmw5mc: Christopher Welte
   dpg3k:  Dave Goldstein
+  ecr2c:  Ellen Ramsey
+  img7u:  Ivey Glendon
   jgc4q:  Zeke Crater
   jh9xp:  Jill Heinze
   md5wz:  Mike Durbin
+  mhw8m:  Mark Witteman
   mjb7q:  Melinda Baumann
   rmg6f:  Bob Gartland
   rsl6m:  Robin Ruggaber
+  stg2s:  Stan Gunn
+  tcb2e:  Todd Burks
   tss6n:  Tim Stevens
+  vdg8v:  Dave Griles
   xw5d:   Xiaoming Wang
+
+# =============================================================================
+# :section: Privilege group 'log'
+#
+# Users who have the privilege to modify the application log.
+# =============================================================================
+
+log:
+  tss6n:  Tim Stevens
+  rmg6f:  Bob Gartland
 
 # =============================================================================
 # :section: Privilege group 'all'

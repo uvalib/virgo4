@@ -62,6 +62,14 @@ class User < ApplicationRecord
 
   public
 
+  # Virgo 3 expects this as the user's ID.
+  #
+  # @return [String]
+  #
+  def login
+    email.to_s.sub(/@.*/, '')
+  end
+
   # Return the user's bookmarks for the given item(s).
   #
   # @param [Array<Blacklight::Document>] docs

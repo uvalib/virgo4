@@ -1,0 +1,39 @@
+<%# app/views/layouts/blacklight.html.erb -%>
+<%-
+  # Main (index) layout
+  #
+  # This overrides the Blacklight version to support the ability to specify
+  # whether the sidebar comes first in the tab sequence (@sidebar_tab_first).
+  #
+  # When @sidebar_tab_first is set to *true*, the appearance of the layout does
+  # not change, but because the HTML elements are reordered, links in the
+  # sidebar will be earlier in the tab sequence than links in the content.
+  #
+  # Conversely, to change the layout of the sidebar, a template may set
+  # @sidebar_show_last to *true* so that the sidebar appears after the content.
+
+  @sidebar_tab_first ||= false
+  @sidebar_show_last ||= false
+
+  content_for(:content) {
+    if (sidebar = content_for(:sidebar)).present?
+      mc = main_content_classes + ' '
+      mc << (@sidebar_show_last ? 'order-first' : 'order-last')
+      content = content_tag(:section, class: mc, id: 'content') { yield }
+
+      sc = sidebar_classes + ' '
+      sc << (@sidebar_show_last ? 'order-last'  : 'order-first')
+      sidebar = content_tag(:section, class: sc, id: 'sidebar') { sidebar }
+
+      if @sidebar_tab_first
+        sidebar + content
+      else
+        content + sidebar
+      end
+    else
+      content_tag(:section, class: 'col-md-12') { yield }
+    end
+  }
+
+-%>
+<%= render template: 'layouts/blacklight/base' %>
