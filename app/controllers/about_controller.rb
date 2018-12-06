@@ -15,6 +15,12 @@ class AboutController < ApplicationController
   include AboutConcern
 
   # ===========================================================================
+  # :section: Filter actions
+  # ===========================================================================
+
+  before_action :verify_session, only: %i(log log_wipe)
+
+  # ===========================================================================
   # :section:
   # ===========================================================================
 
@@ -42,6 +48,23 @@ class AboutController < ApplicationController
       format.xml  { render xml:  @topic_list.to_xml }
       format.json { render json: @topic_list.to_json }
     end
+  end
+
+  # == GET /about/log
+  # Administrator-only application log viewer.
+  #
+  def log
+    count = default_log_lines(params)
+    lines = get_file_lines(log: true, tail: count)
+    respond_with(lines)
+  end
+
+  # == DELETE /about/log
+  # Administrator-only command to wipe the application log.
+  #
+  def log_wipe
+    lines = wipe_log
+    respond_with(lines, template: 'about/log')
   end
 
 end

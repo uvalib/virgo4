@@ -1,4 +1,4 @@
-// app/assets/feature/gallery.js.erb
+// app/assets/feature/gallery.js
 //
 // Adds functionality to Blacklight::Gallery.
 
