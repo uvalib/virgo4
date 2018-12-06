@@ -1,0 +1,17 @@
+<%# app/views/about/_sidebar.html.erb -%>
+<%-
+  # Controls to select "About" pages inserted into `content_for(:sidebar)`.
+  pages = {
+    'About Virgo':    about_index_path,
+    'Library Codes':  about_list_path(:library),
+    'Location Codes': about_list_path(:location),
+  }
+-%>
+
+<%- pages.each_pair do |label, path| -%>
+  <%- state = ('disabled' if request.path == path) -%>
+  <li class="about-sidebar-link <%= state -%>">
+    <%- link_opt = state ? { class: state, tabindex: -1 } : {} -%>
+    <%= link_to(label, path, link_opt) %>
+  </li>
+<%- end -%>

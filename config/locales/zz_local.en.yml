@@ -11,6 +11,67 @@ en:
     application_name: 'Virgo'
 
     # =========================================================================
+    # About page
+    # =========================================================================
+
+    about:
+
+      title:            'About This Service'
+      page_title:       'About %{app}'
+      error:
+        no_user:        'You must be logged in to see this information'
+        unauthorized:   'You are not authorized for this information.'
+
+      library:
+        label:          'Library Codes'
+        description: >
+          Libraries configured in the Sirsi ILS as reported by the Firehose
+          service.
+        columns:
+          - ID
+          - Code
+          - Name
+          - LEOable
+          - Deliverable
+          - Holdable
+          - Remote
+
+      location:
+        label:          'Location Codes'
+        description: >
+          Locations configured in the Sirsi ILS as reported by the Firehose
+          service.
+        columns:
+          - ID
+          - Code
+          - Name
+
+      property:
+        label:          'Service Execution'
+        env:
+          featured:
+            - _ORIGINAL_GEM_PATH
+            - BUNDLE_BIN_PATH
+            - GEM_HOME
+            - GEM_PATH
+            - gemset
+            - LANG
+            - LANGUAGE
+            - MY_RUBY_HOME
+            - PATH
+            - RUBYLIB
+            - rvm_bin_path
+            - rvm_gemset_name
+            - rvm_path
+            - rvm_ruby_string
+            - rvm_version
+            - TRACE_CONCERNS
+            - TRACE_LOADING
+            - TRACE_NOTIFICATIONS
+            - USER
+
+
+    # =========================================================================
     # FIELD LABELS
     #
     # These labels apply to either the "_facet" or "_display" form of the

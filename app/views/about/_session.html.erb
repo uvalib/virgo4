@@ -1,0 +1,23 @@
+<%# app/views/about/_session.html.erb -%>
+<%-
+  # About session information.
+  missing ||= '&mdash;'.html_safe
+  user    ||= current_user&.login
+
+  #user     += ' (admin)' if user_is_admin?(user) # TODO
+  ip_addr   = get_current_ip
+  true_addr = get_current_ip(true)
+  fake_addr = (ip_addr unless ip_addr == true_addr)
+  true_addr = nil unless fake_addr.present?
+
+  session_items = {
+    'User':              (user || missing),
+    'IP address':        ip_addr,
+    'True IP address':   true_addr,
+    'Forged IP address': fake_addr,
+    'Session ID':        (session[:session_id] || missing)
+  }.compact
+-%>
+
+<h2 class="about-section">Current Session</h2>
+<%= show_entries(session_items) -%>

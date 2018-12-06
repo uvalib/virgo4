@@ -1,0 +1,30 @@
+<%# app/views/about/_internal.html.erb -%>
+<%-
+  # Internal application status information.
+  return unless authorized?
+
+  property_sets = [
+    show_entries(run_values),
+    show_entries(url_values),
+    show_entries(db_values)
+  ]
+-%>
+
+<h2 class="about-section">Execution properties</h2>
+<%- property_sets.each do |property_set| -%>
+  <%= property_set %><br/>
+<%- end -%>
+
+<h2 class="about-section">Params and session</h2>
+<p>
+  <em>Add URL parameter </em>
+  <code>virgo_debug=true</code>
+  <em> to see this information in a panel on every page.</em>
+</p>
+<%= "debug_panel(class: 'debug-panel about')" %><p></p>
+
+<h2 class="about-section">Rails Info</h2>
+<pre class="about-listing"><%= Rails::Info %></pre>
+
+<h2 class="about-section">Environment Variables</h2>
+<%= show_env_values -%>
