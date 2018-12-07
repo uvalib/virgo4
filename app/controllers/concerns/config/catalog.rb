@@ -11,8 +11,6 @@ require_relative '_solr'
 #
 class Config::Catalog < Config::Base
 
-  NON_CATALOG_TYPES = Config::Solr::MUSIC_TYPES + Config::Solr::MUSIC_TYPES
-
   # ===========================================================================
   # :section:
   # ===========================================================================
@@ -35,8 +33,9 @@ class Config::Catalog < Config::Base
         require_relative '_solr_fake'
         ::Config::SolrFake.new(controller)
       end
-    cfg.deep_copy(self).tap do |config|
-      remove_facets!(config, NON_CATALOG_TYPES)
+    cfg.tap do |config|
+      remove_facets!(config, Config::Solr::VIDEO_TYPES)
+      remove_facets!(config, Config::Solr::MUSIC_TYPES)
     end
   end
 

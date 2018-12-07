@@ -64,7 +64,7 @@ module Blacklight::Lens::Document
   # @see Blacklight::Document::Base#hidden?
   #
   def hidden?
-    has?(:shadowed_location_facet, 'HIDDEN')
+    has?(:shadowed_location_f, 'HIDDEN')
   end
 
   # Indicate whether this document can be discovered by user search.
@@ -73,7 +73,7 @@ module Blacklight::Lens::Document
   # @see Blacklight::Document::Base#discoverable?
   #
   def discoverable?
-    !has?(:shadowed_location_facet, 'UNDISCOVERABLE')
+    !has?(:shadowed_location_f, 'UNDISCOVERABLE')
   end
 
   # ===========================================================================

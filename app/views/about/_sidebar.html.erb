@@ -6,7 +6,12 @@
     'Library Codes':  about_list_path(:library),
     'Location Codes': about_list_path(:location),
   }
-  pages[:'Rails Log'] = about_log_path if authorized?
+  if authorized?
+    pages.merge!(
+      'Solr Information': about_solr_path,
+      'Rails Log':        about_log_path
+    )
+  end
 -%>
 
 <%- pages.each_pair do |label, path| -%>

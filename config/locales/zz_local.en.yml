@@ -22,30 +22,6 @@ en:
         no_user:        'You must be logged in to see this information'
         unauthorized:   'You are not authorized for this information.'
 
-      library:
-        label:          'Library Codes'
-        description: >
-          Libraries configured in the Sirsi ILS as reported by the Firehose
-          service.
-        columns:
-          - ID
-          - Code
-          - Name
-          - LEOable
-          - Deliverable
-          - Holdable
-          - Remote
-
-      location:
-        label:          'Location Codes'
-        description: >
-          Locations configured in the Sirsi ILS as reported by the Firehose
-          service.
-        columns:
-          - ID
-          - Code
-          - Name
-
       property:
         label:          'Service Execution'
         env:
@@ -70,6 +46,123 @@ en:
             - TRACE_NOTIFICATIONS
             - USER
 
+      library:
+        label:          'Library Codes'
+        description: >
+          Libraries configured in the Sirsi ILS as reported by the Firehose
+          service.
+        columns:
+          - ID
+          - Code
+          - Name
+          - LEOable
+          - Deliverable
+          - Holdable
+          - Remote
+
+      location:
+        label:          'Location Codes'
+        description: >
+          Locations configured in the Sirsi ILS as reported by the Firehose
+          service.
+        columns:
+          - ID
+          - Code
+          - Name
+
+      log:
+        title:          'Rails %{env} log'
+        label:          'Rails log'
+        description: >
+          The final %{lines} lines of the Rails application log.
+        lines:          1000
+        controls:
+          refresh:
+            label:      'Refresh'
+            tooltip:    'Get the current end of the %{log}'
+          wipe:
+            label:      'Wipe'
+            tooltip:    'Clear the %{log} - for emergencies only'
+            confirm:    'Are you sure you want to clear the %{log}?'
+
+      solr:
+        title:          'Solr Information'
+        description: >
+          Fields defined in the index along with select status information for
+          the Solr application instance.
+
+        fields:
+          label:        'Solr Fields'
+          types:
+            facet:
+              suffix:   '_f'
+            display:
+              suffix:   '_a'
+            sort:
+              suffix:   '_ssort'
+            suggest:
+              suffix:   '_suggest'
+
+        status:
+          label:        'Solr Status'
+          data_template:
+            # === Selected values from #{solr_url}/admin/system
+            admin/system:
+              system:
+                systemLoadAverage:    '-'
+                uptime:               '-'
+                availableProcessors:  '-'
+              core:
+                schema:               '-'
+                host:                 '-'
+                start:                '-'
+                directory:
+                  cwd:                '-'
+                  instance:           '-'
+                  data:               '-'
+                  index:              '-'
+              lucene:
+                solr-spec-version:    '-'
+              jvm:
+                version:              '-'
+                memory:
+                  free:               '-'
+                  total:              '-'
+                  max:                '-'
+                  used:               '-'
+                jmx:
+                  commandLineArgs:    []
+            # === Selected values from #{solr_url}/admin/properties
+            admin/properties:
+              system.properties:
+                file.encoding:        '-'
+                user.name:            '-'
+                user.timezone:        '-'
+                user.home:            '-'
+                user.dir:             '-'
+                solr.solr.home:       '-'
+                solr.install.dir:     '-'
+                solr.default.confdir: '-'
+                solr.log.dir:         '-'
+                jetty.base:           '-'
+                jetty.port:           '-'
+            # === Selected values from #{solr_url}/admin/config
+            config:
+              config:
+                requestHandler:
+                  /select:
+                    defType:          '-'
+                    rows:             '-'
+                    q.alt:            '-'
+                    qf:               '-'
+                    pf:               '-'
+                  /suggest:
+                    defaults:
+                      suggest:        '-'
+                      suggest.count:  '-'
+                    components:       []
+                searchComponent:
+                  suggest:            []
 
     # =========================================================================
     # FIELD LABELS
@@ -106,20 +199,28 @@ en:
       call_number:                      'Call Number'
       call_number_broad:                'Call Number'
       call_number_narrow:               'Call Number Range'
+      cc_type:                          '[cc_type]'
+      cc_uri:                           '[cc_uri]'
       composition_era:                  'Musical Composition Era'
       date_bulk_coverage:               'Date(s)'
+      date_first_indexed:               'Date First Indexed'
       date_indexed:                     'Date Indexed'
+      date_received:                    'Date Received'
+      digital_collection:               'Digital Collection'
       form:                             'Form'
       format:                           'Format'
+      fund_code:                        'Fund Code'
       instrument:                       'Musical Instrument'
       isbn:                             'ISBN'
       issn:                             'ISSN'
       journal_addnl_title:              'Journal Title'
       journal_title:                    'Journal'
+      journal_title_addl:               'Journal (addl)'
       language:                         'Language'
       lc_call_number:                   'LC Call Number'
       lccn:                             'LCCN'
       library:                          'Library'
+      license:                          'License'
       local_notes:                      'Local Note'
       location2:                        'Shelf Location'
       location:                         'Location'
@@ -130,9 +231,11 @@ en:
       pda_coutts_library:               'PDA Library'
       pda_isbn:                         'PDA ISBN'
       published_date:                   'Publication Era'
+      published_daterange:              'Publication Dates'
       region:                           'Geographic Region'
       release:                          'Release'
       reverse_shelfkey:                 'Reverse Shelfkey'
+      rs_uri:                           '[rs_uri]'
       shadowed_location:                'Shadowing'
       shelfkey:                         'Shelfkey'
       source:                           'Source'
@@ -146,11 +249,13 @@ en:
       title_alternate:                  'Alternate Title'
       title_notes:                      'Title Note'
       title_series:                     'Series'
+      title_sub:                        '[title_sub]'
       title_uniform:                    'Uniform Title'
       title_vern:                       'Title' # in the original language
       topic_form_genre:                 'Topic Form Genre'
       url:                              'Access Online'
       url_supp:                         'Related Resource'
+      use:                              'Permissions'
       video_director:                   'Director'
       video_genre:                      'Film Genre'
       video_rating:                     'Rating'
@@ -175,17 +280,14 @@ en:
       created_date:                     '[created_date]'
       datafile_name:                    '[datafile_name]'
       date_coverage:                    'Date'
-      date_first_indexed:               '[date_first_indexed]'
       degree:                           'Degree'
       denomination:                     'Denomination'
       desc_meta_file:                   '[desc_meta]'
       description_note:                 'Description Note'
-      digital_collection:               'Digital Collection'
       doc_type:                         '[doc_type_facet]'
       duration:                         'Duration'
       feature:                          '[feature_facet]'
       full_hierarchy:                   '[full_hierarchy]'
-      fund_code:                        '[fund_code_facet]'
       genre:                            'Genre'
       group:                            'Group'
       hierarchy:                        '[hierarchy_display]'
@@ -225,7 +327,6 @@ en:
       responsibility_statement:         'By'
       rights_wrapper:                   '[rights_wrapper_display]'
       rights_wrapper_url:               '[rights_wrapper_url]'
-      rs_uri:                           '[rs_uri]'
       scope_content:                    '[scope_content]'
       score:                            '[score]'
       signature:                        'Signature'
@@ -235,7 +336,6 @@ en:
       torchbearer:                      '[torchbearer_facet]'
       unit:                             'Unit'
       upc:                              'UPC'
-      use:                              'Permission'
       year:                             'Date'
       year_multisort_i:                 'Year'
 
@@ -529,15 +629,19 @@ en:
 
       field:
         <<:               *METADATA_FIELD_LABELS
+        author:           'Contributor'
 
       facet_field:
         <<:               *FACET_FIELD_LABELS
+        author:           'Contributor'
 
       index_field:
         <<:               *INDEX_FIELD_LABELS
+        author:           'Contributor'
 
       show_field:
         <<:               *SHOW_FIELD_LABELS
+        author:           'Contributor'
 
       search_field:
         <<:               *SEARCH_FIELD_LABELS
@@ -566,15 +670,19 @@ en:
 
       field:
         <<:               *METADATA_FIELD_LABELS
+        author:           'Author/Composer'
 
       facet_field:
         <<:               *FACET_FIELD_LABELS
+        author:           'Author/Composer'
 
       index_field:
         <<:               *INDEX_FIELD_LABELS
+        author:           'Author/Composer'
 
       show_field:
         <<:               *SHOW_FIELD_LABELS
+        author:           'Author/Composer'
 
       search_field:
         <<:               *SEARCH_FIELD_LABELS

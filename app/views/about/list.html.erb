@@ -5,7 +5,7 @@
 
   title, description, heading_row, rows = topic_components(topic, items)
 
-  page_title ||= t('blacklight.about.library.page_title', default: title)
+  page_title ||= t("blacklight.about.#{topic}.page_title", default: title)
 
 -%>
 <%= render 'about/common', page_title: page_title %>

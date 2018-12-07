@@ -31,7 +31,6 @@ class CatalogAdvancedController < BlacklightAdvancedSearch::AdvancedController
         oclc_f
         barcode_f
         date_indexed_f
-        example_pivot_field
         example_query_facet_field
       )
       Config::Base.remove_facets!(config, ignored_facets)

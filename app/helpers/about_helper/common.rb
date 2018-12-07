@@ -30,10 +30,9 @@ module AboutHelper::Common
   # @return [ActiveSupport::SafeBuffer]
   #
   def topic_heading(topic)
-    I18n.t(
-      "blacklight.about.#{topic}.title",
-      default: "#{topic.to_s.humanize.capitalize} Codes"
-    ).html_safe
+    default = "#{topic.to_s.humanize.capitalize} Codes"
+    scope   = "blacklight.about.#{topic}"
+    I18n.t('title', default: [:label, default], scope: scope).html_safe
   end
 
   # Wraps a name-value pair in <span> tags inside a paragraph element.

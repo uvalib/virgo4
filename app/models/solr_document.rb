@@ -82,7 +82,7 @@ class SolrDocument < LensDocument
     #contributor: 'xxx',
     #coverage:    'xxx',
     creator:      'author_a',
-    date:         'published_date',
+    date:         'published_date',  # TODO: 'published_date' || 'published_daterange'
     #description: 'material_type_display',
     identifier:   'id',
     #publisher:   'published_display',

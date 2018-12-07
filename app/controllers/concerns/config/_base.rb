@@ -627,6 +627,20 @@ class Config::Base
 
     public
 
+    # Add facet fields to a configuration.
+    #
+    # @param [Blacklight::Configuration] config
+    # @param [Array<String>]             names
+    #
+    # @return [void]
+    #
+    def add_facets!(config, *names)
+      names.flatten.each do |type|
+        name = type.end_with?('_f') ? type : "#{type}_f"
+        config.add_facet_field(name) unless config.facet_field?(name)
+      end
+    end
+
     # Remove facet fields from a configuration.
     #
     # @param [Blacklight::Configuration] config
@@ -646,7 +660,7 @@ class Config::Base
     # show page fields in item details), but that may change.
     #
     def remove_facets!(config, *names)
-      names = names.flatten.flat_map { |type| %W(#{type} #{type}_f) }.uniq
+      names = names.flatten.map { |t| t.end_with?('_f') ? t : "#{t}_f" }
       config.facet_fields.extract!(*names)
     end
 

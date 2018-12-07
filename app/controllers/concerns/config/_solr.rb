@@ -20,11 +20,9 @@ class Config::Solr < Config::Base
 
   # === Music related (facet) fields ===
   MUSIC_TYPES = %w(
-    composition_era
     instrument
     music_composition_form
-    recording_format
-    recordings_and_scores
+    composition_era
   )
 
   # === Video related (facet) fields ===
@@ -39,7 +37,6 @@ class Config::Solr < Config::Base
 
   # === Catalog-only (facet) fields ===
   CATALOG_TYPES = %w(
-    example_pivot_field
   )
 
   # === Common field values ===
@@ -133,26 +130,32 @@ class Config::Solr < Config::Base
 
       config.add_facet_field 'library_f'
       config.add_facet_field 'format_f'
+      add_facets!(config, VIDEO_TYPES)
       config.add_facet_field 'author_f'
+      add_facets!(config, MUSIC_TYPES)
       config.add_facet_field 'subject_f'
+      config.add_facet_field 'subject_era_f'
+      config.add_facet_field 'digital_collection_f'
       config.add_facet_field 'call_number_broad_f'
       config.add_facet_field 'call_number_narrow_f'
       config.add_facet_field 'language_f'
       config.add_facet_field 'region_f'
       config.add_facet_field 'published_date'
-      config.add_facet_field 'subject_era_f'
-      VIDEO_TYPES.each { |type| config.add_facet_field "#{type}_f" }
-      MUSIC_TYPES.each { |type| config.add_facet_field "#{type}_f" }
+      config.add_facet_field 'use_f'
+      config.add_facet_field 'license_class_f'
       config.add_facet_field 'source_f'
       config.add_facet_field 'location2_f'
       # JSON-only facets
-      config.add_facet_field 'barcode_f',           helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'date_indexed_f',      helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'location_f',          helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'oclc_f',              helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'issn_f',              helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'shadowed_location_f', helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'topic_form_genre_f',  helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'barcode_f',            helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'date_first_indexed_f', helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'date_indexed_f',       helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'date_received_f',      helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'fund_code_f',          helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'location_f',           helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'oclc_f',               helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'issn_f',               helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'shadowed_location_f',  helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'topic_form_genre_f',   helper_method: :raw_value, if: :json_request?
 
       # === Experimental facets
       now = Time.zone.now.year
@@ -162,29 +165,57 @@ class Config::Solr < Config::Base
         years_25: { label: 'within 25 Years', fq: "pub_date:[#{now-25} TO *]" }
       }, label: 'Publication Range'
 
+=begin # NOTE: turning this off for now...
       config.add_facet_field(
         'example_pivot_field',
         label:  'Pivot Field',
         pivot:  %w(format_f language_f),
         unless: :json_request?
       )
+=end
 
       # === Unimplemented facets
+      # config.add_facet_field 'alternate_id_facet'
+      # config.add_facet_field 'anchor_script_facet'
+      # config.add_facet_field 'aspace_version_facet'
+      # config.add_facet_field 'author_prev_facet'
+      # config.add_facet_field 'author_sort_facet'
+      # config.add_facet_field 'belongs_to_facet'
+      # config.add_facet_field 'book_plate_facet'
       # config.add_facet_field 'call_number_facet'
       # config.add_facet_field 'category_facet'
       # config.add_facet_field 'collection_facet'
-      # config.add_facet_field 'date_first_indexed_facet'
-      # config.add_facet_field 'date_received_facet'
-      # config.add_facet_field 'digital_collection_f'
-      # config.add_facet_field 'fund_code_facet'
+      # config.add_facet_field 'content_model_facet'
+      # config.add_facet_field 'content_type_facet'
+      # config.add_facet_field 'feature_facet'
+      # config.add_facet_field 'format_diff_facet'
+      # config.add_facet_field 'format_extra_facet'
+      # config.add_facet_field 'format_old_facet'
+      # config.add_facet_field 'format_orig_facet'
+      # config.add_facet_field 'genre_facet'
       # config.add_facet_field 'group_facet'
-      # config.add_facet_field 'license_class_facet'
-      # config.add_facet_field 'location_facet'
+      # config.add_facet_field 'guide_book_facet'
+      # config.add_facet_field 'has_optional_facet'
+      # config.add_facet_field 'hierarchy_level_facet'
+      # config.add_facet_field 'libloctype_facet'
+      # config.add_facet_field 'media_retrieval_id_facet'
       # config.add_facet_field 'ml_number_facet'
-      # config.add_facet_field 'series_title_f'
+      # config.add_facet_field 'music_catagory_facet'
+      # config.add_facet_field 'music_composition_era_facet'
+      # config.add_facet_field 'policy_facet'
+      # config.add_facet_field 'ports_of_call_facet'
+      # config.add_facet_field 'published_date_display'
+      # config.add_facet_field 'recording_format_facet'
+      # config.add_facet_field 'recording_type_facet'
+      # config.add_facet_field 'recordings_and_scores_facet'
+      # config.add_facet_field 'released_facet'
+      # config.add_facet_field 'series_title_facet'
       # config.add_facet_field 'signature_facet'
       # config.add_facet_field 'torchbearer_facet'
-      # config.add_facet_field 'use_facet'
+      # config.add_facet_field 'video_director_facet'
+      # config.add_facet_field 'video_genre_facet'
+      # config.add_facet_field 'video_rating_facet'
+      # config.add_facet_field 'year_facet'
       # config.add_facet_field 'year_multisort_i'
 
       # Set labels from locale for this lens and supply options that apply to
@@ -197,7 +228,7 @@ class Config::Solr < Config::Base
             when 'call_number_broad_f'  then 15
             when 'digital_collection_f' then 10
             when 'library_f'            then -1 # Show all libraries.
-            when 'series_title_f'       then 15
+            when 'title_series_f'       then 15 # NOTE: not in index
             else                             20
           end
 
@@ -217,7 +248,7 @@ class Config::Solr < Config::Base
             when 'region_f'             then "\x20".."\x7E"
             when 'subject_f'            then "\x20".."\x7E"
             when 'topic_form_genre_f'   then "\x20".."\x7E"
-            when 'year_multisort_i'     then 0..9
+            when 'year_multisort_i'     then 0..9 # NOTE: not in index
             else                             'A'..'Z'
           end
 
@@ -262,12 +293,13 @@ class Config::Solr < Config::Base
       config.add_index_field 'title_a',              helper_method: :raw_value, if: :json_request?
       config.add_index_field 'subtitle_a',           helper_method: :raw_value, if: :json_request?
       config.add_index_field 'title_vern_a',         helper_method: :raw_value, if: :json_request?
-      config.add_index_field 'subtitle_vern_a',      helper_method: :raw_value, if: :json_request?
+      config.add_index_field 'subtitle_vern_a',      helper_method: :raw_value, if: :json_request? # NOTE: not in index
       config.add_index_field 'format_a',             helper_method: :format_facet_label
       config.add_index_field 'author_vern_a'
       config.add_index_field 'author_a'
       config.add_index_field 'language_a'
       config.add_index_field 'published_date'
+      config.add_index_field 'published_daterange'
       config.add_index_field 'digital_collection_a'
       config.add_index_field 'library_a'
       config.add_index_field 'location_a'
@@ -295,7 +327,7 @@ class Config::Solr < Config::Base
       config.add_show_field 'title_a',               helper_method: :raw_value, if: :json_request?
       config.add_show_field 'title_vern_a',          helper_method: :raw_value, if: :json_request?
       config.add_show_field 'subtitle_a',            helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'subtitle_vern_a',       helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'subtitle_vern_a',       helper_method: :raw_value, if: :json_request? # NOTE: not in index
       config.add_show_field 'author_a',              helper_method: :raw_value, if: :json_request?
       config.add_show_field 'author_vern_a',         helper_method: :raw_value, if: :json_request?
       config.add_show_field 'author_added_entry_a'
@@ -307,8 +339,11 @@ class Config::Solr < Config::Base
       config.add_show_field 'title_added_entry_a'
       config.add_show_field 'title_alternate_a'
       config.add_show_field 'journal_title_a'
+      config.add_show_field 'journal_title_addl_a'
       config.add_show_field 'journal_addnl_title_a'
       config.add_show_field 'published_date'
+      config.add_show_field 'published_daterange'
+      config.add_show_field 'date_coverage_a'
       config.add_show_field 'date_bulk_coverage_a'
       config.add_show_field 'composition_era_a'
       config.add_show_field 'music_composition_form_a'
@@ -328,6 +363,7 @@ class Config::Solr < Config::Base
       config.add_show_field 'lccn_a'
       config.add_show_field 'oclc_t'
       config.add_show_field 'region_a'
+      config.add_show_field 'digital_collection_a'
       config.add_show_field 'subject_a'
       config.add_show_field 'subject_era_a'
       config.add_show_field 'subject_summary_a'
@@ -336,12 +372,16 @@ class Config::Solr < Config::Base
       config.add_show_field 'local_notes_a'
       config.add_show_field 'url_a',                 helper_method: :url_link
       config.add_show_field 'url_supp_a',            helper_method: :url_link
-      config.add_show_field 'location'
       config.add_show_field 'pda_catkey_a'
       config.add_show_field 'pda_coutts_library_a'
       config.add_show_field 'pda_isbn_a'
       config.add_show_field 'barcode_e'
       config.add_show_field 'summary_holdings_a'
+      config.add_show_field 'cc_type_t'
+      config.add_show_field 'cc_uri_a',              helper_method: :url_link
+      config.add_show_field 'rights_url_a',          helper_method: :url_link
+      config.add_show_field 'rs_uri_a',              helper_method: :url_link
+      config.add_show_field 'fund_code_a'
       config.add_show_field 'shadowed_location_a'
       config.add_show_field 'library_a',             helper_method: :raw_value, if: :json_request?
       config.add_show_field 'location_a',            helper_method: :raw_value, if: :json_request?
@@ -351,79 +391,146 @@ class Config::Solr < Config::Base
       config.add_show_field 'shelfkey'
       config.add_show_field 'reverse_shelfkey'
       config.add_show_field 'marc_error_a'
+      config.add_show_field 'date_received_a'
       config.add_show_field 'date_indexed_a'
+      config.add_show_field 'date_first_indexed_a'
+      config.add_show_field 'hathi_id_a',            helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'source_a',              helper_method: :raw_value, if: :json_request?
       config.add_show_field 'fullrecord',            helper_method: :raw_value, if: :json_request?
-
-      # === Unused fields
-      # config.add_show_field 'library_facet'
-      # config.add_show_field 'location_facet'
-      # config.add_show_field 'call_number_broad_a'
-      # config.add_show_field 'call_number_narrow_a'
-      # config.add_show_field 'instrument_raw_a'
-      # config.add_show_field 'source_f'
 
       # === Unimplemented fields
       # config.add_show_field 'abstract_display'
+      # config.add_show_field 'access_display'
       # config.add_show_field 'accession_display'
+      # config.add_show_field 'act_display'
       # config.add_show_field 'admin_meta_file_display'
-      # config.add_show_field 'alternate_id_facet'
-      # config.add_show_field 'author_facet'
+      # config.add_show_field 'anchor_script_display'
+      # config.add_show_field 'anchor_script_pdf_url_display'
+      # config.add_show_field 'anchor_script_thumbnail_url_display'
+      # config.add_show_field 'aus_display'
+      # config.add_show_field 'aut_display'
+      # config.add_show_field 'author_full_display'
+      # config.add_show_field 'availability_display'
       # config.add_show_field 'avalon_url_display'
+      # config.add_show_field 'book_plate_name_display'
+      # config.add_show_field 'book_plate_thumb_url_display'
+      # config.add_show_field 'book_plate_url_display'
       # config.add_show_field 'breadcrumbs_display'
-      # config.add_show_field 'collection_facet'
+      # config.add_show_field 'category_display'
+      # config.add_show_field 'cmp_display'
+      # config.add_show_field 'cnd_display'
+      # config.add_show_field 'cng_display'
+      # config.add_show_field 'collection_title_display'
+      # config.add_show_field 'container_display'
       # config.add_show_field 'content_model_facet'
       # config.add_show_field 'content_type_facet'
+      # config.add_show_field 'contributor_display'
+      # config.add_show_field 'cre_display'
       # config.add_show_field 'created_date_display'
+      # config.add_show_field 'creator_display'
+      # config.add_show_field 'ctb_display'
+      # config.add_show_field 'custom_show_field_display'
       # config.add_show_field 'datafile_name_display'
-      # config.add_show_field 'date_first_indexed_facet'
+      # config.add_show_field 'date_bulk_coverage_display'
+      # config.add_show_field 'date_coverage_display'
+      # config.add_show_field 'date_display'
       # config.add_show_field 'degree_display'
       # config.add_show_field 'denomination_display'
       # config.add_show_field 'desc_meta_file_display'
+      # config.add_show_field 'description_display'
       # config.add_show_field 'description_note_display'
-      # config.add_show_field 'digital_collection_facet'
+      # config.add_show_field 'despined_barcodes_display'
+      # config.add_show_field 'digitized_item_pid_display'
+      # config.add_show_field 'display_aspect_ratio_display'
       # config.add_show_field 'doc_type_facet'
+      # config.add_show_field 'drt_display'
+      # config.add_show_field 'dst_display'
       # config.add_show_field 'duration_display'
-      # config.add_show_field 'feature_facet'
+      # config.add_show_field 'edition_display'
+      # config.add_show_field 'editor_display'
+      # config.add_show_field 'edt_display'
+      # config.add_show_field 'extent_display'
+      # config.add_show_field 'feature_display'
+      # config.add_show_field 'form_display'
       # config.add_show_field 'full_hierarchy_display'
-      # config.add_show_field 'fund_code_facet'
-      # config.add_show_field 'genre_facet'
+      # config.add_show_field 'genre_display'
+      # config.add_show_field 'geographic_subject_display'
+      # config.add_show_field 'grant_info_display'
+      # config.add_show_field 'group_display'
+      # config.add_show_field 'hathi_id_display'
       # config.add_show_field 'hierarchy_display'
       # config.add_show_field 'hierarchy_level_display'
+      # config.add_show_field 'hst_display'
       # config.add_show_field 'id'
       # config.add_show_field 'iiif_presentation_metadata_display'
       # config.add_show_field 'individual_call_number_display'
+      # config.add_show_field 'instrument_raw_display'
       # config.add_show_field 'issued_date_display'
-      # config.add_show_field 'license_class_facet'
+      # config.add_show_field 'itr_display'
+      # config.add_show_field 'ive_display'
+      # config.add_show_field 'keywords_display'
+      # config.add_show_field 'linked_responsibility_statement_display'
       # config.add_show_field 'media_description_display'
       # config.add_show_field 'media_resource_id_display'
-      # config.add_show_field 'media_retrieval_id_facet'
+      # config.add_show_field 'media_retrieval_id_display'
+      # config.add_show_field 'media_type_display'
       # config.add_show_field 'medium_display'
+      # config.add_show_field 'mint_display'
+      # config.add_show_field 'mod_display'
+      # config.add_show_field 'modified_chicago_citation_display'
+      # config.add_show_field 'msd_display'
       # config.add_show_field 'mus_display'
       # config.add_show_field 'music_catagory_facet'
       # config.add_show_field 'note_display'
+      # config.add_show_field 'notes_display'
+      # config.add_show_field 'nrt_display'
+      # config.add_show_field 'online_url_display'
+      # config.add_show_field 'pan_display'
+      # config.add_show_field 'part_aspect_ratio_display'
       # config.add_show_field 'part_display'
       # config.add_show_field 'part_duration_display'
       # config.add_show_field 'part_label_display'
       # config.add_show_field 'part_pid_display'
       # config.add_show_field 'pbcore_display'
-      # config.add_show_field 'pdf_url_display',            helper_method: :url_link
+      # config.add_show_field 'pdf_url_display'
+      # config.add_show_field 'physical_form_display'
+      # config.add_show_field 'pre_display'
+      # config.add_show_field 'prn_display'
+      # config.add_show_field 'pro_display'
+      # config.add_show_field 'production_date_display'
+      # config.add_show_field 'published_date_display'
       # config.add_show_field 'published_display'
+      # config.add_show_field 'publisher_display'
       # config.add_show_field 'raw_ead_display'
-      # config.add_show_field 'recording_format_facet'
-      # config.add_show_field 'recording_type_facet'
-      # config.add_show_field 'release_date_facet'
+      # config.add_show_field 'related_item_display'
       # config.add_show_field 'repository_address_display'
+      # config.add_show_field 'resource_display'
+      # config.add_show_field 'responsibility_statement_display'
+      # config.add_show_field 'rights_display'
       # config.add_show_field 'rights_wrapper_display'
-      # config.add_show_field 'rights_wrapper_url_display', helper_method: :url_link
-      # config.add_show_field 'rs_uri_display',             helper_method: :url_link
+      # config.add_show_field 'rights_wrapper_url_display'
       # config.add_show_field 'scope_content_display'
+      # config.add_show_field 'scopecontent_display'
       # config.add_show_field 'score'
+      # config.add_show_field 'signature_display'
+      # config.add_show_field 'sng_display'
+      # config.add_show_field 'special_collections_holding_display'
+      # config.add_show_field 'spk_display'
+      # config.add_show_field 'sponsoring_agency_display'
+      # config.add_show_field 'tei_url_display'
+      # config.add_show_field 'temporal_subject_display'
       # config.add_show_field 'terms_of_use_display'
+      # config.add_show_field 'thumbnail_display'
+      # config.add_show_field 'thumbnail_url_display'
       # config.add_show_field 'timestamp'
       # config.add_show_field 'toc_display'
       # config.add_show_field 'unit_display'
       # config.add_show_field 'upc_display'
+      # config.add_show_field 'upc_full_display'
       # config.add_show_field 'use_facet'
+      # config.add_show_field 'video_run_time_display'
+      # config.add_show_field 'video_target_audience_display'
+      # config.add_show_field 'year_display'
 
       # =======================================================================
       # Search fields
