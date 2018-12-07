@@ -18,7 +18,7 @@ class AboutController < ApplicationController
   # :section: Filter actions
   # ===========================================================================
 
-  before_action :verify_session, only: %i(log log_wipe)
+  before_action :verify_session, only: %i(solr log log_wipe)
 
   # ===========================================================================
   # :section:
@@ -48,6 +48,12 @@ class AboutController < ApplicationController
       format.xml  { render xml:  @topic_list.to_xml }
       format.json { render json: @topic_list.to_json }
     end
+  end
+
+  # == GET /about/solr
+  # Administrator-only Solr information.
+  #
+  def solr
   end
 
   # == GET /about/log

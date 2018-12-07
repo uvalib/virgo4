@@ -11,8 +11,6 @@ require_relative '_solr'
 #
 class Config::Music < Config::Base
 
-  NON_MUSIC_TYPES = Config::Solr::CATALOG_TYPES + Config::Solr::VIDEO_TYPES
-
   # ===========================================================================
   # :section:
   # ===========================================================================
@@ -35,7 +33,8 @@ class Config::Music < Config::Base
 
       # === Facet fields ===
 
-      remove_facets!(config, NON_MUSIC_TYPES)
+      remove_facets!(config, Config::Solr::CATALOG_TYPES)
+      remove_facets!(config, Config::Solr::VIDEO_TYPES)
 
       # === Index metadata fields ===
 

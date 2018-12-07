@@ -122,4 +122,24 @@ body.blacklight-about {
     .log-scroller {
         // TODO: ?
     }
+
+    //=========================================================================
+    // About Solr page
+    //=========================================================================
+
+    .about-solr {
+
+        margin-bottom: 1px;
+        border:        1px solid #00000020;
+
+        .about-item,
+        .about-value {
+            display:      inline-block;
+            width:        30%;
+            margin:       0;
+            padding-left: 0.5rem;
+        }
+
+        .about-value:before { content: ""; }
+    }
 }

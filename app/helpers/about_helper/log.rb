@@ -17,7 +17,11 @@ module AboutHelper::Log
     __included(base, '[AboutHelper::Log]')
   end
 
-  DEFAULT_LOG_LINES = 1000
+  # Number of lines to get from the end of the log file.
+  #
+  # @type [Numeric]
+  #
+  DEFAULT_LOG_LINES = I18n.t('blacklight.about.log.lines', default: 1000)
 
   # ===========================================================================
   # :section:
@@ -253,6 +257,48 @@ module AboutHelper::Log
     opt[:class]    = Array.wrap(classes).join(' ') if classes.present?
     opt[:tabindex] = 0 if tab
     content_tag(:span, text.html_safe, opt)
+  end
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  public
+
+  # Allow log control definitions to include I18n symbols that will be replaced
+  # with the appropriately-scoped locale value.
+  #
+  # @param [Hash{Symbol=>Hash}]
+  #
+  # @return [Hash{String=>Hash}]
+  #
+  def log_controls(hash)
+    (hash || {}).map { |control, opt|
+
+      # Button label.
+      scope = { scope: "blacklight.about.log.controls.#{control}" }
+      if control.is_a?(Symbol)
+        default = [:title, control.to_s.humanize.capitalize]
+        control = t('label', scope.merge(default: default))
+      end
+
+      # Button options.
+      scope.merge!(log: "#{Rails.env} Rails log")
+      if opt[:title].is_a?(Symbol)
+        opt[:title] = t('tooltip', scope)
+      end
+      if opt[:'data-confirm'].is_a?(Symbol)
+        opt[:'data-confirm'] = t('confirm', scope)
+      end
+      if opt[:data].is_a?(Hash) && opt[:data][:confirm].is_a?(Symbol)
+        opt[:data][:confirm] = t('confirm', scope)
+      end
+
+      # Ensure that UrlHelper#button_to sees :method the way it requires.
+      opt[:method] = opt[:method].to_s.downcase if opt[:method].present?
+
+      [control, opt]
+    }.to_h
   end
 
 end

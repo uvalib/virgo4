@@ -26,7 +26,8 @@ module Blacklight::Solr::RepositoryExt
   public
 
   VERBOSE_LOGGING =
-    defined?(::BLACKLIGHT_VERBOSE_LOGGING) && ::BLACKLIGHT_VERBOSE_LOGGING
+    %w(y yes true).include?(ENV['VERBOSE_LOGGING'].to_s.downcase) ||
+    (defined?(::BLACKLIGHT_VERBOSE_LOGGING) && ::BLACKLIGHT_VERBOSE_LOGGING)
 
   SEARCH_FILTERS = %i(
     default_solr_parameters

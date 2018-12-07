@@ -15,6 +15,12 @@ require 'blacklight/configuration'
 #
 module Blacklight::ConfigurationExt
 
+  # ===========================================================================
+  # :section: Blacklight::Configuration overrides
+  # ===========================================================================
+
+  public
+
   # document_model
   #
   # @return [Class]
@@ -130,7 +136,46 @@ module Blacklight::ConfigurationExt
   end
 
   # ===========================================================================
-  # :section:
+  # :section: Local methods
+  # ===========================================================================
+
+  public
+
+  # Indicate whether *name* is a sort key and/or is part of the Solr sort.
+  #
+  # @param [String, Symbol] name
+  #
+  def sort_field?(name)
+    name = name.to_s
+    sort_fields.any? { |k, v| (k.to_s == name) || v.sort.include?(name) }
+  end
+
+  # Indicate whether *name* is a facet field.
+  #
+  # @param [String, Symbol] name
+  #
+  def facet_field?(name)
+    facet_fields.key?(name)
+  end
+
+  # Indicate whether *name* is an index field.
+  #
+  # @param [String, Symbol] name
+  #
+  def index_field?(name)
+    index_fields.key?(name)
+  end
+
+  # Indicate whether *name* is a display field.
+  #
+  # @param [String, Symbol] name
+  #
+  def show_field?(name)
+    show_fields.key?(name)
+  end
+
+  # ===========================================================================
+  # :section: Local methods
   # ===========================================================================
 
   private

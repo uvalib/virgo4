@@ -1,0 +1,50 @@
+<%# app/views/about/solr.html.erb -%>
+<%-
+  # Administrator-only Solr information.
+  return unless authorized?
+
+  title       ||= t('blacklight.about.solr.title', default: 'Solr Info')
+  page_title  ||= title
+  description ||= t('blacklight.about.solr.description', default: '')
+  config      ||= default_blacklight_config
+
+-%>
+<%= render 'about/common', page_title: page_title %>
+
+<h1 class="about-topic-title"><%= title %></h1>
+<div class="about-topic-description"><%= description %></div>
+
+<h2 class="about-section">
+  <%= t('blacklight.about.solr.fields.label') %>
+</h2>
+
+<%- get_solr_fields.each_pair do |type, fields_and_counts| -%>
+  <h3 class="about-section">
+    <%= h("#{type.capitalize} Fields") %>
+  </h3>
+  <p class="about-entry about-solr">
+    <span class="about-item">NAME</span>
+    <span class="about-item">DOCUMENT COUNT</span>
+    <span class="about-item">NOT IN CONFIGURATION</span>
+  </p>
+  <%- fields_and_counts.each_pair do |field, count| -%>
+    <p class="about-entry about-solr">
+      <span class="about-item"><%= h(field) -%></span>
+      <span class="about-value"><%= h(count || '-') -%></span>
+      <%- unless in_configuration?(field, config) -%>
+        <span class="about-value">X</span>
+      <%- end -%>
+    </p>
+  <%- end -%>
+<%- end -%>
+
+<h2 class="about-section">
+  <%= t('blacklight.about.solr.status.label') %>
+</h2>
+
+<%- get_solr_information.each_pair do |route, data| -%>
+  <h3 class="about-section">
+    <%= h(route) %>
+  </h3>
+  <pre class="log-scroller"><%= JSON.pretty_generate(data) -%></pre>
+<%- end -%>

@@ -1,8 +1,9 @@
 <%# app/views/about/log.html.erb -%>
 <%-
   # Administrator-only log file viewer.
-  page_title ||=
-    t('blacklight.about.log.page_title', env: Rails.env, default: 'Log file')
+  title ||=
+    t('blacklight.about.log.title', env: Rails.env, default: 'Log file')
+  page_title ||= title
   lines ||= @lines || []
   lines = colorize_lines(lines, log: true, join: true)
 -%>

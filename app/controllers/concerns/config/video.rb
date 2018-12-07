@@ -11,8 +11,6 @@ require_relative '_solr'
 #
 class Config::Video < Config::Base
 
-  NON_VIDEO_TYPES = Config::Solr::CATALOG_TYPES + Config::Solr::MUSIC_TYPES
-
   # ===========================================================================
   # :section:
   # ===========================================================================
@@ -35,7 +33,8 @@ class Config::Video < Config::Base
 
       # === Facet fields ===
 
-      remove_facets!(config, NON_VIDEO_TYPES)
+      remove_facets!(config, Config::Solr::CATALOG_TYPES)
+      remove_facets!(config, Config::Solr::MUSIC_TYPES)
 
       # === Index metadata fields ===
 
