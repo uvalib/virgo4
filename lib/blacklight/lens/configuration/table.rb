@@ -42,6 +42,7 @@ module Blacklight::Lens
         keys
         size
         length
+        map
         empty?
         blank?
         present?
@@ -78,6 +79,22 @@ module Blacklight::Lens
       def []=(key, entry)
         key = key_for(key) unless valid_key?(key)
         @hash[key] = entry if key
+      end
+
+      # Delegate all other methods to @hash.
+      #
+      # @param [Symbol] method
+      # @param [Array]  args
+      #
+      # @return [*]
+      #
+      # == Implementation Notes
+      # This might be temporary; it's probably better to avoid #method_missing
+      # if possible and explicitly add needed delegations to #TABLE_METHODS.
+      #
+      def method_missing(method, *args, &block)
+        logger.info { "NOTE: lens table delegating #{method} to @hash"}
+        @hash.send(method, *args, &block)
       end
 
     end

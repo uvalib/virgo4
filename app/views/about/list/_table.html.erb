@@ -1,0 +1,15 @@
+<%# app/views/about/list/_table.html.erb -%>
+<%-
+  # Table of list values.
+  heading ||= nil
+  rows    ||= []
+-%>
+
+<table class="about-topic-table">
+  <thead><%= heading -%></thead>
+  <tbody>
+    <%- rows.each do |topic_row| -%>
+      <%= topic_row %>
+    <%- end -%>
+  </tbody>
+</table>

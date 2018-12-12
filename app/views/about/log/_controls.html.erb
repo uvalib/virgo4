@@ -1,0 +1,29 @@
+<%# app/views/about/log/_controls.html.erb -%>
+<%-
+  # Controls for the log file viewer.
+  available_controls =
+    log_controls(
+      refresh: {
+        action:         'log',
+        method:         'get',
+        title:          :tooltip,
+        form_class:     'log-button refresh',
+      },
+      wipe: {
+        action:         'log_wipe',
+        method:         'delete',
+        title:          :tooltip,
+        form_class:     'log-button wipe',
+        'data-confirm': :confirm,
+      }
+    ) if authorized?
+  return unless available_controls.present?
+-%>
+
+<li class="about-sidebar-link log-controls">
+  <%- available_controls.each_pair do |label, opt| -%>
+    <%- options      = opt.slice(:action) -%>
+    <%- html_options = opt.except(*options.keys) -%>
+    <%= button_to(label, options, html_options) %>
+  <%- end -%>
+</li>

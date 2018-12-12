@@ -41,6 +41,10 @@ body.blacklight-about {
         }
     }
 
+    .solr-controls {
+        // TODO: ???
+    }
+
     .log-controls {
 
         margin: 0;
@@ -68,6 +72,12 @@ body.blacklight-about {
 
     .featured {
         background-color: lightcyan;
+    }
+
+    .inline {
+        display:        inline-block;
+        width:          auto;
+        vertical-align: super;
     }
 
     .about-section {
@@ -98,6 +108,11 @@ body.blacklight-about {
         border:      1px solid black;
     }
 
+    .about-table {
+        width: -moz-available;
+        width: available;
+    }
+
     //=========================================================================
     // About list pages
     //=========================================================================
@@ -111,16 +126,7 @@ body.blacklight-about {
     }
 
     .about-topic-table {
-        width: -moz-available;
-        width: available;
-    }
-
-    //=========================================================================
-    // About log page
-    //=========================================================================
-
-    .log-scroller {
-        // TODO: ?
+        @extend .about-table;
     }
 
     //=========================================================================
@@ -132,6 +138,12 @@ body.blacklight-about {
         margin-bottom: 1px;
         border:        1px solid #00000020;
 
+        &.about-header {
+            @extend .bg-light;
+            font-weight: bold;
+        }
+
+        .about-column,
         .about-item,
         .about-value {
             display:      inline-block;
@@ -141,5 +153,77 @@ body.blacklight-about {
         }
 
         .about-value:before { content: ""; }
+    }
+
+    .about-lens-select {
+
+        @extend .inline;
+
+        margin-left: 1rem;
+
+        .form-control {
+            @extend .inline;
+        }
+    }
+
+    .about-solr-table-container {
+        height:     90vh;
+        overflow-x: auto;
+        resize:     both;
+    }
+
+    .about-solr-table {
+
+        $border: 1px solid black;
+
+        @extend .about-table;
+
+        margin-bottom: 0.25rem;
+        border:        $border;
+
+        .heading {
+            background-color: #eeeeee;
+        }
+
+        .heading,
+        .cell {
+            padding: 0 0.5rem;
+            border:  $border;
+        }
+
+        .about-histogram {
+
+            @extend .about-table;
+
+            display:      inline-table;
+            padding-left: 0;
+
+            .zero {
+                color: darkgray;
+            }
+
+            tr {
+                display: inline;
+            }
+
+            th, td {
+                min-width:   75px;
+                padding:     0 0.25rem 1px 0;
+                line-height: 1;
+                text-align:  right;
+            }
+
+            td {
+                border: 2px solid white;
+            }
+        }
+    }
+
+    //=========================================================================
+    // About log page
+    //=========================================================================
+
+    .log-scroller {
+        // TODO: ?
     }
 }

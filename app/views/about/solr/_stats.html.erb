@@ -1,0 +1,25 @@
+<%# app/views/about/solr/_stats.html.erb -%>
+<%-
+  # Statistics for Solr fields.
+  solr_stats ||= @solr_stats || {}
+-%>
+
+<div class="about-solr-table-container">
+  <table class="about-solr-table">
+    <thead>
+      <%= solr_stats_header_row %>
+      <tr class="heading-row">
+        <%- all_but_last = solr_stats_columns.size - 1 -%>
+        <%- solr_stats_columns.take(all_but_last).each do -%>
+          <th class="heading"></th>
+        <%- end -%>
+        <th class="heading"><%= solr_stats_histogram_headers -%></th>
+      </tr>
+    </thead>
+    <tbody>
+      <%- solr_stats.each_pair do |field, data| -%>
+        <%= solr_stats_row(field, data) %>
+      <%- end -%>
+    </tbody>
+  </table>
+</div>

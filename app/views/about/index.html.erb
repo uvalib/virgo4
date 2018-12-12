@@ -4,17 +4,19 @@
   title ||= t('blacklight.about.title')
   page_title ||=
     t('blacklight.about.page_title', app: application_name, default: title)
+  version ||= 'TODO' # TODO: app version
+
 -%>
-<%= render 'about/common', page_title: page_title %>
+<%= render 'about/common', title: title, page_title: page_title %>
 
 <div id="content">
 
   <h1 class='page-heading'><%= title %></h1>
   <p></p>
   <p><%= DateTime.current %></p>
-  <p><span class="about-item">Version</span> <%= 'TODO' %></p>
+  <p><span class="about-item">Version</span> <%= version %></p>
 
-  <%= render 'about/session' %>
-  <%= render 'about/internal' %>
+  <%= render 'about/index/session' %>
+  <%= render 'about/index/internal' %>
 
 </div>

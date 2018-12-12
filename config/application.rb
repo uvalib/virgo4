@@ -21,6 +21,10 @@ module Virgo
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 5.2
 
+    # Specify I18n load paths.  @see config/locales/virgo/en.yml
+    config.i18n.load_path +=
+      Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}').to_s]
+
     # Permitted parameters.
     # NOTE: Needs work.
     config.action_controller.permit_all_parameters = true # TODO: testing

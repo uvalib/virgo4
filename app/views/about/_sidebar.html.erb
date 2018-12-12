@@ -2,24 +2,33 @@
 <%-
   # Controls to select "About" pages inserted into `content_for(:sidebar)`.
   pages = {
-    'About Virgo':    about_index_path,
-    'Library Codes':  about_list_path(:library),
-    'Location Codes': about_list_path(:location),
+    main:     about_index_path,
+    library:  about_list_path(:library),
+    location: about_list_path(:location),
   }
   if authorized?
     pages.merge!(
-      'Solr Information': about_solr_path,
-      'Rails Log':        about_log_path
+      solr:       about_solr_path,
+      solr_stats: about_solr_stats_path,
+      log:        about_log_path
     )
   end
+  controls = sidebar_controls(pages)
+  return unless controls.present?
 -%>
 
-<%- pages.each_pair do |label, path| -%>
-  <%- state = ('disabled' if request.path == path) -%>
-  <li class="about-sidebar-link <%= state -%>">
-    <%- link_opt = state ? { class: state, tabindex: -1 } : {} -%>
-    <%= link_to(label, path, link_opt) %>
-  </li>
+<%- controls.each_pair do |button_label, button_data| -%>
+  <%- path = button_data[:path] -%>
+  <%- if button_label.is_a?(String) -%>
+    <%- tooltip  = button_data[:tooltip].presence -%>
+    <%- selected = ('disabled' if request.path == path) -%>
+    <li class="about-sidebar-link <%= selected -%>">
+      <%- link_opt = {} -%>
+      <%- link_opt.merge!(title: tooltip) if tooltip -%>
+      <%- link_opt.merge!(class: selected, tabindex: -1) if selected -%>
+      <%= link_to(button_label, path, link_opt) %>
+    </li>
+  <%- else -%>
+    <%= render path %>
+  <%- end -%>
 <%- end -%>
-
-<%= render 'about/log_controls' if request.path == about_log_path %>

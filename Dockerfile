@@ -7,10 +7,12 @@ FROM ruby:2.5.1-alpine
 RUN apk add --no-cache \
     bash \
     build-base \
+    curl-dev \
     g++ \
     gcc \
     git \
     libc-dev \
+    libcurl \
     libffi-dev \
     libxml2 \
     libxslt-dev \
