@@ -27,29 +27,38 @@ module IconHelper
   public
 
   # Returns the raw SVG (String) for a cached Blacklight icon located in
-  # app/assets/images/blacklight/*.svg.
+  # app/assets/images/blacklight/*.svg.  If no icon is found, a glyphicon is
+  # attempted.
   #
   # @param [String, Symbol] icon_name
   # @param [Hash, nil]      opt
   #
-  # @option opt [Boolean] :raise      If *false*, return *nil* if not found.
+  # @option opt [Boolean] :raise      If *true*, use the overridden Blacklight
+  #                                     method directly unless the icon is
+  #                                     clearly a glyphicon.
   #
   # @return [ActiveSupport::SafeBuffer]
   #
   # This method overrides:
   # @see Blacklight::IconHelperBehavior#blacklight_icon
   #
+  # == Implementation Notes
+  # There are not many SVG icons so this method attempts to create a glyph
+  #
   def blacklight_icon(icon_name, opt = nil)
     opt = opt ? opt.dup : {}
+    no_raise  = !opt.delete(:raise)
+    icon_name = icon_name.to_s
     result =
-      if opt.delete(:raise)
-        super(icon_name, opt)
-      else
-        super(icon_name, opt) rescue nil
+      unless icon_name.start_with?('glyphicon-')
+        no_raise ? (super(icon_name, opt) rescue nil) : super(icon_name, opt)
       end
-    return result if result.present?
-    icon_name = icon_name.to_s.sub(/^glyphicon-/, '')
-    content_tag(:span, '', class: "glyphicon glyphicon-#{icon_name}")
+    if result.blank?
+      icon_name = icon_name.sub(/^glyphicon-/, '')
+      merge_html_options!(opt, class: "glyphicon glyphicon-#{icon_name}")
+      result = content_tag(:span, '', opt)
+    end
+    result
   end
 
 end

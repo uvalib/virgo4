@@ -1,0 +1,12 @@
+<%# app/views/about/log/_viewer.html.erb -%>
+<%-
+  # Log file viewer.
+  lines ||= @lines || []
+  lines = colorize_lines(lines, log: true, join: true)
+-%>
+
+<%- if request.xhr? -%>
+  <%= lines %>
+<%- else -%>
+  <div class="log-scroller"><%= lines %></div>
+<%- end -%>

@@ -26,7 +26,7 @@ module Blacklight::Lens
       # @see self#key_for_name
       #
       KEY_PATH_HINT =
-        Regexp.new((%w(/ :: Controller) + lens_keys.map(&:to_s)).join('|'), true)
+        Regexp.new((%w(/ :: Controller) + lens_keys).join('|'), true)
 
       # Used to determine whether to interpret a name as one that as a document
       # ID by eliminating strings with invalid characters.

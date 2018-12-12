@@ -2,11 +2,9 @@
 <%-
   # Common elements for all About pages
 
-  page_title ||= t(
-    'blacklight.about.page_title',
-    app:     application_name,
-    default: [:'blacklight.about.title' , 'About']
-  )
+  action     ||= params[:action]
+  title      ||= t("blacklight.about.#{action}.title",      default: '')
+  page_title ||= t("blacklight.about.#{action}.page_title", default: title)
   content_for(:page_title, page_title)
 
   @sidebar_tab_first = true

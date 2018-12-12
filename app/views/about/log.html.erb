@@ -1,16 +1,14 @@
 <%# app/views/about/log.html.erb -%>
 <%-
   # Administrator-only log file viewer.
+  return unless authorized?
+
   title ||=
     t('blacklight.about.log.title', env: Rails.env, default: 'Log file')
   page_title ||= title
   lines ||= @lines || []
-  lines = colorize_lines(lines, log: true, join: true)
+
 -%>
 <%= render 'about/common', page_title: page_title %>
 
-<%- if request.xhr? -%>
-  <%= lines %>
-<%- else -%>
-  <div class="log-scroller"><%= lines %></div>
-<%- end -%>
+<%= render 'about/log/viewer', lines: lines %>

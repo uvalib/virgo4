@@ -51,9 +51,20 @@ class AboutController < ApplicationController
   end
 
   # == GET /about/solr
+  # == GET /about/solr?lens=:lens
   # Administrator-only Solr information.
   #
   def solr
+    @solr_fields = get_solr_fields
+    @solr_info   = get_solr_information
+  end
+
+  # == GET /about/solr_stats
+  # Administrator-only Solr information.
+  #
+  def solr_stats
+    @solr_stats = get_solr_statistics
+    render 'about/solr'
   end
 
   # == GET /about/log

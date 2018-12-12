@@ -3,10 +3,17 @@
   # Administrator-only Solr information.
   return unless authorized?
 
-  title       ||= t('blacklight.about.solr.title', default: 'Solr Info')
+  i18n_scope  ||= 'blacklight.about.solr'
+  i18n_scope   += '.stats' if params[:action] == 'solr_stats'
+  title       ||= t(:title, scope: i18n_scope, default: 'Solr Info')
   page_title  ||= title
-  description ||= t('blacklight.about.solr.description', default: '')
-  config      ||= default_blacklight_config
+  description ||= t(
+    :description,
+    scope:    i18n_scope,
+    not_this: not_this_lens,
+    not_any:  not_any_lens,
+    default:  ''
+  ).html_safe
 
 -%>
 <%= render 'about/common', page_title: page_title %>
@@ -14,37 +21,21 @@
 <h1 class="about-topic-title"><%= title %></h1>
 <div class="about-topic-description"><%= description %></div>
 
-<h2 class="about-section">
-  <%= t('blacklight.about.solr.fields.label') %>
-</h2>
+<%- if params[:action] == 'solr_stats' %>
 
-<%- get_solr_fields.each_pair do |type, fields_and_counts| -%>
-  <h3 class="about-section">
-    <%= h("#{type.capitalize} Fields") %>
-  </h3>
-  <p class="about-entry about-solr">
-    <span class="about-item">NAME</span>
-    <span class="about-item">DOCUMENT COUNT</span>
-    <span class="about-item">NOT IN CONFIGURATION</span>
-  </p>
-  <%- fields_and_counts.each_pair do |field, count| -%>
-    <p class="about-entry about-solr">
-      <span class="about-item"><%= h(field) -%></span>
-      <span class="about-value"><%= h(count || '-') -%></span>
-      <%- unless in_configuration?(field, config) -%>
-        <span class="about-value">X</span>
-      <%- end -%>
-    </p>
-  <%- end -%>
-<%- end -%>
+  <%= render 'about/solr/stats' %>
 
-<h2 class="about-section">
-  <%= t('blacklight.about.solr.status.label') %>
-</h2>
+<%- else -%>
 
-<%- get_solr_information.each_pair do |route, data| -%>
-  <h3 class="about-section">
-    <%= h(route) %>
-  </h3>
-  <pre class="log-scroller"><%= JSON.pretty_generate(data) -%></pre>
+  <h2 class="about-section inline">
+    <%= t('blacklight.about.solr.fields.label') %>
+  </h2>
+  <%= lens_select_menu(params[:lens]) %>
+  <%= render 'about/solr/fields' %>
+
+  <h2 class="about-section">
+    <%= t('blacklight.about.solr.info.label') %>
+  </h2>
+  <%= render 'about/solr/info' %>
+
 <%- end -%>

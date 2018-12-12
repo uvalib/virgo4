@@ -1,8 +1,17 @@
-# config/locales/zz_local.en.yml
+# config/locales/virgo/en.yml
 #
-# This file is for local configuration items.  Because YAML files are processed
-# in alphabetical order it also provides a location from which any other I18n
-# item can be overridden.
+# This file is for local configuration items and for final, guaranteed
+# overrides for values other I18n paths including the "en.blacklight.*"
+# hierarchy.
+#
+# NOTE: If other subdirectories are created they should sort before this one.
+#
+# Regardless of any attempt to define an order on files when appending to
+# `config.i18n.load_path`, I18n will reorder the files so that all of the the
+# files from a directory will be appended in collation order and then all of
+# the files will be appended in collation order.  So, to keep 'virgo/en.yml'
+# as the last file of the load path, other subdirectories should be named with
+# something that sorts earlier than 'v'.
 
 en:
 
@@ -72,24 +81,39 @@ en:
 
       log:
         title:          'Rails %{env} log'
-        label:          'Rails log'
         description: >
           The final %{lines} lines of the Rails application log.
         lines:          1000
-        controls:
-          refresh:
+        control:
+          label:        'Rails Log'
+          tooltip:      'View the Rails application log.'
+
+        refresh:
+          control:
             label:      'Refresh'
-            tooltip:    'Get the current end of the %{log}'
-          wipe:
+            tooltip:    'Get the current end of the %{log}.'
+
+        wipe:
+          control:
             label:      'Wipe'
-            tooltip:    'Clear the %{log} - for emergencies only'
+            tooltip:    'Clear the %{log} - for emergencies only.'
             confirm:    'Are you sure you want to clear the %{log}?'
 
       solr:
         title:          'Solr Information'
         description: >
           Fields defined in the index along with select status information for
-          the Solr application instance.
+          the Solr application instance.  Use the menu below to see which Solr
+          fields are available in each lens configuration.
+          &nbsp; %{not_this} indicates the field is not in the selected lens.
+          &nbsp; %{not_any} indicates the field is not configured in any lens.
+        control:
+          label:        'Solr Info'
+          tooltip: >
+            Information about the Solr service and the fields that it defines.
+
+        select:
+          label:        'Select Lens'
 
         fields:
           label:        'Solr Fields'
@@ -97,21 +121,22 @@ en:
             facet:
               suffix:   '_f'
             display:
-              suffix:   '_a'
+              suffix:   '_t'
+              show_as:  '_a'
             sort:
               suffix:   '_ssort'
             suggest:
               suffix:   '_suggest'
 
-        status:
+        info:
           label:        'Solr Status'
           data_template:
             # === Selected values from #{solr_url}/admin/system
             admin/system:
               system:
-                systemLoadAverage:    '-'
+                systemLoadAverage:    0.0
                 uptime:               '-'
-                availableProcessors:  '-'
+                availableProcessors:  0
               core:
                 schema:               '-'
                 host:                 '-'
@@ -162,7 +187,48 @@ en:
                       suggest.count:  '-'
                     components:       []
                 searchComponent:
-                  suggest:            []
+                  suggest:            # All elements
+
+        stats:
+          title:        'Solr Field Statistics'
+          description: >
+            Per-field statistics.
+          control:
+            label:      'Solr Stats'
+            tooltip: >
+              Statistics for all fields defined by Solr.
+              NOTE: Takes at least 10 seconds to complete if not cached.
+          columns:
+            -
+              label:    'Field'
+              tooltip:  'The Solr field.'
+            -
+              label:    'Type'
+              tooltip:  'Field type as listed in the Solr configuration.'
+            -
+              label:    'Docs'
+              tooltip:  'Number of Solr records which include this field.'
+            -
+              label:    'Terms'
+              tooltip: >
+                Number of unique terms for this field across all documents.
+                (The value for a field may contain one term or many terms,
+                depending on the expected content of the field.)
+            -
+              label:    'Terms per document'
+              tooltip: >
+                A histogram of numbers of Solr documents where the document
+                contains up to the indicated number of distinct terms within
+                one or more values for the given field.
+                (E.g. 10% in the "16" column would indicate that,
+                of the total number of documents containing a given Solr field,
+                10% of them have from 9 to 16 distinct terms for that field.)
+          data_template:
+            type:       '-'
+            docs:       0
+            distinct:   0
+            #topTerms:  []
+            histogram:  []
 
     # =========================================================================
     # FIELD LABELS

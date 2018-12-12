@@ -1,0 +1,17 @@
+<%# app/views/about/solr/_controls.html.erb -%>
+<%-
+  # Controls for Solr operations.
+  available_controls =
+    solr_controls({
+      # NOTE: none currently
+    }) if authorized?
+  return unless available_controls.present?
+-%>
+
+<li class="about-sidebar-link solr-controls">
+  <%- available_controls.each_pair do |label, opt| -%>
+    <%- options      = opt[:url] -%>
+    <%- html_options = opt.except(:url) -%>
+    <%= link_to(label, options, html_options) %>
+  <%- end -%>
+</li>

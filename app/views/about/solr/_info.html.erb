@@ -1,0 +1,10 @@
+<%# app/views/about/solr/_info.html.erb -%>
+<%-
+  # Solr service operating information.
+  solr_info ||= @solr_info || {}
+-%>
+
+<%- solr_info.each_pair do |route, data| -%>
+  <h3 class="about-section"><%= h(route) -%></h3>
+  <pre class="log-scroller"><%= JSON.pretty_generate(data) -%></pre>
+<%- end -%>

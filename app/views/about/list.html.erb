@@ -12,12 +12,4 @@
 
 <h1 class="about-topic-title"><%= title %></h1>
 <div class="about-topic-description"><%= description %></div>
-
-<table class="about-topic-table">
-  <thead><%= heading_row -%></thead>
-  <tbody>
-    <%- rows.each do |topic_row| -%>
-      <%= topic_row %>
-    <%- end -%>
-  </tbody>
-</table>
+<%= render 'about/list/table', heading: heading_row, rows: rows %>

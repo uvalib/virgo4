@@ -1,0 +1,30 @@
+<%# app/views/about/solr/_fields.html.erb -%>
+<%-
+  # Tables of Solr fields grouped by Blacklight usage.
+  solr_fields ||= @solr_fields || {}
+  lens        ||= params[:lens]
+  lens_key      = lens&.to_sym || default_lens_key
+  lens_current  = lens_key.to_s.capitalize
+-%>
+
+<%- solr_fields.each_pair do |type, fields| -%>
+  <h3 class="about-section"><%= h("#{type.capitalize} Fields") -%></h3>
+  <p class="about-header about-solr">
+    <span class="about-column">Name</span>
+    <span class="about-column">Document Count</span>
+    <span class="about-column">In <%= lens_current -%> configuration</span>
+  </p>
+  <%- fields.each_pair do |field, data| -%>
+    <%- count  = data[:count] || '-' -%>
+    <%- lenses = data[:lenses] -%>
+    <%- marker = (not_any_lens if lenses.blank?) -%>
+    <%- marker ||= (not_this_lens unless lenses.include?(lens_key)) -%>
+    <p class="about-entry about-solr">
+      <span class="about-item"><%= solr_stats_link(field) -%></span>
+      <span class="about-value"><%= h(count) -%></span>
+      <%- if marker -%>
+        <span class="about-value"><%= marker -%></span>
+      <%- end -%>
+    </p>
+  <%- end -%>
+<%- end -%>
