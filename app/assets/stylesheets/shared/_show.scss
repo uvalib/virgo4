@@ -40,6 +40,12 @@ body.blacklight-show .document {
                 border: 1px solid lightgray;
             }
         }
+
+        // TODO: remove when Virgo 3 is gone
+        .pre-release-button {
+            display: block;
+            margin:  1rem auto 0;
+        }
     }
 
     &.blacklight-online,
@@ -85,5 +91,19 @@ body.blacklight-show .document {
                 border-radius: 50%;
             }
         }
+    }
+
+    dd.blacklight-url_a {
+        word-break: keep-all;
+    }
+
+    // TODO: temporary; field should not actually be displayed as a URL
+    dd.blacklight-rights_url_a {
+        word-break: keep-all;
+    }
+
+    // TODO: temporary; field should not actually be displayed as a URL
+    dd.blacklight-rs_uri_a {
+        word-break: keep-all;
     }
 }

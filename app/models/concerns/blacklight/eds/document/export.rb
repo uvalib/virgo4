@@ -37,8 +37,7 @@ module Blacklight::Eds::Document
       super # TODO: XML export for non-MARC
     end
 
-    # Emit an APA (American Psychological Association) bibliographic citation
-    # from the :citation_apa field.
+    # Emit an APA (American Psychological Association) bibliographic citation.
     #
     # @return [ActiveSupport::SafeBuffer]
     #
@@ -49,11 +48,10 @@ module Blacklight::Eds::Document
     # @see Blacklight::Solr::Document::MarcExport#export_as_apa_citation_txt
     #
     def export_as_apa_citation_txt
-      self[:citation_apa]&.html_safe || super # TODO: APA for non-MARC
+      get_citation_style(:apa)&.html_safe || super # TODO: APA for non-MARC
     end
 
-    # Emit an MLA (Modern Language Association) bibliographic citation from the
-    # :citation_mla field.
+    # Emit an MLA (Modern Language Association) bibliographic citation.
     #
     # @return [ActiveSupport::SafeBuffer]
     #
@@ -64,11 +62,10 @@ module Blacklight::Eds::Document
     # @see Blacklight::Solr::Document::MarcExport#export_as_mla_citation_txt
     #
     def export_as_mla_citation_txt
-      self[:citation_mla]&.html_safe || super # TODO: MLA for non-MARC
+      get_citation_style(:mla)&.html_safe || super # TODO: MLA for non-MARC
     end
 
-    # Emit an CMOS (Chicago Manual of Style) bibliographic citation from the
-    # :citation_chicago field.
+    # Emit an CMOS (Chicago Manual of Style) bibliographic citation.
     #
     # @return [ActiveSupport::SafeBuffer]
     #
@@ -79,7 +76,7 @@ module Blacklight::Eds::Document
     # @see Blacklight::Solr::Document::MarcExport#export_as_chicago_citation_txt
     #
     def export_as_chicago_citation_txt
-      self[:citation_chicago]&.html_safe || super # TODO: CMOS for non-MARC
+      get_citation_style(:chicago)&.html_safe || super # TODO:CMOS for non-MARC
     end
 
     # Exports as an OpenURL KEV (key-encoded value) query string.
@@ -109,7 +106,7 @@ module Blacklight::Eds::Document
     # @see Blacklight::Solr::Document::MarcExport#export_as_refworks_marc_txt
     #
     def export_as_refworks_marc_txt
-      super # TODO - RefWorks for non-MARC
+      get_citation_export(:refworks) || super # TODO - RefWorks for non-MARC
     end
 
     # Export to EndNote.
@@ -123,7 +120,7 @@ module Blacklight::Eds::Document
     # @see Blacklight::Solr::Document::MarcExport#export_as_endnote
     #
     def export_as_endnote
-      super # TODO - EndNote for non-MARC
+      get_citation_export(:endnote) || super # TODO - EndNote for non-MARC
     end
 
     # Export to Zotero RIS.
@@ -134,7 +131,39 @@ module Blacklight::Eds::Document
     # @see Blacklight::Lens::Document::Export#export_as_ris
     #
     def export_as_ris
-      super # TODO - Zotero RIS for non-MARC
+      get_citation_export(:ris) || super # TODO - Zotero RIS for non-MARC
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    protected
+
+    # Extract citation from the :eds_citation_styles field.
+    #
+    # @param [String] style
+    #
+    # @return [String, nil]
+    #
+    def get_citation_style(style)
+      style = style.to_s.downcase
+      Array.wrap(self['eds_citation_styles']).find { |e|
+        return e['data'] if e && e['data'].present? && (e['id'] == style)
+      }
+    end
+
+    # Extract citation export from the :eds_citation_exports field.
+    #
+    # @param [String] style
+    #
+    # @return [String, nil]
+    #
+    def get_citation_export(style)
+      style = style.to_s.upcase
+      Array.wrap(self['eds_citation_exports']).find { |e|
+        return e['data'] if e && e['data'].present? && (e['id'] == style)
+      }
     end
 
   end

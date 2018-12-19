@@ -21,6 +21,7 @@ module AboutHelper
   include AboutHelper::Internal
   include AboutHelper::List
   include AboutHelper::Solr
+  include AboutHelper::Eds
   include AboutHelper::Log
 
   # ===========================================================================

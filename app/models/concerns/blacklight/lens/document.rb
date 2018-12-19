@@ -48,6 +48,7 @@ module Blacklight::Lens::Document
     @lens = lens
     raise if @lens && !@lens.is_a?(Symbol)
     Blacklight::Document::Base.register_export_formats(self)
+    @raw_source ||= source_doc
     super(source_doc, response)
   end
 
@@ -103,6 +104,22 @@ module Blacklight::Lens::Document
       model = ctrlr.blacklight_config.document_model
     end
     model.new(_source, response, key) rescue self
+  end
+
+  # The document ID to be used for external references
+  #
+  # @return [String]
+  #
+  def export_id
+    id
+  end
+
+  # The original data received from the search repository.
+  #
+  # @return [String]
+  #
+  def raw_source
+    @raw_source
   end
 
 end

@@ -12,23 +12,12 @@ __loading_begin(__FILE__)
 module AboutHelper::List
 
   include AboutHelper::Common
-  extend  AboutHelper::Common
+
+  extend self
 
   def self.included(base)
     __included(base, '[AboutHelper::List]')
   end
-
-  # The heading for the library list page.
-  #
-  # @type [ActiveSupport::SafeBuffer]
-  #
-  LIBRARY_HEADING = topic_heading(:library).freeze
-
-  # The heading for the location list page.
-  #
-  # @type [ActiveSupport::SafeBuffer]
-  #
-  LOCATION_HEADING = topic_heading(:location).freeze
 
   # The description for the library list page that appears below the heading.
   #
@@ -192,6 +181,18 @@ module AboutHelper::List
 
   public
 
+  # Lookup or generate a topic heading.
+  #
+  # @param [Symbol] topic
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def topic_heading(topic)
+    scope   = "blacklight.about.#{topic}"
+    default = "#{topic.to_s.humanize.capitalize} Codes"
+    I18n.t(:title, scope: scope, default: [:label, default]).html_safe
+  end
+
   # topic_components
   #
   # @param [Symbol] topic
@@ -211,7 +212,6 @@ module AboutHelper::List
     result << send("#{topic}_heading_row")
     result << send("#{topic}_rows", topic_list)
   rescue => e
-    $stderr.puts ">>> #{e.inspect}"
     default = [
       'Unknown',
       %Q(No information on "#{topic.to_s.humanize.capitalize}"),
@@ -240,6 +240,24 @@ module AboutHelper::List
     html_opt = args.last.is_a?(Hash) ? args.pop : {}
     args.map { |arg| content_tag(tag, arg, html_opt) }.join.html_safe
   end
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  public
+
+  # The heading for the library list page.
+  #
+  # @type [ActiveSupport::SafeBuffer]
+  #
+  LIBRARY_HEADING = topic_heading(:library).freeze
+
+  # The heading for the location list page.
+  #
+  # @type [ActiveSupport::SafeBuffer]
+  #
+  LOCATION_HEADING = topic_heading(:location).freeze
 
 end
 

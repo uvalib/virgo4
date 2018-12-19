@@ -1,6 +1,6 @@
 <%# app/views/about/log/_controls.html.erb -%>
 <%-
-  # Controls for the log file viewer.
+  # Added controls for the log file viewer.
   available_controls =
     log_controls(
       refresh: {
@@ -20,7 +20,7 @@
   return unless available_controls.present?
 -%>
 
-<li class="about-sidebar-link log-controls">
+<li class="sidebar-entry log-controls">
   <%- available_controls.each_pair do |label, opt| -%>
     <%- options      = opt.slice(:action) -%>
     <%- html_options = opt.except(*options.keys) -%>

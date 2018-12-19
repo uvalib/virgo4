@@ -75,14 +75,22 @@ module ArticlesHelper
 
   # Translation of XML element tags to equivalent HTML element tags.
   EBSCO_XML_TO_HTML = {
-    '<anid>'   => '<anid style="display: none">',
-    '<title '  => '<div ',
-    '</title>' => '</div>',
-    '<bold>'   => '<b>',
-    '</bold>'  => '</b>',
-    '<emph>'   => '<i>',
-    '</emph>'  => '</i>',
-  }.freeze
+    title:       'atitle',
+    bold:        'b',
+    emph:        'i',
+    item:        'li',
+    ulist:       'ul',
+    olist:       'ol',
+    superscript: 'sup',
+    sups:        'sup',
+    subscript:   'sub',
+    subs:        'sub',
+  }.flat_map { |xml, html|
+    [
+      %W(<#{xml}\  <#{html}\ ),
+      %W(</#{xml}> </#{html}>)
+    ]
+  }.to_h.deep_freeze
 
   # For matching any of the XML element tag strings.
   EBSCO_XML_KEYS = Regexp.new(EBSCO_XML_TO_HTML.keys.join('|'))
@@ -147,7 +155,7 @@ module ArticlesHelper
     return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
     values = (values.first.presence if values.is_a?(Hash))
-    array_of_hashes = (values['Links'].to_a if values.is_a?(Hash))
+    array_of_hashes = (values['links'].to_a if values.is_a?(Hash))
     result =
       if array_of_hashes.present?
         controller = 'articles' # TODO: generalize
@@ -181,9 +189,9 @@ module ArticlesHelper
     return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
     separator = opt.delete(:separator) || "<br/>\n"
-    text = Array.wrap(values).join(separator)
-    anchor   = content_tag(:div, '', id: FULL_TEXT_ANCHOR, class: 'anchor')
-    scroller = content_tag(:div, eds_text(text, true), class: 'scroller')
+    content   = Array.wrap(values).join(separator)
+    anchor    = content_tag(:div, '', id: FULL_TEXT_ANCHOR, class: 'anchor')
+    scroller  = content_tag(:div, eds_text(content, true), class: 'scroller')
     anchor + scroller
   end
 
@@ -191,7 +199,7 @@ module ArticlesHelper
   #
   # @param [Hash] options
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [ActiveSupport::SafeBuffer, nil]
   #
   def fulltext_link(options = nil)
     return raw_value(options) unless request.format.html?
@@ -199,13 +207,13 @@ module ArticlesHelper
     return unless doc.is_a?(Blacklight::Document)
     return unless doc[:eds_html_fulltext_available]
     label = I18n.t('ebsco_eds.links.view', default: 'View')
-    opt = {
+    url = url_for(
       controller: Blacklight::Lens.key_for_doc(doc),
-      action:     'show',
+      action:     :show,
       id:         doc.id,
       anchor:     FULL_TEXT_ANCHOR
-    }
-    link_to(label, url_for(opt))
+    )
+    link_to(label, url) if url.present?
   end
 
   # ebsco_eds_plink

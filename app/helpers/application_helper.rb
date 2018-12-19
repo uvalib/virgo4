@@ -63,11 +63,13 @@ module ApplicationHelper
   # @see ActionView::Helper::OutputSafetyHelper#to_sentence
   #
   def url_link(value, opt = nil)
-    return raw_value(opt) unless request.format.html?
-    values, opt = extract_config_value(value, opt)
+    unless request.format.html?
+      return raw_value(value).to_s.split('|').first.presence
+    end
+    value, opt = extract_config_value(value, opt)
     separator = opt.delete(:separator) || ' '
     result =
-      Array.wrap(values).map { |url|
+      Array.wrap(value).map { |url|
         parts = url.to_s.split('|', -3)
         next if (url = parts.first).blank?
         label = (parts.last.presence if parts.size > 1) || url
@@ -91,7 +93,7 @@ module ApplicationHelper
   # @return [nil]                                 If no URLs were present.
   #
   def doi_link(value, opt = nil)
-    return raw_value(options) unless request.format.html?
+    return raw_value(value) unless request.format.html?
     value, opt = extract_config_value(value, opt)
     separator = opt.delete(:separator)
     result =

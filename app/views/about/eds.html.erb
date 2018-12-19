@@ -1,0 +1,8 @@
+<%# app/views/about/eds.html.erb -%>
+<%-
+  # Administrator-only EBSCO EDS information.
+  return unless authorized?
+  repository ||= :eds
+  lens       ||= params[:lens] || :articles
+-%>
+<%= render 'about/common/repository', repository: repository, lens: lens %>

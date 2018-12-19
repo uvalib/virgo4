@@ -151,7 +151,7 @@ module EBSCO::EDS::RecordExt
   def html_fulltext(sanitize_config = nil)
     return unless html_fulltext_available
     value = @record.dig('FullText', 'Text', 'Value')
-    if @decode_sanitize_html
+    if @decode_sanitize_html && false # TODO: This requires special handling...
       sanitize_config ||= SANITIZE_FULLTEXT_CONFIG
       value = html_decode_and_sanitize(value, sanitize_config)
     end
@@ -285,6 +285,7 @@ module EBSCO::EDS::RecordExt
       when Array then url, label, icon = lnk
       else            url = lnk
     end
+    url     &&= add_protocol(url) if type.start_with?('customlink-')
     url     ||= 'detail'
     label   ||= I18n.t("#{i18n_scope}.label", default: url)
     icon    ||= I18n.t("#{i18n_scope}.icon")
@@ -488,6 +489,10 @@ module EBSCO::EDS::RecordExt
   #
   def html_decode_and_sanitize(data, sanitize_config = nil)
     data = CGI.unescapeHTML(data.to_s)
+    # Need to double-unescape data with an ephtml section.
+    if data =~ /<ephtml>/
+      data = CGI.unescapeHTML(data).gsub(/\\"/, '"').gsub(/\\n /, '')
+    end
     sanitize_config ||= SANITIZE_CONFIG
     Sanitize.fragment(data, sanitize_config)
   end

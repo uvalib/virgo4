@@ -364,6 +364,35 @@ module Blacklight::Lens::Controller
     request.format.json?
   end
 
+  # Indicate whether the field has a numeric value of zero.
+  #
+  # @param [Blacklight::Configuration::Field] config
+  # @param [Hash]                             opt
+  #
+  def zero_value?(config, opt)
+    !nonzero_value?(config, opt)
+  end
+
+  # Indicate whether the field has a numeric value other than zero.
+  #
+  # @param [Blacklight::Configuration::Field] config
+  # @param [Hash]                             opt
+  #
+  def nonzero_value?(config, opt)
+    case opt
+      when Hash
+        opt[:value].to_i.nonzero?
+      when Blacklight::Document
+        if config.is_a?(Blacklight::Configuration::Field) && (key = config.key)
+          if_any?(opt) do |doc|
+            Array.wrap(doc[key]).any? do |v|
+              v.to_s.gsub(/[^\d]/, '').to_i.nonzero?
+            end
+          end
+        end
+    end
+  end
+
   # ===========================================================================
   # :section:
   # ===========================================================================

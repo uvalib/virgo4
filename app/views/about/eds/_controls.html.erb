@@ -1,14 +1,14 @@
-<%# app/views/about/solr/_controls.html.erb -%>
+<%# app/views/about/eds/_controls.html.erb -%>
 <%-
-  # Added controls for Solr operations.
+  # Added controls for EBSCO EDS operations.
   available_controls =
-    solr_controls({
+    eds_controls({
       # NOTE: none currently
     }) if authorized?
   return unless available_controls.present?
 -%>
 
-<li class="sidebar-entry solr-controls">
+<li class="sidebar-entry eds-controls">
   <%- available_controls.each_pair do |label, opt| -%>
     <%- options      = opt[:url] -%>
     <%- html_options = opt.except(:url) -%>

@@ -1,6 +1,70 @@
 // app/assets/stylesheets/shared/_mixins.scss
 
 // ============================================================================
+// Generic - Widths
+// ============================================================================
+
+/// Set width to the available width.
+///
+/// @param {String} $fall-back        The value that will be used for MS Edge
+///                                     and Internet Explorer (since they don't
+///                                     support any "fit-content" variant).
+///
+//noinspection CssInvalidPropertyValue  NOTE: RubyMine -webkit-fill-available
+@mixin width-available($fall-back: 50%) {
+    width: $fall-back;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: available;
+}
+
+/// Set width to fit the content.
+///
+/// @param {String} $fall-back        The value that will be used for MS Edge
+///                                     and Internet Explorer (since they don't
+///                                     support any "fit-content" variant).
+///
+//noinspection CssInvalidPropertyValue  NOTE: RubyMine -webkit-fit-content
+@mixin width-fit-content($fall-back: auto) {
+    width: $fall-back;
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+}
+
+// ============================================================================
+// Generic - Heights
+// ============================================================================
+
+/// Set height to the available vertical space.
+///
+/// @param {String} $fall-back        The value that will be used for MS Edge
+///                                     and Internet Explorer (since they don't
+///                                     support any "fit-content" variant).
+///
+//noinspection CssInvalidPropertyValue  NOTE: RubyMine -webkit-fill-available
+@mixin height-available($fall-back: 50%) {
+    height: $fall-back;
+    height: -webkit-fill-available;
+    height: -moz-available;
+    height: available;
+}
+
+/// Set height to fit the content.
+///
+/// @param {String} $fall-back        The value that will be used for MS Edge
+///                                     and Internet Explorer (since they don't
+///                                     support any "fit-content" variant).
+///
+//noinspection CssInvalidPropertyValue  NOTE: RubyMine -webkit-fit-content
+@mixin height-fit-content($fall-back: auto) {
+    height: $fall-back;
+    height: -webkit-fit-content;
+    height: -moz-fit-content;
+    height: fit-content;
+}
+
+// ============================================================================
 // Animation
 // ============================================================================
 

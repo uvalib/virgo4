@@ -1,4 +1,4 @@
-<%# app/views/about/_common.html.erb -%>
+<%# app/views/about/common/_page.html.erb -%>
 <%-
   # Common elements for all About pages
 
@@ -8,5 +8,5 @@
   content_for(:page_title, page_title)
 
   @sidebar_tab_first = true
-  content_for(:sidebar) { render 'about/sidebar' } unless request.xhr?
+  content_for(:sidebar) { render 'about/common/sidebar' } unless request.xhr?
 -%>

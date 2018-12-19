@@ -80,6 +80,24 @@ module EBSCO::EDS::SessionExt
     @auth_type = ENV['EDS_AUTH']      || @config[:auth]
     @log_level = ENV['EDS_LOG_LEVEL'] || @config[:log_level]
     @cache_dir = ENV['EDS_CACHE_DIR'] || @config[:eds_cache_dir]
+    @auth_expire =
+      ENV['EDS_AUTH_CACHE_EXPIRES_IN'] ||
+        @config[:auth_cache_expires_in]
+    @info_expire =
+      ENV['EDS_INFO_CACHE_EXPIRES_IN'] ||
+        @config[:info_cache_expires_in]
+    @retrieve_expire =
+      ENV['EDS_RETRIEVE_CACHE_EXPIRES_IN'] ||
+        @config[:retrieve_cache_expires_in]
+    @search_expire =
+      ENV['EDS_SEARCH_CACHE_EXPIRES_IN'] ||
+        @config[:search_cache_expires_in]
+    @export_format_expire =
+      ENV['EDS_EXPORT_FORMAT_CACHE_EXPIRES_IN'] ||
+        @config[:export_format_cache_expires_in]
+    @citation_styles_expire =
+      ENV['EDS_CITATION_STYLES_CACHE_EXPIRES_IN'] ||
+        @config[:citation_styles_cache_expires_in]
 
     # Boolean configuration options can be overridden by environment variables.
     @guest =
@@ -136,9 +154,15 @@ module EBSCO::EDS::SessionExt
     @cache_opt =
       if @use_cache
         {
-          store:      :file_store,
-          cache_dir:  @cache_dir,
-          logger:     @logger,
+          store:                  :file_store,
+          cache_dir:              @cache_dir,
+          logger:                 @logger,
+          auth_expire:            @auth_expire,
+          info_expire:            @info_expire,
+          search_expire:          @search_expire,
+          retrieve_expire:        @retrieve_expire,
+          export_format_expire:   @export_format_expire,
+          citation_styles_expire: @citation_styles_expire
         }
       end
 
@@ -165,8 +189,9 @@ module EBSCO::EDS::SessionExt
     }
 
     # Establish session properties, acquiring them remotely as needed.
-    @auth_token    = options[:auth_token].presence    || create_auth_token
-    @session_token = options[:session_token].presence || create_session_token
+    @auth_token     = options[:auth_token].presence     || create_auth_token
+    @session_token  = options[:session_token].presence  || create_session_token
+    @citation_token = options[:citation_token].presence || create_citation_token
 
     # Get search characteristics (from cache when possible).
     info  = do_request(:get, path: @config[:info_url])
@@ -174,11 +199,12 @@ module EBSCO::EDS::SessionExt
 
     if @debug
       if options.key?(:caller)
-        Log.add('SESSION CALLER: ' + options[:caller].inspect)
-        Log.add('CALLER OPTIONS: ' + options.inspect)
+        Log.add('*** EDS *** SESSION CALLER: ' + options[:caller].inspect)
+        Log.add('*** EDS *** CALLER OPTIONS: ' + options.inspect)
       end
-      Log.add('AUTH TOKEN:    ' + @auth_token.inspect)
-      Log.add('SESSION TOKEN: ' + @session_token.inspect)
+      Log.add('*** EDS *** AUTH TOKEN:     ' + @auth_token.inspect)
+      Log.add('*** EDS *** SESSION TOKEN:  ' + @session_token.inspect)
+      Log.add('*** EDS *** CITATION TOKEN: ' + @citation_token.inspect)
     end
 
   end
@@ -362,9 +388,9 @@ module EBSCO::EDS::SessionExt
   # This method overrides:
   # @see EBSCO::EDS::Session#connection
   #
-  def connection(use_cache = @use_cache)
+  def connection(use_cache: @use_cache, token: @session_token)
     Faraday.new(@conn_opt) do |conn|
-      conn.headers['x-sessionToken']        = @session_token
+      conn.headers['x-sessionToken']        = token
       conn.headers['x-authenticationToken'] = @auth_token
       conn.use :eds_caching_middleware, @cache_opt if use_cache
       conn.use :eds_exception_middleware
@@ -383,7 +409,18 @@ module EBSCO::EDS::SessionExt
   # @see EBSCO::EDS::Session#jump_connection
   #
   def jump_connection
-    connection(false)
+    connection(use_cache: false)
+  end
+
+  # Same as above but with @citation_token.
+  #
+  # @return [Faraday::Connection]
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Session#citation_connection
+  #
+  def citation_connection
+    connection(token: @citation_token)
   end
 
   # ===========================================================================
@@ -398,6 +435,22 @@ module EBSCO::EDS::SessionExt
   #
   def guest
     @guest
+  end
+
+  # Return session data as a hash for debugging.
+  #
+  # Note that @config and @info are not included; they should be handled
+  # individually through the individual member attributes.
+  #
+  # @return [Hash]
+  #
+  def to_h
+    instance_variables.map { |var|
+      next if %i(@config @info).include?(var)
+      name  = var.to_s.sub(/^@/, '')
+      value = instance_variable_get(var)
+      [name, value]
+    }.compact.sort.to_h
   end
 
   # ===========================================================================

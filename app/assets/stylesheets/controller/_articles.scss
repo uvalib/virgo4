@@ -28,16 +28,12 @@ $article-fulltext-full-width: true;
 // Articles - EBSCO XML fields
 //=============================================================================
 
-// On search result entries for:
-//  :eds_composed_title ("Published in")
-//  :eds_authors_composed
-//  :eds_subjects
-//
 // @see Blacklight::Eds::Document#prepare
-//
+
 searchLink {
     font-style: italic;
 }
+
 relatesTo {
     &:before { content: "[" }
     &:after  { content: "]" }
@@ -46,6 +42,16 @@ relatesTo {
 //=============================================================================
 // Articles - Definitions
 //=============================================================================
+
+// Make paragraphs delineated by <br> stand apart.
+%article-paragraphs {
+    br { margin-bottom: 0.5rem; }
+}
+
+// Make list items delineated by <br> stand apart.
+%article-list {
+    br { margin-bottom: 0.05rem; }
+}
 
 // Articles panels
 %article-panel {
@@ -84,10 +90,23 @@ dt.blacklight-eds_abstract {
     }
 }
 dd.blacklight-eds_abstract {
-    //@extend %article-panel;
+
+    @extend %article-paragraphs;
     @if $article-abstract-full-width {
         @extend %article-full-width;
     }
+
+    line-height: 1.25;
+}
+
+// Related Subjects
+dd.blacklight-eds_subjects {
+    @extend %article-list;
+}
+
+// Authors (composed)
+dd.blacklight-eds_authors_composed {
+    @extend %article-paragraphs;
 }
 
 // Embedded full text.
@@ -149,6 +168,7 @@ dd.blacklight-eds_html_fulltext {
         // Article ID and other information (<anid> in the received data).
         > anid {
             word-break:   break-all;
+            font-size:    small;
             font-variant: all-small-caps;
             color:        gray;
         }
@@ -374,6 +394,7 @@ dd.blacklight-eds_html_fulltext {
 
 // Annotated authors and author affiliations.
 dd.blacklight-eds_authors_composed {
+    @extend %article-paragraphs;
     relatesTo:before { content: " ["; }
 }
 dd.blacklight-eds_author_affiliations {

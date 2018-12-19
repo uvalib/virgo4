@@ -13,9 +13,13 @@ json.data do
   json.id   @document.id
   json.type @document[type_field]
   json.attributes do
-    doc_presenter = json_presenter(@document)
+    doc_presenter = show_presenter(@document)
     doc_presenter.fields_to_render.each do |field_name, field|
       json.set! field_name, doc_presenter.field_value(field_name)
     end
   end
+end
+
+if @document.respond_to?(:raw_source) && @document.raw_source.present?
+  json.set! 'raw_source', @document.raw_source
 end

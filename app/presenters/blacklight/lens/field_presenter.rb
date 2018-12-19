@@ -39,6 +39,10 @@ module Blacklight::Lens
         retrieve_values
       else
         options[:value] &&= Array.wrap(options[:value]).map(&:html_safe)
+        if options.key?(:separator_options)
+          @field_config = @field_config.dup
+          @field_config.separator_options = options[:separator_options]
+        end
         super
       end
     end

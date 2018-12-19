@@ -133,6 +133,8 @@ Rails.application.routes.draw do
   get    'about/solr',        to: 'about#solr',       as: 'about_solr'
   get    'about/solr_stats',  to: 'about#solr_stats', as: 'about_solr_stats'
 
+  get    'about/eds',         to: 'about#eds',        as: 'about_eds'
+
   get    'about/log',         to: 'about#log',        as: 'about_log'
   delete 'about/log',         to: 'about#log_wipe',   as: 'about_log_wipe'
 

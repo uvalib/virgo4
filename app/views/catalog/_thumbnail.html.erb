@@ -7,4 +7,6 @@
 -%>
 <div class="document-thumbnail" aria-hidden="true">
   <%= presenter.thumbnail_tag({}, counter: counter) %>
+  <%# TODO: comparison link; remove when Virgo 3 is gone -%>
+  <%= production_virgo_link(document) unless params[:action] == 'index' %>
 </div>

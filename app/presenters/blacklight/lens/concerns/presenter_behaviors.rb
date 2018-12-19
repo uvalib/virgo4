@@ -152,39 +152,42 @@ module Blacklight::Lens
       }
       opt.merge!(options)
 
-      format        = opt[:format].presence
-      line_break    = opt[:line_break].presence
-      line_break    = "\n" if line_break && format.nil?
-      title_sep     = opt[:title_sep].presence
-      title_max     = opt[:title_max].presence
-      title_tag     = opt[:title_tag].presence
-      title_class   = opt[:title_class].presence
-      title         = opt[:show_title].presence
-      subtitle      = opt[:show_subtitle].presence
-      linked_title  = opt[:show_linked_title].presence
-      author_sep    = opt[:author_sep].presence
-      author_max    = opt[:author_max].presence
-      author_tag    = opt[:author_tag].presence
-      author_class  = opt[:author_class].presence
-      author        = opt[:show_author].presence
-      linked_author = opt[:show_linked_author].presence
+      format       = opt[:format].presence
+      line_break   = opt[:line_break].presence
+      line_break   = "\n" if line_break && format.nil?
+      title_sep    = opt[:title_sep].presence
+      title_max    = opt[:title_max].presence
+      title_tag    = opt[:title_tag].presence
+      title_class  = opt[:title_class].presence
+      title        = opt[:show_title].presence
+      subtitle     = opt[:show_subtitle].presence
+      alt_title    = opt[:show_linked_title].presence
+      author_sep   = opt[:author_sep].presence
+      author_max   = opt[:author_max].presence
+      author_tag   = opt[:author_tag].presence
+      author_class = opt[:author_class].presence
+      author       = opt[:show_author].presence
+      alt_author   = opt[:show_linked_author].presence
 
-      def_field      = configuration.default_title_field
-      title        &&= value_for(view_config.title_field, def_field).presence
-      subtitle     &&= title && value_for(view_config.subtitle_field).presence
-      linked_title &&= value_for(view_config.alt_title_field).presence
+      def_field   = configuration.default_title_field
+      title     &&= value_for(view_config.title_field, def_field).presence
+      subtitle  &&= title && value_for(view_config.subtitle_field).presence
+      alt_title &&= value_for(view_config.alt_title_field).presence
 
       title_lines = []
-      title_lines << linked_title
+      title_lines << alt_title
       title_lines << [title, subtitle].reject(&:blank?).join(title_sep)
       title_lines.delete_if(&:blank?).uniq!
 
-      author        &&= value_for(view_config.author_field).presence
-      linked_author &&= value_for(view_config.alt_author_field).presence
-
+      # Eliminate the configured line-oriented separator options for #value_for
+      # if author_sep is not an HTML element.
+      vf = {}
+      if author_sep && !author_sep.html_safe?
+        vf[:separator_options] = { words_connector: author_sep }
+      end
       author_lines = []
-      author_lines << Array.wrap(linked_author).join(author_sep)
-      author_lines << Array.wrap(author).join(author_sep)
+      author_lines << value_for(view_config.alt_author_field, vf) if alt_author
+      author_lines << value_for(view_config.author_field, vf)     if author
       author_lines.delete_if(&:blank?).uniq!
 
       if format
@@ -244,16 +247,16 @@ module Blacklight::Lens
     # value_for
     #
     # @param [Symbol, Array<Symbol>] fields
-    # @param [Symbol, nil]           alt_field
+    # @param [Symbol, Hash, nil]     opt
     #
     # @return [String, nil]
     #
-    # Compare with:
-    # @see Blacklight::Lens::ShowPresenter#value_for
-    #
-    def value_for(fields, alt_field = nil)
+    def value_for(fields, opt = nil)
+      fv_opt, alt_field = opt.is_a?(Hash) ? [opt, nil] : [nil, opt]
       field = Array.wrap(fields).find { |f| document.has?(f) } || alt_field
-      field_value(field, value: document[field]) if field
+      return unless field.present?
+      fv_opt ||= {}
+      field_value(field, fv_opt.merge(value: document[field]))
     end
 
     # A minimal implementation that is defined only if the current context does

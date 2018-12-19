@@ -173,7 +173,7 @@ module Blacklight::Eds
     #
     def search_builder
       super.tap do |result|
-        unless result.is_a?(SearchBuilderEds)
+        unless result.is_a?(::SearchBuilderEds)
           raise "#{result.class} should be SearchBuilderEds"
         end
       end

@@ -288,6 +288,81 @@ module CatalogHelper
     }.join("&nbsp;\n").html_safe
   end
 
+  # ===========================================================================
+  # :section: Pre-release - TODO: remove when Virgo 3 is gone
+  # ===========================================================================
+
+  public
+
+  # An outlink to the document in the current production Virgo 3 instance.
+  #
+  # @param [Blacklight::Lens::Document, Hash] doc
+  # @param [Hash, nil]                        opt
+  #
+  # @option opt [String] :label       Link label in place of default.
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  # == Implementation Notes
+  # Translating show pages is straightforward, however translating index pages
+  # is problematic because the field names are all different.  Since that's a
+  # lot of work for an unclear benefit, for now this method will simply return
+  # *nil* from index pages.
+  #
+  def production_virgo_link(doc, opt = nil)
+    return if params[:action] == 'index' # NOTE: see above
+    html_opt = {
+      label: 'In production Virgo',
+      class: 'pre-release-button',
+      title: 'View the equivalent record in Virgo 3 production'
+    }
+    merge_html_options!(html_opt, opt)
+    label = html_opt.delete(:label)
+    doc = doc.to_hash if params[:action] == 'index'
+    url = production_virgo_url(doc)
+    outlink(label, url, html_opt)
+  end
+
+  # The URL to the document in the current production Virgo 3 instance.
+  #
+  # @param [Blacklight::Lens::Document, Hash] opt
+  #
+  # == Usage Notes
+  # The results of this method are only useful for item details show pages;
+  # index pages would be useless because all of the facet field names are
+  # different.  (To correct this, this method would have to process each URL
+  # option, mapping Virgo 4 field names to Virgo 3 field names.)
+  #
+  def production_virgo_url(opt = nil)
+    eds = doc = nil
+    case opt
+      when Blacklight::Document
+        eds = opt.is_a?(Blacklight::Eds::Document)
+        doc = opt
+        opt = {}
+      when ActionController::Parameters
+        opt = opt.to_hash.with_indifferent_access
+      when Hash
+        opt = opt.with_indifferent_access
+      else
+        opt = {}
+    end
+    ctrlr  = opt.delete(:controller) || doc&.lens || default_lens_key
+    action = opt.delete(:action).to_s
+    if (action == 'show') || (action.blank? && doc)
+      doc_id = opt.delete(:id) || doc&.export_id
+      action = eds ? "article?id=#{doc_id}" : doc_id
+    elsif (action == 'index') || (action.blank? && !doc)
+      opt[:id] ||= doc.export_id if doc
+      action = nil
+    end
+
+    url = +"https://search.lib.virginia.edu/#{ctrlr}"
+    url << "/#{action}" if action.present?
+    url << (action&.include?('?') ? '&' : '?') << opt.to_query if opt.present?
+    url
+  end
+
 end
 
 __loading_end(__FILE__)

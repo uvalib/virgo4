@@ -6,5 +6,5 @@
 
 <%- solr_info.each_pair do |route, data| -%>
   <h3 class="about-section"><%= h(route) -%></h3>
-  <pre class="log-scroller"><%= JSON.pretty_generate(data) -%></pre>
+  <%= show_table(data, repository: :solr) %>
 <%- end -%>

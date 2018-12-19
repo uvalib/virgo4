@@ -37,6 +37,7 @@ module EBSCO::EDS::ResultsExt
   #
   def initialize(search_results, eds_config = nil, limiters = nil, opt = nil)
 
+    eds_config ||= {}
     @results     = search_results || {}
     @limiters    = limiters || []
     @raw_options = opt || {}

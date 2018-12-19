@@ -13,6 +13,34 @@ body.blacklight-about {
     $sidebar-selected-bg: whitesmoke;
 
     //=========================================================================
+    // General
+    //=========================================================================
+
+    .inline {
+        display:        inline-block;
+        width:          auto;
+        vertical-align: super;
+    }
+
+    // Styling for "ok" glyph indicating.
+    .in-this-lens {
+        color: #00ff0040;
+    }
+
+    // Styling for the "remove" glyph indicating that an item does not pertain
+    // to the selected lens.
+    .not-this-lens {
+        // TODO: ???
+    }
+
+    // Styling for the "remove" glyph indicating that an item does not pertain
+    // to any lens.
+    .not-any-lens {
+        @extend .text-light;
+        @extend .bg-danger;
+    }
+
+    //=========================================================================
     // Sidebar and page layout
     //=========================================================================
 
@@ -24,7 +52,7 @@ body.blacklight-about {
         @extend .col-md-#{$sidebar-width};
     }
 
-    .about-sidebar-link {
+    .sidebar-entry {
 
         @extend .card;
 
@@ -41,14 +69,23 @@ body.blacklight-about {
         }
     }
 
+    // A grouping of related sidebar controls.
+    %sidebar-controls {
+        margin: 0;
+        border: none;
+    }
+
     .solr-controls {
-        // TODO: ???
+        @extend %sidebar-controls;
+    }
+
+    .eds-controls {
+        @extend %sidebar-controls;
     }
 
     .log-controls {
 
-        margin: 0;
-        border: none;
+        @extend %sidebar-controls;
 
         .log-button {
 
@@ -66,18 +103,68 @@ body.blacklight-about {
     // About pages
     //=========================================================================
 
+    .about-title {
+        // TODO: ?
+    }
+
+    .about-description {
+        margin-bottom: 1rem;
+    }
+
+    .about-lens-select {
+
+        @extend .inline;
+
+        margin-left: 1rem;
+
+        .form-control {
+            @extend .inline;
+        }
+    }
+
+    .about-table-container {
+        // TODO: ???
+    }
+
+    .about-table-scroller {
+
+        @extend .about-table-container;
+
+        width:      67vw;
+        max-height: 90vh;
+        overflow-x: auto;
+        resize:     both;
+    }
+
+    .about-table {
+
+        @include width-available;
+
+        // For consistent alignment between tables.
+        col.col1 {
+            width: 20%;
+        }
+
+        // Ensure that nested tables fit within a cell as well as possible.
+        .about-table-container {
+            width:      auto;
+            height:     auto;
+            max-height: unset;
+            padding:    1rem 0.5rem;
+            overflow-x: unset;
+        }
+    }
+
+    //=========================================================================
+    // About index page
+    //=========================================================================
+
     p {
         margin-bottom: 0.25rem;
     }
 
     .featured {
         background-color: lightcyan;
-    }
-
-    .inline {
-        display:        inline-block;
-        width:          auto;
-        vertical-align: super;
     }
 
     .about-section {
@@ -108,22 +195,9 @@ body.blacklight-about {
         border:      1px solid black;
     }
 
-    .about-table {
-        width: -moz-available;
-        width: available;
-    }
-
     //=========================================================================
     // About list pages
     //=========================================================================
-
-    .about-topic-title {
-        // TODO: ?
-    }
-
-    .about-topic-description {
-        margin-bottom: 1rem;
-    }
 
     .about-topic-table {
         @extend .about-table;
@@ -155,21 +229,12 @@ body.blacklight-about {
         .about-value:before { content: ""; }
     }
 
-    .about-lens-select {
-
-        @extend .inline;
-
-        margin-left: 1rem;
-
-        .form-control {
-            @extend .inline;
-        }
+    .about-solr-table-container {
+        @extend .about-table-container;
     }
 
-    .about-solr-table-container {
-        height:     90vh;
-        overflow-x: auto;
-        resize:     both;
+    .about-solr-table-scroller {
+        @extend .about-table-scroller;
     }
 
     .about-solr-table {
@@ -187,8 +252,9 @@ body.blacklight-about {
 
         .heading,
         .cell {
-            padding: 0 0.5rem;
-            border:  $border;
+            padding:        0 0.5rem;
+            vertical-align: baseline;
+            border:         $border;
         }
 
         .about-histogram {
@@ -216,6 +282,34 @@ body.blacklight-about {
             td {
                 border: 2px solid white;
             }
+        }
+    }
+
+    //=========================================================================
+    // About EBSCO EDS page
+    //=========================================================================
+
+    .about-eds {
+        @extend .about-solr;
+    }
+
+    .about-eds-table-container {
+        @extend .about-table-container;
+    }
+
+    .about-eds-table-scroller {
+        @extend .about-table-scroller;
+    }
+
+    .about-eds-table {
+
+        @extend .about-solr-table;
+
+        border: none;
+
+        // Bold the first data row of a nested two-column table.
+        .nested > tbody > tr:first-of-type {
+            font-weight: bold;
         }
     }
 

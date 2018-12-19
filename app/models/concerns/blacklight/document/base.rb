@@ -26,7 +26,7 @@ module Blacklight::Document
     # Multiple "values" can be given; only one needs to match.
     #
     # @param [Symbol, String, Array<String,Symbol>] key
-    # @param [Array<String,Regexp>]                 values
+    # @param [Array<String,Regexp>]                 patterns
     #
     # This method overrides:
     # @see Blacklight::Document#has?
@@ -35,17 +35,17 @@ module Blacklight::Document
     # The original does not support the ability to test for the presence of any
     # key from an array of keys unless values are given.
     #
-    def has?(key, *values)
+    def has?(key, *patterns)
       if key.is_a?(Array)
-        key.any? { |k| has?(k, *values) }
+        key.any? { |k| has?(k, *patterns) }
       elsif !key?(key)
         false
-      elsif (doc_values = Array.wrap(self[key])).blank?
+      elsif (doc_values = Array.wrap(self[key]).reject(&:blank?)).blank?
         false
-      elsif values.blank?
+      elsif patterns.blank?
         true
       else
-        values.any? do |expected|
+        patterns.any? do |expected|
           if expected.is_a?(Regexp)
             doc_values.any? { |actual| actual =~ expected }
           else

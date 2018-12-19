@@ -1,0 +1,17 @@
+<%# app/views/catalog/_results_pagination.html.erb -%>
+<%-
+  # Pagination controls at the bottom of the search results page.
+  return unless show_pagination? && (@response&.total_pages.to_i > 1)
+
+  label ||= t('views.pagination.aria.container_label')
+
+-%>
+<div class="row record-padding">
+  <div class="col-md-12">
+    <nav class="pagination" role="region" aria-label="<%= label -%>">
+      <%= paginate @response, outer_window: 2, theme: 'blacklight' %>
+      <%# TODO: comparison link; remove when Virgo 3 is gone -%>
+      <%= production_virgo_link(params.to_hash) -%>
+    </nav>
+  </div>
+</div>

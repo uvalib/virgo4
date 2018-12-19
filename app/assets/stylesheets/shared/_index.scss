@@ -20,6 +20,11 @@
     }
 }
 
+// "Did-you-mean" suggestion.
+.suggest {
+    margin-bottom: 2rem;
+}
+
 // Page links and search widgets
 .sort-pagination {
     .tools.btn-group {
@@ -96,6 +101,11 @@
                     border:     1px solid lightgray;
                 }
             }
+
+            // TODO: remove when Virgo 3 is gone
+            .pre-release-button {
+                display: none;
+            }
         }
 
         &.blacklight-coin {
@@ -108,5 +118,15 @@
                 }
             }
         }
+    }
+}
+
+// TODO: remove when Virgo 3 is gone
+.pagination {
+
+    justify-content: space-between;
+
+    .pre-release-button {
+        @include height-fit-content;
     }
 }

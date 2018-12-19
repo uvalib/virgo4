@@ -25,26 +25,7 @@ module AboutHelper::Solr
   #
   # @see self#get_solr_fields
   #
-  SOLR_TYPES =
-    I18n.t('blacklight.about.solr.fields.types').deep_freeze
-
-  # Definitions of the parts of the JSON returned from the Solr luke handler.
-  #
-  # @type [Hash{Symbol=>*}]
-  #
-  # @see self#get_solr_statistics
-  #
-  SOLR_STATS_DATA_TEMPLATE =
-    I18n.t('blacklight.about.solr.stats.data_template').deep_freeze
-
-  # Definitions of the parts of the JSON returned from the Solr luke handler.
-  #
-  # @type [Array<Hash{Symbol=>String}>]
-  #
-  # @see self#solr_stats_columns
-  #
-  SOLR_STATS_COLUMNS =
-    I18n.t('blacklight.about.solr.stats.columns').deep_freeze
+  SOLR_TYPES = I18n.t('blacklight.about.solr.fields.types').deep_freeze
 
   # Definitions of the parts of the JSON returned from the Solr luke handler.
   #
@@ -54,6 +35,24 @@ module AboutHelper::Solr
   #
   SOLR_INFO_DATA_TEMPLATE =
     I18n.t('blacklight.about.solr.info.data_template').deep_freeze
+
+  # Definitions of the parts of the JSON returned from the Solr luke handler.
+  #
+  # @type [Hash{Symbol=>*}]
+  #
+  # @see self#get_solr_statistics
+  #
+  SOLR_STATS_DATA_TEMPLATE =
+    I18n.t('blacklight.about.solr_stats.data_template').deep_freeze
+
+  # Definitions of the parts of the JSON returned from the Solr luke handler.
+  #
+  # @type [Array<Hash{Symbol=>String}>]
+  #
+  # @see self#solr_stats_columns
+  #
+  SOLR_STATS_COLUMNS =
+    I18n.t('blacklight.about.solr_stats.columns').deep_freeze
 
   # ===========================================================================
   # :section:
@@ -68,27 +67,32 @@ module AboutHelper::Solr
   # @see self#SOLR_TYPES
   # @see self#get_solr_field_data
   #
+  # Compare with:
+  # @see AboutHelper::Eds#get_eds_fields
+  #
   def get_solr_fields
-    fields       = get_solr_field_data
+
+    fields = get_solr_field_data
+
     lens_keys    = Blacklight::Lens.lens_keys
     lens_configs = lens_keys.map { |k| [k, blacklight_config_for(k)] }.to_h
+
     SOLR_TYPES.map { |type, entry|
-      suffix, show_as =
-        entry.is_a?(Hash) ? entry.slice(:suffix, :show_as).values : entry.to_s
+      prefix, suffix, show_as = value_array(entry, :prefix, :suffix, :show_as)
+      show_as = suffix.presence && show_as.presence
       table =
         fields.map { |field, count|
           field = field.to_s
-          next unless field.end_with?(suffix)
-          data = { count: count }
-          field, variant =
-            show_as ? [field.sub(/#{suffix}$/, show_as), field] : field
-          data[:lenses] =
+          next unless prefix.blank? || field.start_with?(prefix)
+          next unless suffix.blank? || field.end_with?(suffix)
+          names = show_as ? [field.sub(/#{suffix}$/, show_as), field] : [field]
+          matching_config =
             lens_configs.select { |_, config|
-              options = { type: type, config: config }
-              in_configuration?(field, options) ||
-                (in_configuration?(variant, options) if variant)
-            }.keys
-          [field, data]
+              names.any? { |name|
+                in_configuration?(name, type: type, config: config)
+              }
+            }
+          [field, { count: count.to_s.presence, lenses: matching_config.keys }]
         }.compact.to_h
       [type, table]
     }.to_h
@@ -122,83 +126,23 @@ module AboutHelper::Solr
     end
   end
 
-  # Indicate whether the given field name is in the current configuration.
-  #
-  # @param [Symbol]                         field
-  # @param [Symbol, Array<Symbol>]          type    One or more of
-  #                                                   `SOLR_TYPES.keys`;
-  #                                                   default: all types.
-  # @param [Blacklight::Configuration, nil] config  Default value is
-  #                                                 `default_blacklight_config`
-  #
-  def in_configuration?(field, type: type, config: config)
-    config ||= default_blacklight_config
-    type   ||= SOLR_TYPES.keys
-    type     = Array.wrap(type)
-    case type
-      when [:sort]
-        config.sort_field?(field)
-      when [:facet]
-        config.facet_field?(field)
-      when [:display], [:suggest]
-        config.index_field?(field) || config.show_field?(field)
-      else
-        (type.include?(:sort)  && config.sort_field?(field)) ||
-        (type.include?(:facet) && config.facet_field?(field)) ||
-        (config.index_field?(field) || config.show_field?(field))
-    end
-  end
-
   # ===========================================================================
   # :section:
   # ===========================================================================
 
   public
 
-  # A menu element to choose a lens to use in comparisons between Solr fields
-  # and configured Blacklight fields.
+  # Solr sidebar control buttons.
   #
-  # @param [String, nil] selected_lens
-  # @param [String, nil] path           Default: `request.path`
+  # @param [Hash{Symbol=>Hash}]
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [Hash{String=>Hash}]
   #
-  def lens_select_menu(selected_lens = nil, path = nil)
-    keys   = Blacklight::Lens.lens_keys.map(&:to_s)
-    table  = keys.map { |k| [k.capitalize, k] }
-    prompt = I18n.t('blacklight.about.solr.select.label', default: 'Lens')
-    menu   = table.unshift([prompt, ''])
-    menu   = options_for_select(menu, selected_lens.to_s)
-    path ||= request.path
-    form_tag(path, method: :get, class: 'about-lens-select') do
-      select_opt = { class: 'form-control', onchange: 'this.form.submit();' }
-      select_tag(:lens, menu, select_opt)
-    end
-  end
-
-  # Icon for the Solr field table that indicates that the selected lens
-  # configuration does not include the associated Solr field.
+  # Compare with:
+  # @see AboutHelper::Eds#eds_controls
   #
-  # @return [ActiveSupport::SafeBuffer]
-  #
-  def not_this_lens
-    blacklight_icon(
-      'remove',
-      title: 'The lens configuration does not include this Solr field'
-    )
-  end
-
-  # Icon for the Solr field table that indicates that no lens configuration
-  # includes the associated Solr field.
-  #
-  # @return [ActiveSupport::SafeBuffer]
-  #
-  def not_any_lens
-    blacklight_icon(
-      'remove',
-      class: 'text-light bg-danger',
-      title: 'No lens configuration includes this Solr field'
-    )
+  def solr_controls(hash)
+    form_controls(:solr, hash)
   end
 
   # Link to the indicated portion of the '/about/solr_stats' page.
@@ -247,16 +191,6 @@ module AboutHelper::Solr
     name = name.to_s
     url  = "#{solr_url(true)}/schema?field=#{name}"
     link_to(h(name), url, link_opt)
-  end
-
-  # Solr sidebar control buttons.
-  #
-  # @param [Hash{Symbol=>Hash}]
-  #
-  # @return [Hash{String=>Hash}]
-  #
-  def solr_controls(hash)
-    form_controls(:solr, hash)
   end
 
   # ===========================================================================
@@ -322,8 +256,9 @@ module AboutHelper::Solr
             when 4 then 'three or four documents'
             else        "#{previous + 1} to #{upper_bound} documents"
           end
-        tooltip  = "Portion of unique terms for this field that are in #{docs}"
         previous = upper_bound
+        tooltip =
+          "Percentage of unique terms for this field that are in #{docs}"
         { upper_bound: upper_bound, tooltip: tooltip }
       end
   end
@@ -515,34 +450,6 @@ module AboutHelper::Solr
         end
     end
     get_solr_data(route, opt)[:fields] || {}
-  end
-
-  # Make a copy of *hash* which contains only the portions of the original that
-  # match the structure of *template*.  At any level of the hierarchy, the
-  # ordering of keys in *template* defines the ordering of keys in the result.
-  #
-  # @param [Hash] hash
-  # @param [Hash] template
-  #
-  # @return [Hash{Symbol=>Hash}]
-  #
-  def deep_slice(hash, template)
-    hash ||= {}
-    keys = template&.keys || []
-    hash.slice(*keys).map { |k, v|
-      if v.is_a?(Hash) && template[k].is_a?(Hash)
-        v = deep_slice(v, template[k])
-      elsif logger.debug?
-        # If `template[k]` is *nil* then that indicates that all of `v[k]` is
-        # intended to be included in the result so no need for a debug message.
-        unless (expected = template[k].class).nil? || v.is_a?(expected)
-          logger.debug {
-            "#{__method__}: #{k}: expected #{expected}; data is #{v.class}"
-          }
-        end
-      end
-      [k, v]
-    }.to_h
   end
 
   # The base path to Solr for constructing requests.

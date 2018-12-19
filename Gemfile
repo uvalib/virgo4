@@ -106,7 +106,7 @@ gem 'blacklight_advanced_search', '~> 6.4', github: 'RayLubinsky/blacklight_adva
 gem 'blacklight-gallery', '~> 0.11'
 
 # EBSCO EDS gem for articles search.
-gem 'ebsco-eds', '1.0.0' # TODO: '~> 1.0'
+gem 'ebsco-eds', '1.0.7'
 
 # =============================================================================
 # :section: Local

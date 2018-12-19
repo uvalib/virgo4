@@ -1,0 +1,36 @@
+<%# app/views/about/common/_fields.html.erb -%>
+<%-
+  # Tables of search repository fields grouped by Blacklight usage.
+  repository  ||= nil
+  fields      ||= nil
+  return unless repository.present? && fields.present?
+
+  lens        ||= params[:lens]
+  lens_key      = lens&.to_sym || default_lens_key
+  lens_current  = lens_key.to_s.capitalize
+  not_any       = not_any_lens(repository: repository)
+  not_this      = not_this_lens(repository: repository)
+  in_this       = in_this_lens
+-%>
+
+<%- fields.each_pair do |type, repository_fields| -%>
+  <h3 class="about-section"><%= h("#{type.capitalize} Fields") -%></h3>
+  <p class="about-header about-<%= repository -%>">
+    <span class="about-column">Name</span>
+    <span class="about-column">Document Count</span>
+    <span class="about-column">In <%= lens_current -%> configuration</span>
+  </p>
+  <%- repository_fields.each_pair do |field, data| -%>
+    <%- field  = solr_stats_link(field) if repository == :solr -%>
+    <%- count  = data[:count] || '-' -%>
+    <%- lenses = data[:lenses] -%>
+    <%- marker = (not_any if lenses.blank?) -%>
+    <%- marker ||= (not_this unless lenses.include?(lens_key)) -%>
+    <%- marker ||= in_this -%>
+    <p class="about-entry about-<%= repository -%>">
+      <span class="about-item"><%= h(field) -%></span>
+      <span class="about-value"><%= h(count) -%></span>
+      <span class="about-value"><%= marker -%></span>
+    </p>
+  <%- end -%>
+<%- end -%>

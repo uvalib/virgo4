@@ -1,0 +1,30 @@
+<%# app/views/about/eds/_info.html.erb -%>
+<%-
+  # EBSCO EDS API information.
+  eds_session   ||= @eds_session || {}
+  eds_info      ||= eds_session.info.raw
+  info_sections ||= I18n.t('blacklight.about.eds.info.sections', default: [])
+-%>
+
+<h3 class="about-section">EBSCO::EDS::Session</h3>
+<%= show_table(eds_session.to_h, repository: :eds) %>
+
+<h3 class="about-section">EBSCO::EDS::Configuration</h3>
+<%= show_table(eds_session.config, repository: :eds) %>
+
+<%- info_sections.each do |section| -%>
+  <%- if section.is_a?(Hash) -%>
+    <%- section.each_pair do |main_section, subsections| -%>
+      <%- section_info = eds_info[main_section.to_s] -%>
+      <%- subsections.each do |subsection| -%>
+        <h3 class="about-section">
+          <%= "EBSCO::EDS::Info / #{main_section} / #{subsection}" %>
+        </h3>
+        <%= show_table(section_info[subsection], repository: :eds) %>
+      <%- end -%>
+    <%- end -%>
+  <%- else -%>
+    <h3 class="about-section"><%= "EBSCO::EDS::Info / #{section}" -%></h3>
+    <%= show_table(eds_info[section.to_s], repository: :eds) %>
+  <%- end -%>
+<%- end -%>

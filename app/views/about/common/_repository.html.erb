@@ -1,0 +1,45 @@
+<%# app/views/about/common/_repository.html.erb -%>
+<%-
+  # Common search repository information page template.
+  repository ||= nil
+  return unless repository.present?
+
+  i18n_scope  ||= "blacklight.about.#{params[:action]}"
+  title       ||= t(:title, scope: i18n_scope, default: 'Repository Info')
+  page_title  ||= title
+  description ||= t(
+    :description,
+    scope:    i18n_scope,
+    not_this: not_this_lens,
+    not_any:  not_any_lens,
+    default:  ''
+  ).html_safe
+
+  main_page = repository.to_s
+  if params[:action] == main_page
+    lens ||= params[:lens]
+    fields_label = t('fields.label', scope: i18n_scope, default: 'Fields')
+    info_label   = t('info.label',   scope: i18n_scope, default: 'Info')
+  else
+    alternate_page = params[:action].sub(/_/, '/')
+  end
+-%>
+<%= render 'about/common/page', page_title: page_title %>
+
+<h1 class="about-title"><%= title -%></h1>
+<div class="about-description"><%= description -%></div>
+
+<%- if params[:action] == main_page -%>
+
+  <h2 class="about-section inline"><%= fields_label -%></h2>
+  <%= lens_select_menu(selected: lens) %>
+  <%= render "about/#{repository}/fields" %>
+
+  <h2 class="about-section"><%= info_label -%></h2>
+  <%= render "about/#{repository}/info" %>
+
+<%- else -%>
+
+  <%= render "about/#{alternate_page}" %>
+
+<%- end -%>

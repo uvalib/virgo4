@@ -1,0 +1,18 @@
+// app/assets/stylesheets/shared/_pre-release.scss
+//
+// Test fixtures to support pre-release testing, especially to facilitate
+// comparisons with the current Virgo 3 production service.
+//
+// TODO: Remove these definitions when Virgo 3 is gone.
+
+//=============================================================================
+// Only applicable to pre-release features and affordances.
+//=============================================================================
+
+// Pre-release button.
+.pre-release-button {
+    @extend  .btn;
+    @extend  .btn-secondary;
+    @include width-fit-content;
+    background-color: $debug-color-bg;
+}

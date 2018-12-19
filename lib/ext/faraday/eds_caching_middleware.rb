@@ -22,24 +22,40 @@ module Faraday
     # Faraday cache directory for :file_store.
     FARADAY_CACHE_DIR = File.join(CACHE_ROOT_DIR, 'faraday_eds_cache').freeze
 
+    # Default expiration time.
+    DEFAULT_EXPIRATION = 30.minutes
+
+    # Lifetime of the auth token.
+    AUTH_TOKEN_EXPIRATION = 30.minutes
+
     # Default options
     #
-    # NOTE: The original has :expires_in default to 30 *seconds*.
-    #
     DEFAULT_OPTIONS = {
-      logger:           nil,
-      cache_dir:        FARADAY_CACHE_DIR,
-      expires_in:       30.minutes,
-      http_header:      'x-faraday-eds-cache',
-      store:            :memory_store,
-      store_options:    {},
-      cacheable_paths:  %w(
+      logger:                 nil,
+      cache_dir:              FARADAY_CACHE_DIR,
+      auth_expire:            (AUTH_TOKEN_EXPIRATION - 5.minutes),
+      info_expire:            1.day,
+      retrieve_expire:        DEFAULT_EXPIRATION,
+      search_expire:          DEFAULT_EXPIRATION,
+      export_format_expire:   1.day,
+      citation_styles_expire: 1.day,
+      http_header:            'x-faraday-eds-cache',
+      store:                  :memory_store,
+      store_options:          {},
+      cacheable_paths: %w(
         /authservice/rest/uidauth
+        /edsapi/rest/ExportFormat
+        /edsapi/rest/CitationStyles
         /edsapi/rest/Info
         /edsapi/rest/Retrieve?
         /edsapi/rest/Search?
       ),
     }.freeze
+
+    # Sanity check.
+    unless DEFAULT_OPTIONS[:auth_expire] < AUTH_TOKEN_EXPIRATION
+      raise 'auth_expire must be less than the auth token expiration'
+    end
 
     # =========================================================================
     # :section:
@@ -59,24 +75,26 @@ module Faraday
     # @option args [Hash]                                 :store_options
     #
     def initialize(app, *args)
-      super(app)
 
+      @app = app
       opt = DEFAULT_OPTIONS
       opt = opt.merge(args.first) if args.first.is_a?(Hash)
 
-      @logger          = opt[:logger]
-      @cache_dir       = opt[:cache_dir]
-      @expires_in      = opt[:expires_in]
-      @http_header     = opt[:http_header]
-      @store           = opt[:store]
-      @store_options   = opt[:store_options]
-      @cacheable_paths = opt[:cacheable_paths]
+      @logger                 = opt[:logger]
+      @cache_dir              = opt[:cache_dir]
+      @auth_expire            = opt[:auth_expire]
+      @info_expire            = opt[:info_expire]
+      @retrieve_expire        = opt[:retrieve_expire]
+      @search_expire          = opt[:search_expire]
+      @export_format_expire   = opt[:export_format_expire]
+      @citation_styles_expire = opt[:citation_styles_expire]
+      @http_header            = opt[:http_header]
+      @store                  = opt[:store]
+      @store_options          = opt[:store_options]
+      @cacheable_paths        = opt[:cacheable_paths]
 
-      if @expires_in
-        @store_options[:expires_in] ||= @expires_in
-      else
-        @expires_in = @store_options[:expires_in]
-      end
+      # auth_expire must be less than the 30 minute auth token expiration.
+      @auth_expire = [@auth_expire, DEFAULT_OPTIONS[:auth_expire]].min
 
       if @store == :file_store
         if !@cache_dir
@@ -184,6 +202,9 @@ module Faraday
     #
     # @return [Faraday::Env, nil]
     #
+    # Used in place of:
+    # @see Faraday::EdsCachingMiddleware#cached_response
+    #
     def read_cache(env, cache_key = nil)
       return unless cache_key ||= key(env)
       @store.fetch(cache_key).tap do |response_env|
@@ -198,6 +219,11 @@ module Faraday
     # @param [String, nil]  cache_key
     #
     # @return [TrueClass, FalseClass, nil]
+    #
+    # @see self#cache_opt
+    #
+    # Used in place of:
+    # @see Faraday::EdsCachingMiddleware#cache_response
     #
     def write_cache(env, cache_key = nil)
       return unless (cache_key ||= key(env))
@@ -214,22 +240,22 @@ module Faraday
     #
     # @return [Hash]
     #
+    # @see self#write_cache
+    #
     def cache_opt(env)
-      options ||= {}
       url = request_url(env)
       expiry =
-        if url.include?('/edsapi/rest/Info')
-          24.hours
-        elsif @cacheable_paths.any? { |p| url.include?(p) }
-          30.minutes
-        else
-          0
+        case url
+          when %r{/authservice/rest/uidauth}   then @auth_expire
+          when %r{/edsapi/rest/Info}           then @info_expire
+          when %r{/edsapi/rest/Search\?}       then @search_expire
+          when %r{/edsapi/rest/Retrieve\?}     then @retrieve_expire
+          when %r{/edsapi/rest/ExportFormat}   then @export_format_expire
+          when %r{/edsapi/rest/CitationStyles} then @citation_styles_expire
+          else                                      DEFAULT_EXPIRATION
         end
-      unless expiry == @expires_in
-        log("expires in #{expiry} for #{url}")
-        options = options.merge(expires_in: expiry)
-      end
-      options
+      log("expires in #{expiry} for #{url}")
+      { expires_in: expiry }
     end
 
     # to_response
@@ -279,14 +305,17 @@ module Faraday
     #
     def initialize_store(store = nil)
       store ||= @store
-      return store if store.is_a?(ActiveSupport::Cache::Store)
-      unless store.is_a?(Symbol)
-        raise "expected Symbol, got #{store.class} #{store.inspect}"
+      case store
+        when ActiveSupport::Cache::Store
+          store
+        when Symbol
+          options = []
+          options << @cache_dir if store == :file_store
+          options << @store_options
+          @store = ActiveSupport::Cache.lookup_store(store, *options)
+        else
+          raise "expected Symbol, got #{store.class} #{store.inspect}"
       end
-      parameters = [store]
-      parameters << @cache_dir if store == :file_store
-      parameters << @store_options
-      @store = ActiveSupport::Cache.lookup_store(*parameters)
     end
 
   end

@@ -1,0 +1,10 @@
+<%# app/views/about/eds/_fields.html.erb -%>
+<%-
+  # Tables of EBSCO EDS fields grouped by Blacklight usage.
+  template_opts = {
+    repository: repository ||= :eds,
+    fields:     fields     ||= @eds_fields || {},
+    lens:       lens       ||= params[:lens] || :articles
+  }
+-%>
+<%= render 'about/common/fields', template_opts %>

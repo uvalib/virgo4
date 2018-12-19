@@ -101,6 +101,7 @@ class Config::Eds < Config::Base
       config.add_facet_field 'eds_library_location_facet',   helper_method: :raw_value, if: :json_request?
       config.add_facet_field 'eds_library_collection_facet', helper_method: :raw_value, if: :json_request?
       config.add_facet_field 'eds_author_university_facet',  helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'pub_year_tisim',               helper_method: :raw_value, if: :json_request?
 
       # === Experimental facets
       now = Time.zone.now.year
@@ -149,6 +150,7 @@ class Config::Eds < Config::Base
       config.add_index_field 'eds_languages'
       config.add_index_field 'eds_html_fulltext_available', helper_method: :fulltext_link
       config.add_index_field 'eds_relevancy_score'
+      config.add_index_field 'eds_result_id',               helper_method: :raw_value, if: :json_request?
 
       # =======================================================================
       # Show pages (item details)
@@ -167,12 +169,10 @@ class Config::Eds < Config::Base
       # [2] 'Published in' ('eds_composed_title'), if present, eliminates the
       #     need for separate 'eds_source_title', 'eds_publication_info', and
       #     'eds_publication_date' entries.
-      #
-      # [3] 'eds_result_id' is only meaningful in search results so it's not
-      #     included here.
 
       config.add_show_field 'eds_title',                    helper_method: :raw_value, if: :json_request?
       config.add_show_field 'eds_publication_type',         helper_method: :eds_publication_type_label
+      config.add_show_field 'eds_authors',                  helper_method: :raw_value, if: :json_request?
       config.add_show_field 'eds_document_type'             # TODO: Cope with extraneous text (e.g. "Artikel<br>PeerReviewed")
       config.add_show_field 'eds_publication_status'
       config.add_show_field 'eds_other_titles'
@@ -183,21 +183,19 @@ class Config::Eds < Config::Base
       config.add_show_field 'eds_publication_year'
       config.add_show_field 'eds_volume'
       config.add_show_field 'eds_issue'
-      config.add_show_field 'eds_page_count'
-      config.add_show_field 'eds_start_page'
+      config.add_show_field 'eds_page_start'
+      config.add_show_field 'eds_page_count',               unless: :zero_value?
+      config.add_show_field 'eds_fulltext_word_count',      unless: :zero_value?
+      config.add_show_field 'eds_physical_description'
+      config.add_show_field 'eds_notes'
       config.add_show_field 'eds_publication_info'
       config.add_show_field 'eds_publisher'
       config.add_show_field 'eds_publication_date'
       config.add_show_field 'eds_document_doi',             helper_method: :doi_link
       config.add_show_field 'eds_document_oclc'
       config.add_show_field 'eds_issns'
-      config.add_show_field 'eds_isbns'
-      config.add_show_field 'eds_abstract'
-      config.add_show_field 'eds_publication_type_id'
-      config.add_show_field 'eds_access_level'
-      config.add_show_field 'eds_authors_composed'
-      config.add_show_field 'eds_author_affiliations'
       config.add_show_field 'eds_issn_print'
+      config.add_show_field 'eds_isbns'
       config.add_show_field 'eds_isbn_print'
       config.add_show_field 'eds_isbn_electronic'
       config.add_show_field 'eds_isbns_related'
@@ -208,34 +206,49 @@ class Config::Eds < Config::Base
       config.add_show_field 'eds_subjects_bisac'
       config.add_show_field 'eds_subjects_mesh'
       config.add_show_field 'eds_subjects_genre'
-      config.add_show_field 'eds_author_supplied_keywords'
-      config.add_show_field 'eds_subset'
       config.add_show_field 'eds_code_naics'
-      config.add_show_field 'eds_fulltext_word_count'
+      config.add_show_field 'eds_author_supplied_keywords'
+      config.add_show_field 'eds_abstract'
+      config.add_show_field 'eds_publication_type_id'
+      config.add_show_field 'eds_access_level'
+      config.add_show_field 'eds_authors_composed'
+      config.add_show_field 'eds_author_affiliations'
+      config.add_show_field 'eds_subset'
       config.add_show_field 'eds_covers'
       config.add_show_field 'eds_cover_thumb_url',          helper_method: :url_link
       config.add_show_field 'eds_cover_medium_url',         helper_method: :url_link
       config.add_show_field 'eds_images'
       config.add_show_field 'eds_quick_view_images'
-      config.add_show_field 'eds_pdf_fulltext_available'
-      config.add_show_field 'eds_ebook_pdf_fulltext_available'
-      config.add_show_field 'eds_ebook_epub_fulltext_available'
       config.add_show_field 'eds_abstract_supplied_copyright'
       config.add_show_field 'eds_descriptors'
       config.add_show_field 'eds_publication_id'
       config.add_show_field 'eds_publication_is_searchable'
       config.add_show_field 'eds_publication_scope_note'
-      config.add_show_field 'all_subjects_search_links'
       config.add_show_field 'eds_database_id'
       config.add_show_field 'eds_accession_number'
       config.add_show_field 'eds_database_name'
       config.add_show_field 'eds_relevancy_score'
+      config.add_show_field 'eds_result_id',                helper_method: :raw_value, if: :json_request?
+      # == Other
+      config.add_show_field 'all_subjects_search_links',    helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'bib_identifiers',              helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'bib_pub_date',                 helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'decode_sanitize_html',         helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'eds_extras_Format',            helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'eds_extras_NoteTitleSource',   helper_method: :raw_value, if: :json_request?
+      # == Citations
+      config.add_show_field 'eds_citation_exports',         helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'eds_citation_styles',          helper_method: :raw_value, if: :json_request?
       # == Availability (links and inline full text)
+      config.add_show_field 'eds_pdf_fulltext_available'
+      config.add_show_field 'eds_ebook_pdf_fulltext_available'
+      config.add_show_field 'eds_ebook_epub_fulltext_available'
+      config.add_show_field 'eds_html_fulltext_available',  helper_method: :raw_value, if: :json_request?
       config.add_show_field 'eds_all_links',                helper_method: :all_eds_links
       config.add_show_field 'eds_plink',                    helper_method: :ebsco_eds_plink
-      #config.add_show_field 'eds_fulltext_links',          helper_method: :best_fulltext # NOTE: not working right
-      config.add_show_field 'eds_notes'
-      config.add_show_field 'eds_physical_description'
+      config.add_show_field 'eds_fulltext_link',            helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'eds_fulltext_links',           helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'eds_non_fulltext_links',       helper_method: :raw_value, if: :json_request?
       config.add_show_field 'eds_html_fulltext',            helper_method: :html_fulltext
 
       # =======================================================================

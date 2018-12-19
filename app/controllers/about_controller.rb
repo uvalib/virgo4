@@ -67,6 +67,14 @@ class AboutController < ApplicationController
     render 'about/solr'
   end
 
+  # == GET /about/eds
+  # Administrator-only EBSCO EDS information.
+  #
+  def eds
+    @eds_session = get_eds_session
+    @eds_fields  = get_eds_fields
+  end
+
   # == GET /about/log
   # Administrator-only application log viewer.
   #

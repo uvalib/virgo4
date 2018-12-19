@@ -330,14 +330,14 @@ class Config::Solr < Config::Base
       config.add_show_field 'subtitle_vern_a',       helper_method: :raw_value, if: :json_request? # NOTE: not in index
       config.add_show_field 'author_a',              helper_method: :raw_value, if: :json_request?
       config.add_show_field 'author_vern_a',         helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'author_added_entry_a'
-      config.add_show_field 'author_director_a'
-      config.add_show_field 'video_director_a'
       config.add_show_field 'format_a',              helper_method: :format_facet_label
       config.add_show_field 'title_uniform_a'
       config.add_show_field 'title_series_a'
       config.add_show_field 'title_added_entry_a'
       config.add_show_field 'title_alternate_a'
+      config.add_show_field 'author_added_entry_a'
+      config.add_show_field 'author_director_a'
+      config.add_show_field 'video_director_a'
       config.add_show_field 'journal_title_a'
       config.add_show_field 'journal_title_addl_a'
       config.add_show_field 'journal_addnl_title_a'
@@ -375,14 +375,14 @@ class Config::Solr < Config::Base
       config.add_show_field 'pda_catkey_a'
       config.add_show_field 'pda_coutts_library_a'
       config.add_show_field 'pda_isbn_a'
-      config.add_show_field 'barcode_e'
-      config.add_show_field 'summary_holdings_a'
       config.add_show_field 'cc_type_t'
       config.add_show_field 'cc_uri_a',              helper_method: :url_link
       config.add_show_field 'rights_url_a',          helper_method: :url_link
       config.add_show_field 'rs_uri_a',              helper_method: :url_link
       config.add_show_field 'fund_code_a'
       config.add_show_field 'shadowed_location_a'
+      config.add_show_field 'summary_holdings_a'
+      config.add_show_field 'barcode_e'
       config.add_show_field 'library_a',             helper_method: :raw_value, if: :json_request?
       config.add_show_field 'location_a',            helper_method: :raw_value, if: :json_request?
       config.add_show_field 'call_number_broad_a',   helper_method: :raw_value, if: :json_request?
@@ -506,7 +506,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'repository_address_display'
       # config.add_show_field 'resource_display'
       # config.add_show_field 'responsibility_statement_display'
-      # config.add_show_field 'rights_display'
       # config.add_show_field 'rights_wrapper_display'
       # config.add_show_field 'rights_wrapper_url_display'
       # config.add_show_field 'scope_content_display'
@@ -527,7 +526,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'unit_display'
       # config.add_show_field 'upc_display'
       # config.add_show_field 'upc_full_display'
-      # config.add_show_field 'use_facet'
       # config.add_show_field 'video_run_time_display'
       # config.add_show_field 'video_target_audience_display'
       # config.add_show_field 'year_display'

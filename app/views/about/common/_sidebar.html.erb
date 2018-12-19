@@ -1,4 +1,4 @@
-<%# app/views/about/_sidebar.html.erb -%>
+<%# app/views/about/common/_sidebar.html.erb -%>
 <%-
   # Controls to select "About" pages inserted into `content_for(:sidebar)`.
   pages = {
@@ -10,6 +10,7 @@
     pages.merge!(
       solr:       about_solr_path,
       solr_stats: about_solr_stats_path,
+      eds:        about_eds_path,
       log:        about_log_path
     )
   end
@@ -22,7 +23,7 @@
   <%- if button_label.is_a?(String) -%>
     <%- tooltip  = button_data[:tooltip].presence -%>
     <%- selected = ('disabled' if request.path == path) -%>
-    <li class="about-sidebar-link <%= selected -%>">
+    <li class="sidebar-entry <%= selected -%>">
       <%- link_opt = {} -%>
       <%- link_opt.merge!(title: tooltip) if tooltip -%>
       <%- link_opt.merge!(class: selected, tabindex: -1) if selected -%>
