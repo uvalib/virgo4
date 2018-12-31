@@ -12,84 +12,8 @@ module EBSCO::EDS::RecordExt
 
   require 'i18n'
 
-  # The RELAXED config:
-  # @see https://github.com/rgrove/sanitize/blob/master/lib/sanitize/config/relaxed.rb
-  #
-  # @type [Hash{Symbol=>Array<String>}]
-  #
-  SANITIZE_BASE_CONFIG = Sanitize::Config::RELAXED
-
-  # Additional HTML elements that are not removed during sanitization.
-  #
-  # @type [Array<String>]
-  #
-  SANITIZE_PERMITTED_ELEMENTS = (
-    SANITIZE_BASE_CONFIG[:elements] + %w(relatesto searchlink)
-  ).deep_freeze
-
-  # Additional HTML attributes that are not removed during sanitization.
-  #
-  # @type [Array<String>]
-  #
-  SANITIZE_PERMITTED_ATTRIBUTES =
-    SANITIZE_BASE_CONFIG[:attributes]
-      .merge('searchlink' => %w(fieldcode term))
-      .deep_freeze
-
-  # General sanitization configuration.
-  # @see self#html_decode_and_sanitize
-  #
-  # @type [Hash{Symbol=>Array<String>}]
-  #
-  SANITIZE_CONFIG =
-    Sanitize::Config.merge(
-      SANITIZE_BASE_CONFIG,
-      elements:   SANITIZE_PERMITTED_ELEMENTS,
-      attributes: SANITIZE_PERMITTED_ATTRIBUTES
-    ).deep_freeze
-
-  # Default replacements of XML node names with related HTML element names.
-  #
-  # @type [HashWithIndifferentAccess{String=>String}]
-  #
-  FULL_TEXT_DEFAULT_TRANSFORM = {
-    title:    'h1',
-    sbt:      'h2',
-    jsection: 'h3',
-    et:       'h3',
-  }.with_indifferent_access.deep_freeze
-
-  # Replace received XML node names with related HTML element names from
-  # 'ebsco_eds.html_fulltext' or #FULL_TEXT_DEFAULT_TRANSFORM.
-  # @see config/locale/ebsco_eds.yml
-  #
-  # @type [Proc]
-  #
-  SANITIZE_TRANSFORMER =
-    lambda do |env|
-      node = env[:node]
-      html_element =
-        I18n.t(
-          "ebsco_eds.html_fulltext.#{node.name}",
-          default: FULL_TEXT_DEFAULT_TRANSFORM[node.name]
-        )
-      node.name = html_element if html_element
-    end
-
-  # Sanitization configuration for full-text content.
-  # @see self#html_fulltext
-  #
-  # @type [Hash{Symbol=>Object}]
-  #
-  SANITIZE_FULLTEXT_CONFIG =
-    SANITIZE_CONFIG.merge(
-      remove_contents: true,
-      transformers:    [SANITIZE_TRANSFORMER]
-    ).deep_freeze
-
   # Date parts and widths (in characters).
   #
-  # @see config/locales/ebsco_eds.yml
   # @see self#bib_publication_date
   #
   # @type [Hash{Symbol=>Numeric}]
@@ -99,6 +23,170 @@ module EBSCO::EDS::RecordExt
     M: I18n.t('ebsco_eds.bib_publication_date.width.month', default: 2),
     D: I18n.t('ebsco_eds.bib_publication_date.width.day',   default: 2)
   }.deep_freeze
+
+  # ===========================================================================
+  # :section: HTML sanitization
+  # ===========================================================================
+
+  public
+
+  # The RELAXED config:
+  # @see https://github.com/rgrove/sanitize/blob/master/lib/sanitize/config/relaxed.rb
+  #
+  # @type [Hash{Symbol=>Object}]
+  #
+  SANITIZE_BASE_CONFIG = Sanitize::Config::RELAXED
+
+  # Additional HTML elements that are not removed during sanitization.
+  #
+  # @type [Array<String>]
+  #
+  # @see self#SANITIZE_BASE_CONFIG[:elements]
+  #
+  ADDED_ELEMENTS = %w(
+    ephtml
+    relatesto
+    relatesTo
+    searchlink
+    searchLink
+  ).deep_freeze
+
+  # Additional HTML attributes that are not removed during sanitization.
+  #
+  # @type [Hash{String=>Array<String>}]
+  #
+  # @see self#SANITIZE_BASE_CONFIG[:attributes]
+  #
+  ADDED_ATTRIBUTES = ADDED_ELEMENTS.map { |e| [e, %i(all)] }.to_h.deep_freeze
+
+  # Default replacements of XML node names with related HTML element names.
+  #
+  # @type [Hash{String=>String}]
+  #
+  EBSCO_TRANSFORMS = {
+    bold:         'b',
+    italic:       'i',
+    item:         'li',
+    olist:        'ol',
+    subs:         'sub',
+    subscript:    'sub',
+    superscript:  'sup',
+    sups:         'sup',
+    title:        'atitle',
+    ulink:        'a',
+    ulist:        'ul'
+  }.stringify_keys.deep_freeze
+
+  # Replace received XML node names with related HTML element names from
+  # self#EBSCO_TRANSFORMS.
+  #
+  # @type [Array<Proc>]
+  #
+  ADDED_TRANSFORMERS = [
+    lambda do |env|
+      node = env[:node]
+      node.name = EBSCO_TRANSFORMS[node.name].presence || node.name
+    end
+  ].freeze
+
+  # General sanitization configuration.
+  #
+  # @type [Hash{Symbol=>Object}]
+  #
+  # @see self#html_decode_and_sanitize
+  #
+  SANITIZE_CONFIG =
+    Sanitize::Config.merge(
+      SANITIZE_BASE_CONFIG,
+      elements:     SANITIZE_BASE_CONFIG[:elements] + ADDED_ELEMENTS,
+      attributes:   SANITIZE_BASE_CONFIG[:attributes].merge(ADDED_ATTRIBUTES),
+      transformers: Array.wrap(SANITIZE_BASE_CONFIG[:transformers]) +
+                      ADDED_TRANSFORMERS,
+    ).freeze
+
+  # ===========================================================================
+  # :section: HTML sanitization for fulltext
+  # ===========================================================================
+
+  public
+
+  # Additional fulltext HTML element tags that are allowed.
+  #
+  # These tags have been observed in various full-text content (in roughly
+  # the order given).  Those whose function has been identified have been
+  # given appropriate styles in app/assets/stylesheets/virgo.css.scss under
+  # the "article-full-text" CSS class.
+  #
+  #   <anid>      Article ID and other information.
+  #   <jsection>  Journal section.
+  #   <et>        Extended title?
+  #   <title>     Article title (transformed into "<atitle>").
+  #   <sbt>       Article subtitle or tagline.
+  #   <hd>        Section heading.
+  #   <hd1>       Sub-section heading.
+  #   <img>       Image.
+  #   <olist>     Ordered list (transformed into "<ol>").
+  #   <ulist>     Unordered list (transformed into "<ul>").
+  #   <item>      List item (transformed into "<li>").
+  #   <blist>     Bibliography list.
+  #   <bibtext>   Bibliography list entry.
+  #   <ct>        Character table? (Essentially like a "<pre>" block.)
+  #   <rj>        ?
+  #   <aug>       By-line / responsibility section.
+  #   <reflink>   Footnote reference (linkage through "idref" attribute).
+  #   <bibl>      Footnote number (linkage through "idref" attribute).
+  #   <nolink>    Empty tag with attributes indicating bad footnote links.
+  #   <ref>       A "references" section that may enclose a bibliography.
+  #
+  # @type [Array<String>]
+  #
+  # @see self#SANITIZE_CONFIG[:elements]
+  #
+  FULL_TEXT_ELEMENTS = %w(
+    anid
+    atitle
+    aug
+    bibl
+    bibtext
+    blist
+    ct
+    et
+    hd
+    hd1
+    jsection
+    nolink
+    p
+    ref
+    reflink
+    rj
+    sbt
+  ).freeze
+
+  # Additional fulltext HTML element attributes that are allowed.
+  #
+  # @type [Hash{String=>Array<String>}]
+  #
+  # @see self#SANITIZE_CONFIG[:attributes]
+  #
+  FULL_TEXT_ATTRIBUTES = {
+    reflink: %w(idref),
+    bibl:    %w(idref),
+  }.stringify_keys.deep_freeze
+
+  # Sanitization configuration for full-text content.
+  #
+  # @type [Hash{Symbol=>Object}]
+  #
+  # @see self#FULL_TEXT_ELEMENTS
+  # @see self#FULL_TEXT_ATTRIBUTES
+  # @see self#html_fulltext
+  #
+  SANITIZE_FULLTEXT_CONFIG =
+    Sanitize::Config.merge(
+      SANITIZE_CONFIG,
+      elements:   SANITIZE_CONFIG[:elements] + FULL_TEXT_ELEMENTS,
+      attributes: SANITIZE_CONFIG[:attributes].merge(FULL_TEXT_ATTRIBUTES),
+    ).freeze
 
   # ===========================================================================
   # :section: MISC HELPERS
@@ -151,7 +239,7 @@ module EBSCO::EDS::RecordExt
   def html_fulltext(sanitize_config = nil)
     return unless html_fulltext_available
     value = @record.dig('FullText', 'Text', 'Value')
-    if @decode_sanitize_html && false # TODO: This requires special handling...
+    if @decode_sanitize_html && value.present?
       sanitize_config ||= SANITIZE_FULLTEXT_CONFIG
       value = html_decode_and_sanitize(value, sanitize_config)
     end

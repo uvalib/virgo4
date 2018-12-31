@@ -22,6 +22,7 @@ require 'blacklight/eds'
 module ArticlesHelper
 
   include BlacklightHelper
+  include ArticlesHelper::FullText
 
   def self.included(base)
     __included(base, '[ArticlesHelper]')
@@ -34,32 +35,57 @@ module ArticlesHelper
   public
 
   # "Find @ UVA" link label.
+  #
+  # @type [ActiveSupport::SafeBuffer]
+  #
   EDS_LINK_LABEL = I18n.t('ebsco_eds.links.eds').html_safe.freeze
 
   # "PLink" label.
+  #
+  # @type [ActiveSupport::SafeBuffer]
+  #
   EDS_PLINK_LABEL = I18n.t('ebsco_eds.links.plink').html_safe.freeze
 
   # URL anchor location on the page for the full text viewer.
+  #
+  # @type [String]
+  #
   FULL_TEXT_ANCHOR = 'full-text'
 
   # URL sign-on path.
+  #
+  # @type [String]
+  #
   SIGN_ON_PATH = '/account/login'
 
   # Displayed only if a method is set up to avoid returning *nil*.
+  #
+  # @type [ActiveSupport::SafeBuffer]
+  #
   EBSCO_NO_LINK = I18n.t('blacklight.no_link').html_safe.freeze
 
   # Indicate whether a method should return *nil* if there was no data.
   # If *false* then self#EBSCO_NO_LINK is returned.
+  #
+  # @type [Hash{Symbol=>Boolean}]
+  #
   RETURN_NIL = {
     best_fulltext:              false,
     eds_links:                  false,
     eds_publication_type_label: true,
   }.freeze
 
+  # Types of linked content.
+  #
+  # @type [Array<String>]
+  #
   EBSCO_LINK_TARGETS = %w(pdf ebook-pdf ebook-epub html cataloglink).freeze
 
   # Alter the order of the types listed below, putting the most desired links
   # first.
+  #
+  # @type [Array<String>]
+  #
   BEST_FULLTEXT_TYPES = %w(
     cataloglink
     pdf
@@ -69,31 +95,6 @@ module ArticlesHelper
     customlink-fulltext
     customlink-other
   ).freeze
-
-  # Patterns that start a new line in the text display.
-  EBSCO_BREAK_BEFORE = Regexp.new(%w(•).join('|'))
-
-  # Translation of XML element tags to equivalent HTML element tags.
-  EBSCO_XML_TO_HTML = {
-    title:       'atitle',
-    bold:        'b',
-    emph:        'i',
-    item:        'li',
-    ulist:       'ul',
-    olist:       'ol',
-    superscript: 'sup',
-    sups:        'sup',
-    subscript:   'sub',
-    subs:        'sub',
-  }.flat_map { |xml, html|
-    [
-      %W(<#{xml}\  <#{html}\ ),
-      %W(</#{xml}> </#{html}>)
-    ]
-  }.to_h.deep_freeze
-
-  # For matching any of the XML element tag strings.
-  EBSCO_XML_KEYS = Regexp.new(EBSCO_XML_TO_HTML.keys.join('|'))
 
   # ===========================================================================
   # :section: Blacklight configuration "helper_methods"
@@ -145,6 +146,44 @@ module ArticlesHelper
     Array.wrap(values).join(separator).html_safe.presence
   end
 
+  # eds_abstract
+  #
+  # @param [Hash] options             Supplied by the presenter.
+  #
+  # @return [ActiveSupport::SafeBuffer, nil]
+  #
+  # === Implementation Notes
+  # Some items have abstracts with implied sections where the "subheading" is
+  # simply a <b> element not otherwise distinguished in the text.  This method
+  # makes these cases explicit.
+  #
+  # === Examples
+  #
+  # @example With implied sections after <br>
+  #   /articles/cmedm__30552144
+  #
+  # @example With implied sections within <b>
+  #   /articles/a9h__133419289
+  #
+  def eds_abstract(options = nil)
+    return raw_value(options) unless request.format.html?
+    values, opt = extract_config_value(options)
+    separator = opt.delete(:separator) || "<br/>\n"
+    result = Array.wrap(values).reject(&:blank?).join(separator)
+
+    # === Make implied sections explicit
+    if result.gsub!(%r{<br\s*/?>([^:\s]+:)\s*}) { abstract_subsection($1) }
+      # (1) For implied sections that follow a <br>, the first implied section
+      # will be at the start of the abstract without a <br>.
+      result.sub!(/\A([^:\s]+:)\s*/) { abstract_subsection($1) }
+    else
+      # (2) Handle implied sections within <b>.
+      result.gsub!(/<b>\s*([^:<]*:)\s*<\/b>/) { abstract_subsection($1) }
+    end
+
+    result.html_safe.presence
+  end
+
   # best_fulltext
   #
   # @param [Hash] options
@@ -188,10 +227,9 @@ module ArticlesHelper
   def html_fulltext(options = nil)
     return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
-    separator = opt.delete(:separator) || "<br/>\n"
-    content   = Array.wrap(values).join(separator)
-    anchor    = content_tag(:div, '', id: FULL_TEXT_ANCHOR, class: 'anchor')
-    scroller  = content_tag(:div, eds_text(content, true), class: 'scroller')
+    content  = render_fulltext(values, opt)
+    anchor   = content_tag(:div, '', id: FULL_TEXT_ANCHOR, class: 'anchor')
+    scroller = content_tag(:div, content, class: 'scroller')
     anchor + scroller
   end
 
@@ -213,7 +251,7 @@ module ArticlesHelper
       id:         doc.id,
       anchor:     FULL_TEXT_ANCHOR
     )
-    link_to(label, url) if url.present?
+    authorized_link(eds_guest?, label, url)
   end
 
   # ebsco_eds_plink
@@ -245,7 +283,7 @@ module ArticlesHelper
   # @return [nil]                                 If no URLs were present.
   #
   def eds_links(options = nil)
-    all_eds_links(options, %w(pdf ebook-pdf ebook-epub html cataloglink))
+    all_eds_links(options, EBSCO_LINK_TARGETS)
   end
 
   # all_eds_links
@@ -284,26 +322,47 @@ module ArticlesHelper
     end
   end
 
-  # Massage text.
-  #
-  # @param [String]                string
-  # @param [TrueClass, FalseClass] multiline
-  #
-  # @return [ActiveSupport::SafeBuffer]
-  #
-  def eds_text(string, multiline = false)
-    return raw_value(options) unless request.format.html?
-    CGI.unescapeHTML(string || '').tap { |result|
-      result.gsub!(EBSCO_BREAK_BEFORE) { |s| '<br/>' + s } if multiline
-      result.gsub!(EBSCO_XML_KEYS, EBSCO_XML_TO_HTML)
-    }.strip.html_safe
-  end
-
   # ===========================================================================
   # :section:
   # ===========================================================================
 
   protected
+
+  # Should the current be user as treated unauthorized?
+  #
+  def eds_guest?
+    current_or_guest_user.guest
+  end
+
+  # authorized_link
+  #
+  # @param [TrueClass, FalseClass, String] guest
+  # @param [String]                        label
+  # @param [String]                        url
+  # @param [Hash, nil]                     opt
+  #
+  # @return [String, nil]
+  #
+  def authorized_link(guest, label, url, opt = nil)
+    return unless url.present?
+    guest   = %w(true yes on).include?(guest.downcase) if guest.is_a?(String)
+    guest   = eds_guest?                               if guest.nil?
+    label ||= I18n.t('ebsco_eds.links.default')
+    opt   ||= {}
+    anchor  = url.start_with?('#')
+    direct  = anchor || !url.start_with?('http') || url.start_with?(root_url)
+    if guest
+      label += I18n.t('ebsco_eds.links.sign_on')
+      url = request.path + url if anchor
+      url = "?redirect=#{u(url)}"
+      url = "#{SIGN_ON_PATH}#{url}"
+      link_to(label, url, opt)
+    elsif direct
+      link_to(label, url, opt)
+    else
+      outlink(label, url, opt)
+    end
+  end
 
   # make_eds_link
   #
@@ -345,39 +404,14 @@ module ArticlesHelper
 
   end
 
-  # authorized_link
-  #
-  # @param [TrueClass, FalseClass, String] guest
-  # @param [String]                        label
-  # @param [String]                        url
-  # @param [Hash, nil]                     opt
-  #
-  # @return [String, nil]
-  #
-  def authorized_link(guest, label, url, opt = nil)
-    return unless url.present?
-    guest   = %w(true yes on).include?(guest.downcase) if guest.is_a?(String)
-    guest   = eds_guest?                               if guest.nil?
-    label ||= I18n.t('ebsco_eds.links.default')
-    opt   ||= {}
-    anchor  = url.start_with?('#')
-    if guest
-      label += I18n.t('ebsco_eds.links.sign_on')
-      url = request.path + url if anchor
-      url = "?redirect=#{u(url)}"
-      url = "#{SIGN_ON_PATH}#{url}"
-      link_to(label, url, opt)
-    elsif anchor
-      link_to(label, url, opt)
-    else
-      outlink(label, url, opt)
-    end
-  end
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
 
-  # Should the current be user as treated unauthorized?
-  #
-  def eds_guest?
-    current_or_guest_user.guest
+  private
+
+  def abstract_subsection(s)
+    content_tag(:div, s.to_s.html_safe, class: 'subheading')
   end
 
 end

@@ -86,12 +86,56 @@ module Blacklight::Eds::Document
 
   private
 
-  EDS_ID_KEYS     ||= %i(id).freeze
-  EDS_DOI_KEYS    ||= %i(eds_document_doi).freeze
-  EDS_MESH_KEYS   ||= %i(eds_subjects_mesh).freeze
-  EDS_NAICS_KEYS  ||= %i(eds_code_naics).freeze
+  # Metadata fields that trigger #modify_dbid processing.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see self#prepare
+  #
+  EDS_ID_KEYS = %i(id).freeze
 
-  EDS_SEARCH_KEYS ||= %i(
+  # Metadata fields that trigger #doi_link processing.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see self#prepare
+  #
+  EDS_DOI_KEYS = %i(eds_document_doi).freeze
+
+  # Metadata fields that trigger #mesh_link processing.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see self#prepare
+  #
+  EDS_MESH_KEYS = %i(eds_subjects_mesh).freeze
+
+  # Metadata fields that trigger #naics_link processing.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see self#prepare
+  #
+  EDS_NAICS_KEYS = %i(eds_code_naics).freeze
+
+  # Metadata fields that trigger #relates_to processing.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see self#prepare
+  #
+  EDS_RELATE_KEYS = %i(
+    eds_author_affiliations
+    eds_authors_composed
+  ).freeze
+
+  # Metadata fields that trigger #search_link processing.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see self#prepare
+  #
+  EDS_SEARCH_KEYS = %i(
     eds_subjects
     eds_subjects_company
     eds_subjects_genre
@@ -99,34 +143,94 @@ module Blacklight::Eds::Document
     eds_subjects_person
   ).freeze
 
-  EDS_EMAIL_KEYS ||= %i(
+  # Metadata fields that trigger #mailto_link processing.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see self#prepare
+  #
+  EDS_EMAIL_KEYS = %i(
     eds_authors_composed
     eds_subjects
     eds_subjects_company
-    eds_subjects_geographic
     eds_subjects_genre
+    eds_subjects_geographic
     eds_subjects_person
   )
 
-  EDS_COMPOSED_KEYS ||= %i(
-    eds_abstract
-    eds_abstract_supplied_copyright
-    eds_author_affiliations
-    eds_author_supplied_keywords
-    eds_composed_title
-    eds_descriptors
-    eds_document_type
-    eds_subjects_bisac
-    eds_subset
-  ).freeze
-
-  EDS_HTML_KEYS ||= (
+  # Metadata fields that trigger #sanitize processing.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see self#prepare
+  #
+  EDS_HTML_KEYS = (
     EDS_MESH_KEYS +
     EDS_NAICS_KEYS +
+    EDS_RELATE_KEYS +
     EDS_SEARCH_KEYS +
-    EDS_EMAIL_KEYS +
-    EDS_COMPOSED_KEYS
+    EDS_EMAIL_KEYS + %i(
+      eds_abstract
+      eds_abstract_supplied_copyright
+      eds_author_supplied_keywords
+      eds_composed_title
+      eds_descriptors
+      eds_document_type
+      eds_subjects_bisac
+      eds_subset
+    )
   ).uniq.freeze
+
+  # Match an HTML break as "<br>" and/or "<br/>" and/or "<br></br>".
+  #
+  # @type [Regexp]
+  #
+  # @see self#prepare
+  #
+  BREAK_REGEX = %r{<br>(\s*</br>)?|<br/>}i
+
+  # Rails treats the substring in the path after a dot as the requested MIME
+  # type for output, so dots in EBSCO item IDs must translated to something
+  # else.
+  #
+  # @type [String]
+  #
+  # @see self#modify_dbid
+  #
+  EDS_ID_DOT_REPLACEMENT = '_'
+
+  # Sanity check.
+  Rails.error {
+    "ID_DOT_REPLACEMENT: #{EDS_ID_DOT_REPLACEMENT.inspect}: must be one char"
+  } unless EDS_ID_DOT_REPLACEMENT.size == 1
+
+  # Used to turn terms into search links via #gsub.
+  #
+  # @type [Regexp]
+  #
+  # @see self#relates_to
+  #
+  RELATES_TO_REGEX = %r{
+    (\s*\[?\s*)                       # Optional outer left bracket        ($1)
+    (<(relatesTo)\s*([^>]*)\s*>)      # Start tag and attributes     ($2,$3,$4)
+      \s*\[?\s*                       # Optional inner left bracket
+      ([^\[\]<]+)                     # Reference number                   ($5)
+      \s*\]?\s*                       # Optional inner right bracket
+    (</\s*\3\s*>)                     # Close tag                          ($6)
+    (\s*\]?\s*)                       # Optional outer right bracket       ($7)
+  }ix
+
+  # Used to turn terms into search links via #gsub.
+  #
+  # @type [Regexp]
+  #
+  # @see self#search_link
+  #
+  SEARCH_LINK_REGEX = %r{
+    (<(searchLink)\s*([^>]*)\s*>)     # Start tag and attributes     ($1,$2,$3)
+      \s*([^<]+)\s*                   # Link text                          ($4)
+    (</\s*\2\s*>)                     # Close tag                          ($5)
+  }ix
 
   # Used to turn MeSH terms into external links via #gsub.
   #
@@ -134,13 +238,7 @@ module Blacklight::Eds::Document
   #
   # @see self#mesh_link
   #
-  MESH_REGEX = %r{                    # gsub match
-    (<searchLink[^>]* term=")         # $1
-    ([^"]*)                           # $2 - search term
-    ("[^>]*>)                         # $3
-    ([^<]+)                           # $4 - link text
-    (</searchLink>)                   # $5
-  }x
+  MESH_REGEX = SEARCH_LINK_REGEX
 
   # URL template for MeSH terms.
   #
@@ -152,16 +250,11 @@ module Blacklight::Eds::Document
 
   # Used to turn NAICS terms into external links via #gsub.
   #
-  #   $1 - search term and link text
-  #
   # @type [Regexp]
   #
   # @see self#naics_link
   #
-  NAICS_REGEX = %r{                   # gsub match
-    (\d+)                             # $1 - search term and link text
-    (</searchLink>)                   # $2
-  }x
+  NAICS_REGEX = SEARCH_LINK_REGEX
 
   # URL template for NAICS codes.
   #
@@ -172,22 +265,6 @@ module Blacklight::Eds::Document
   NAICS_LINK =
     'https://www.census.gov/cgi-bin/sssd/naics/naicsrch?input=%s&search=2017'
 
-  # Used to turn terms into search links via #gsub.
-  #
-  # @type [Regexp]
-  #
-  # @see self#search_link
-  #
-  SEARCH_REGEX = %r{                  # gsub match
-    (<searchLink[^>]* fieldcode=")    # $1
-    ([^"]*)                           # $2 - field code ('SU', 'DE', etc.)
-    ("[^>]* term=")                   # $3
-    ([^"]*)                           # $4 - search term
-    ("[^>]*>)                         # $5
-    ([^<]+)                           # $6 - link text
-    (</searchLink>)                   # $7
-  }x
-
   # Adjust certain EBSCO field values before passing the data to the base
   # initializer.
   #
@@ -196,43 +273,80 @@ module Blacklight::Eds::Document
   #
   # @return [ActiveSupport::HashWithIndifferentAccess]
   #
-  # @see self#EDS_ID_KEYS
-  # @see self#EDS_DOI_KEYS
-  # @see self#EDS_HTML_KEYS
+  # @see self#sanitize
+  # @see self#modify_dbid
+  # @see self#relates_to
+  # @see self#doi_link
+  # @see self#search_link
   # @see self#mesh_link
   # @see self#naics_link
+  # @see self#mailto_link
   #
   def prepare(data, preserve_blanks = nil)
-    @raw_source = data
-    (data || {}).map { |k, v|
-      next unless preserve_blanks || v.is_a?(FalseClass) || v.present?
+    data ||= {}
+    @raw_source = data.sort_by { |k, _| k.to_s }.to_h
+    data.map { |k, v|
+
+      # Determine the nature of the metadata field value.
       k = k.to_sym
+      string = v.is_a?(String)
+      array  = v.is_a?(Array)
+      hash   = v.is_a?(Hash)
+      scalar =
+        if v.blank?
+          v.is_a?(FalseClass)
+        elsif array
+          v.none? { |e| e.is_a?(String) || e.is_a?(Array) || e.is_a?(Hash) }
+        else
+          !string && !hash
+        end
 
-      # Split strings with "<br>" into arrays of strings.
-      v = v.first if v.is_a?(Array) && (v.size == 1)
-      v = v.split('<br>') if v.is_a?(String) && v.include?('<br>')
+      # Allow single or multiple scalars through without any processing.
+      unless scalar || v.blank?
 
-      # Process each string element of *v* based on the nature of *k*.
-      process = {
-        doi:    EDS_DOI_KEYS.include?(k),
-        email:  EDS_EMAIL_KEYS.include?(k),
-        html:   EDS_HTML_KEYS.include?(k),
-        id:     EDS_ID_KEYS.include?(k),
-        mesh:   EDS_MESH_KEYS.include?(k),
-        naics:  EDS_NAICS_KEYS.include?(k),
-        search: EDS_SEARCH_KEYS.include?(k),
-      }
-      v = apply(v) do |s|
-        s = sanitize(s, process[:html])
-        s = modify_dbid(s) if process[:id]
-        s = doi_link(s)    if process[:doi]
-        s = search_link(s) if process[:search]
-        s = mesh_link(s)   if process[:mesh]
-        s = naics_link(s)  if process[:naics]
-        s = mailto_link(s) if process[:email]
-        process[:html] ? s.html_safe : s
+        # Split strings with "<br/>" into arrays of strings.
+        v = Array.wrap(v)
+        if string || v.first.is_a?(String)
+          v = v.join('<br/>').gsub(BREAK_REGEX, '<br/>')
+          v = v.split('<br/>').map(&:strip).reject(&:blank?)
+          v = v.first if string && (v.size == 1)
+        end
+
+        # Determine whether this is a metadata field that should be processed.
+        process = v.presence && {
+          html:   EDS_HTML_KEYS.include?(k),
+          id:     EDS_ID_KEYS.include?(k),
+          relate: EDS_RELATE_KEYS.include?(k),
+          doi:    EDS_DOI_KEYS.include?(k),
+          search: EDS_SEARCH_KEYS.include?(k),
+          mesh:   EDS_MESH_KEYS.include?(k),
+          naics:  EDS_NAICS_KEYS.include?(k),
+          email:  EDS_EMAIL_KEYS.include?(k)
+        }
+
+        # Process each string element of *v* based on the nature of *k*.
+        if process&.values&.any?
+          v = apply(v) do |s|
+            s = sanitize(s, process[:html])
+            s = modify_dbid(s) if process[:id]
+            s = relates_to(s)  if process[:relate]
+            s = doi_link(s)    if process[:doi]
+            s = search_link(s) if process[:search]
+            s = mesh_link(s)   if process[:mesh]
+            s = naics_link(s)  if process[:naics]
+            s = mailto_link(s) if process[:email]
+            process[:html] ? s.html_safe : s
+          end
+        end
       end
 
+      # Skip blank strings, arrays or hashes unless preserving blanks.
+      unless v.present? || v.is_a?(FalseClass)
+        next unless preserve_blanks
+        v = string ? '' : array ? [] : hash ? {} : nil
+      end
+
+      # Emit the metadata field and its value.
       [k, v]
     }.compact.to_h.with_indifferent_access
   end
@@ -245,10 +359,10 @@ module Blacklight::Eds::Document
   #
   def apply(item, &block)
     case item
-      when Hash     then item.map { |k, v| [k, apply(v, &block)] }.to_h
-      when Array    then item.map { |v| apply(v, &block) }
-      when String   then yield(item)
-      else               item
+      when Hash   then item.map { |k, v| [k, apply(v, &block)] }.to_h
+      when Array  then item.map { |v| apply(v, &block) }
+      when String then yield(item)
+      else             item
     end
   end
 
@@ -276,12 +390,13 @@ module Blacklight::Eds::Document
   # interpreting it this way.)
   #
   # @param [String] s
-  # @param [String] replacement       Default: '_'.
   #
   # @return [String]
   #
-  def modify_dbid(s, replacement = '_')
-    s.tr('.', replacement)
+  # @see self#EDS_ID_DOT_REPLACEMENT
+  #
+  def modify_dbid(s)
+    s.tr('.', EDS_ID_DOT_REPLACEMENT)
   end
 
   # Replace email addresses with "mailto:" links.
@@ -289,6 +404,13 @@ module Blacklight::Eds::Document
   # @param [String] s
   #
   # @return [String]
+  #
+  # @see HtmlHelper#email_link
+  #
+  # === Examples
+  #
+  # @example With mailing addresses in :eds_authors_composed
+  #   /articles/ehh__119126750
   #
   def mailto_link(s)
     s.include?('@') ? s.gsub(email_regex) { |x| email_link(x) } : s
@@ -311,29 +433,78 @@ module Blacklight::Eds::Document
     }.to_s
   end
 
+  # Ensure that <relatesTo> elements are enclosed in square brackets.
+  #
+  # @param [String] s
+  #
+  # @return [String]
+  #
+  # @see self#RELATES_TO_REGEX
+  # @see HtmlHelper#path_link
+  #
+  # === Implementation Notes
+  # Using CSS to add separation between <relatesTo> and its neighboring content
+  # works visually, but this does not convey if the results are HTML-sanitized
+  # (e.g. when copying to the clipboard).  Instead, this method ensures that
+  # actual spaces are present on either side of the element.
+  #
+  # === Examples
+  #
+  # @example Multiple authors with one affiliation
+  #   /articles/a9h__129618192
+  #   /articles/a9h__133381278
+  #
+  # @example Multiple authors with multiple affiliations
+  #   /articles/a9h__133686484
+  #   /articles/a9h__133436856
+  #
+  # @example Authors with more than one affiliation
+  #   /articles/a9h__133686482
+  #   /articles/a9h__133436861
+  #   /articles/a9h__133436852
+  #
+  def relates_to(s)
+    s.gsub(RELATES_TO_REGEX) do
+      lsb, open_tag, number, close_tag, rsb = $1, $2, $5, $6, $7
+      lsb = ' ' if lsb.nil? || lsb.empty? || (lsb = lsb.tr('[', '')).empty?
+      rsb = ' ' if rsb.nil? || rsb.empty? || (rsb = rsb.tr(']', '')).empty?
+      [lsb, open_tag, '[', number, ']', close_tag, rsb].join
+    end
+  end
+
   # Create a search URL link for each matching portion of *s*.
   #
   # @param [String] s
   #
   # @return [String]
   #
-  # @see self#SEARCH_REGEX
-  # @see self#SEARCH_LINK
+  # @see self#SEARCH_LINK_REGEX
+  # @see HtmlHelper#path_link
+  #
+  # === Examples
+  #
+  # @example Multiple search links
+  #   /articles/a9h__133661705
   #
   def search_link(s)
-    s.gsub(SEARCH_REGEX) do
-      path_opt = { controller: :articles } # TODO
+    s.gsub(SEARCH_LINK_REGEX) do
+      open_tag, attr, label, close_tag = $1, $3, $4, $5
+      opt  = attr_to_options(attr)
+      term = opt[:term] || CGI.unescapeHTML(label)
+      code = opt[:fieldcode] || opt[:fieldCode]
       search =
-        case $2
+        case code
           when 'TI' then 'title'
           when 'AU' then 'author'
           when 'SU' then 'subject'
         end
-      path_opt[:search_field] = search if search.present?
-      path_opt[:q] = %Q("#{$4}")
-      label = $6.html_safe
-      link  = path_link(label, path_opt)
-      [$1, $2, $3, $4, $5, link, $7].join
+      path_opt = {
+        controller:   :articles, # TODO
+        search_field: search,
+        q:            %Q("#{term}"),
+      }.compact
+      link = path_link(label.html_safe, path_opt)
+      [open_tag, link, close_tag].join
     end
   end
 
@@ -345,13 +516,15 @@ module Blacklight::Eds::Document
   #
   # @see self#MESH_REGEX
   # @see self#MESH_LINK
+  # @see HtmlHelper#outlink
   #
   def mesh_link(s)
     s.gsub(MESH_REGEX) do
-      label = $4.html_safe
-      url   = MESH_LINK % $2
-      link  = outlink(label, url)
-      [$1, $2, $3, link, $5].join
+      open_tag, attr, label, close_tag = $1, $3, $4, $5
+      opt  = attr_to_options(attr)
+      url  = MESH_LINK % opt[:term]
+      link = outlink(label.html_safe, url)
+      [open_tag, link, close_tag].join
     end
   end
 
@@ -363,13 +536,19 @@ module Blacklight::Eds::Document
   #
   # @see self#NAICS_REGEX
   # @see self#NAICS_LINK
+  # @see HtmlHelper#outlink
+  #
+  # === Examples
+  #
+  # @example Valid and invalid NAICS codes
+  #   /articles/a9h__133661705
   #
   def naics_link(s)
     s.gsub(NAICS_REGEX) do
-      label = $1
-      url   = NAICS_LINK % $1
-      link  = outlink(label, url)
-      [link, $2].join
+      open_tag, code, close_tag = $1, $4, $5
+      url  = NAICS_LINK % code
+      link = outlink(code, url)
+      [open_tag, link, close_tag].join
     end
   end
 

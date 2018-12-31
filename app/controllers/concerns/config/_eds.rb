@@ -208,7 +208,7 @@ class Config::Eds < Config::Base
       config.add_show_field 'eds_subjects_genre'
       config.add_show_field 'eds_code_naics'
       config.add_show_field 'eds_author_supplied_keywords'
-      config.add_show_field 'eds_abstract'
+      config.add_show_field 'eds_abstract',                 helper_method: :eds_abstract
       config.add_show_field 'eds_publication_type_id'
       config.add_show_field 'eds_access_level'
       config.add_show_field 'eds_authors_composed'

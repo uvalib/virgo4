@@ -92,6 +92,20 @@ module HtmlHelper
     end
   end
 
+  # Turn HTML element attributes into an HTML option hash.
+  #
+  # @param [String, Array<String>] attr
+  #
+  # @return [Hash{Symbol=>String}]
+  #
+  def attr_to_options(attr)
+    Array.wrap(attr).join(' ').split(/\s+/).map { |pair|
+      key, *value = pair.split('=')
+      value &&= value.join('=').sub(/^"+/, '').sub(/"+$/, '')
+      [key.to_sym, value] if key.present? && value.present?
+    }.compact.to_h
+  end
+
   # ===========================================================================
   # :section:
   # ===========================================================================
@@ -232,7 +246,9 @@ module HtmlHelper
   # @param [String] address
   #
   def email_link(address)
-    %Q(<a href="mailto:#{address}">#{address}</a>)
+    label = address.sub(/^mailto:/, '')
+    href  = "mailto:#{address}"
+    link_to(label, href)
   end
 
 end

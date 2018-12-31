@@ -7,12 +7,6 @@ en:
     message:
       title: 'Restricted to UVA users; please login to see this item.'
 
-    html_fulltext:
-      #title:           'h1'
-      sbt:              'b'
-      #jsection:        'i'
-      et:               'u'
-
     links:
       view:             'View'
       eds:              'Find @ UVA'

@@ -22,4 +22,7 @@ $nav-link-padding: $nav-link-padding-y;
 // Common settings
 //=============================================================================
 
-// TBD
+// For use within "content:" values:
+$thinsp: "\2009"; // Equivalent to "&thinsp;"
+$hairsp: "\200a"; // Equivalent to "&hairsp;"
+
