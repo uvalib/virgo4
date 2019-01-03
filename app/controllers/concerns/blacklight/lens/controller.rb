@@ -83,13 +83,13 @@ module Blacklight::Lens::Controller
       add_nav_action
       add_show_tools_partial
     ).each do |method|
-      class_eval <<-EOS
+      class_eval <<~EOF
         def #{method}(*args)
           Blacklight.logger.warn do
             "SKIPPING DEPRECATED #{method}(\#{args.inspect})"
           end
         end
-      EOS
+      EOF
     end
 
   end
@@ -228,14 +228,20 @@ module Blacklight::Lens::Controller
 
   # Indicate whether to display the saved searches link.
   #
-  def render_saved_searches?
+  # @param [Blacklight::Configuration::Field] _config Unused.
+  # @param [Hash]                             _opt    Unused.
+  #
+  def render_saved_searches?(_config, _opt = nil)
     !disabled?(:saved_searches) &&
       has_user_authentication_provider? && current_user.present?
   end
 
   # Indicate whether to display the search history link.
   #
-  def render_search_history?
+  # @param [Blacklight::Configuration::Field] _config Unused.
+  # @param [Hash]                             _opt    Unused.
+  #
+  def render_search_history?(_config, _opt = nil)
     !disabled?(:search_history) &&
       has_user_authentication_provider? && current_or_guest_user.present?
   end
@@ -245,7 +251,7 @@ module Blacklight::Lens::Controller
   # @param [Blacklight::Configuration::Field] _config Unused.
   # @param [Hash]                             _opt    Unused.
   #
-  def render_bookmark_action?(_config, _opt)
+  def render_bookmark_action?(_config, _opt = nil)
     !disabled?(:bookmark)
   end
 
@@ -254,7 +260,7 @@ module Blacklight::Lens::Controller
   # @param [Blacklight::Configuration::Field] _config Unused.
   # @param [Hash]                             _opt    Unused.
   #
-  def render_email_action?(_config, _opt)
+  def render_email_action?(_config, _opt = nil)
     !disabled?(:email)
   end
 
@@ -266,7 +272,7 @@ module Blacklight::Lens::Controller
   # This method overrides:
   # @see Blacklight::Catalog#render_sms_action?
   #
-  def render_sms_action?(_config, _opt)
+  def render_sms_action?(_config, _opt = nil)
     !disabled?(:sms) && super
   end
 
@@ -275,7 +281,7 @@ module Blacklight::Lens::Controller
   # @param [Blacklight::Configuration::Field] _config Unused.
   # @param [Hash]                             _opt    Unused.
   #
-  def render_citation_action?(_config, _opt)
+  def render_citation_action?(_config, _opt = nil)
     !disabled?(:citation)
   end
 
@@ -287,7 +293,7 @@ module Blacklight::Lens::Controller
   # Compare with:
   # @see Blacklight::Marc::Catalog#render_librarian_view_control?
   #
-  def render_librarian_view_control?(_config, opt)
+  def render_librarian_view_control?(_config, opt = nil)
     !disabled?(:librarian_view) &&
       if_any?(opt) { |doc| doc.has_marc? }
   end
@@ -300,7 +306,7 @@ module Blacklight::Lens::Controller
   # Compare with:
   # @see Blacklight::Marc::Catalog#render_refworks_action?
   #
-  def render_refworks_action?(_config, opt)
+  def render_refworks_action?(_config, opt = nil)
     !disabled?(:refworks) &&
       if_any?(opt) { |doc| doc.exports_as?(export_format[:refworks]) }
   end
@@ -313,7 +319,7 @@ module Blacklight::Lens::Controller
   # Compare with:
   # @see Blacklight::Marc::Catalog#render_endnote_action?
   #
-  def render_endnote_action?(_config, opt)
+  def render_endnote_action?(_config, opt = nil)
     !disabled?(:endnote) &&
       if_any?(opt) { |doc| doc.exports_as?(export_format[:endnote]) }
   end
@@ -323,7 +329,7 @@ module Blacklight::Lens::Controller
   # @param [Blacklight::Configuration::Field] _config Unused.
   # @param [Hash]                             opt
   #
-  def render_zotero_action?(_config, opt)
+  def render_zotero_action?(_config, opt = nil)
     !disabled?(:zotero) &&
       if_any?(opt) { |doc| doc.exports_as?(export_format[:zotero]) }
   end
@@ -333,7 +339,7 @@ module Blacklight::Lens::Controller
   # @param [Blacklight::Configuration::Field] _config Unused.
   # @param [Hash]                             _opt    Unused.
   #
-  def render_sort_widget?(_config, _opt)
+  def render_sort_widget?(_config, _opt = nil)
     !disabled?(:sort)
   end
 
@@ -342,7 +348,7 @@ module Blacklight::Lens::Controller
   # @param [Blacklight::Configuration::Field] _config Unused.
   # @param [Hash]                             _opt    Unused.
   #
-  def render_per_page_widget?(_config, _opt)
+  def render_per_page_widget?(_config, _opt = nil)
     !disabled?(:per_page)
   end
 
@@ -351,7 +357,7 @@ module Blacklight::Lens::Controller
   # @param [Blacklight::Configuration::Field] _config Unused.
   # @param [Hash]                             _opt    Unused.
   #
-  def render_view_type_group?(_config, _opt)
+  def render_view_type_group?(_config, _opt = nil)
     !disabled?(:view_type_group)
   end
 
@@ -360,8 +366,28 @@ module Blacklight::Lens::Controller
   # @param [Blacklight::Configuration::Field] _config Unused.
   # @param [Hash]                             _opt    Unused.
   #
-  def json_request?(_config, _opt)
+  def json_request?(_config, _opt = nil)
     request.format.json?
+  end
+
+  # Indicate whether the field has a non-blank value.
+  #
+  # @param [Blacklight::Configuration::Field] config
+  # @param [Hash]                             opt
+  #
+  def value_present?(config, opt = nil)
+    case opt
+      when Hash
+        opt[:value].present?
+      when Blacklight::Document, nil
+        if config.is_a?(Blacklight::Configuration::Field) && (key = config.key)
+          if_any?(opt) do |doc|
+            Array.wrap(doc[key]).any? do |field|
+              field.is_a?(Hash) ? field[:value].present? : field.present?
+            end
+          end
+        end
+    end
   end
 
   # Indicate whether the field has a numeric value of zero.
@@ -369,7 +395,7 @@ module Blacklight::Lens::Controller
   # @param [Blacklight::Configuration::Field] config
   # @param [Hash]                             opt
   #
-  def zero_value?(config, opt)
+  def zero_value?(config, opt = nil)
     !nonzero_value?(config, opt)
   end
 
@@ -378,11 +404,11 @@ module Blacklight::Lens::Controller
   # @param [Blacklight::Configuration::Field] config
   # @param [Hash]                             opt
   #
-  def nonzero_value?(config, opt)
+  def nonzero_value?(config, opt = nil)
     case opt
       when Hash
         opt[:value].to_i.nonzero?
-      when Blacklight::Document
+      when Blacklight::Document, nil
         if config.is_a?(Blacklight::Configuration::Field) && (key = config.key)
           if_any?(opt) do |doc|
             Array.wrap(doc[key]).any? do |v|
@@ -428,7 +454,7 @@ module Blacklight::Lens::Controller
   #
   # @param [Hash, Blacklight::Document, Array<Blacklight::Document] docs
   #
-  # @options docs [Blacklight::Document, Array<Blacklight::Document>] :document
+  # @option docs [Blacklight::Document, Array<Blacklight::Document>] :document
   #
   # @yield [Blacklight::Document]
   #

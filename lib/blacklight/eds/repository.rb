@@ -338,17 +338,18 @@ module Blacklight::Eds
       [dbid, an.to_s.tr('_', '.')]
     end
 
-    # Extract the list of documents from an EDS response.
+    # Extract the list of documents from EDS response data.
     #
-    # @param [Blacklight::Eds::Response] data
+    # @param [Hash] data
     #
     # @return [Array<EdsDocument>]
     #
     def eds_documents(data)
-      data ||= {}
-      docs = data.dig('response', 'docs')
+      docs = data&.dig('response', 'docs')
       docs = Array.wrap(docs).compact
-      docs.map { |doc| EdsDocument.new(doc) }
+      factory   = blacklight_config.document_factory
+      model_opt = { lens: blacklight_config.lens_key }
+      docs.map { |doc| factory.build(doc, data, model_opt) }
     end
 
     # =========================================================================

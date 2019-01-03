@@ -38,6 +38,7 @@ module Blacklight::Solr
     # @see Blacklight::Lens::DocumentFactory#document_model
     #
     def self.document_model(_data, opt)
+      opt ||= {}
       opt[:solr_document_model] || opt[:document_model] || SolrDocument
     end
 

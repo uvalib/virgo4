@@ -29,11 +29,12 @@ module SearchHistoryConcern
   # `app/views/saved_searches/index.json.jbuilder`.
   #
   # @param [Array<Search>] searches
+  # @param [Symbol]        view       Default: :index.
   #
   # @return [Blacklight::Lens::JsonPresenter]
   #
-  def json_presenter(searches)
-    Blacklight::Lens::JsonPresenter.new(searches)
+  def json_presenter(searches, view: :index)
+    json_presenter_class.new(searches, view: view)
   end
 
 end

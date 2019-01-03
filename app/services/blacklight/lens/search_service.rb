@@ -38,6 +38,7 @@ module Blacklight::Lens
     # @option args [Class]  :search_builder_class   Default:
     #                                               config.search_builder_class
     #
+    # This method overrides:
     # @see Blacklight::SearchService#initialize
     #
     def initialize(context: nil, **args)
@@ -53,6 +54,9 @@ module Blacklight::Lens
     #
     # @return [Array<(Blacklight::Lens::Response, Blacklight::Document)>]
     # @return [Array<(Blacklight::Lens::Response, Array<Blacklight::Document>)>]
+    #
+    # This method overrides:
+    # @see Blacklight::SearchService#fetch
     #
     def fetch(id, other_params = nil)
       other_params ||= {}
@@ -90,7 +94,8 @@ module Blacklight::Lens
     #
     # @return [Array<(Blacklight::Lens::Response, Blacklight::Document)>]
     #
-    # Compare with (for catalog search):
+    # Compare with:
+    # @see Blacklight::Eds::SearchService#fetch_one
     # @see Blacklight::Solr::SearchService#fetch_one
     #
     def polymorphic_fetch_one(id, other_params = nil)
@@ -108,7 +113,8 @@ module Blacklight::Lens
     #
     # @return [Array<(Blacklight::Lens::Response, Array<Blacklight::Document>)>]
     #
-    # Compare with (for catalog search):
+    # Compare with:
+    # @see Blacklight::Eds::SearchService#fetch_many
     # @see Blacklight::Solr::SearchService#fetch_many
     #
     def polymorphic_fetch_many(ids, other_params = nil)

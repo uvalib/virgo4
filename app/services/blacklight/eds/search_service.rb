@@ -37,6 +37,7 @@ module Blacklight::Eds
     # @option user_params [ActionDispatch::Request::Session] :session
     # @option user_params [Boolean]                          :guest
     #
+    # This method overrides:
     # @see Blacklight::Lens::SearchService#initialize
     #
     def initialize(**args)
@@ -55,7 +56,7 @@ module Blacklight::Eds
     #
     # @return [Array<(Blacklight::Eds::Response, Array<EdsDocument>)>]
     #
-    # Compare with:
+    # This method overrides:
     # @see Blacklight::SearchService#search_results
     #
     def search_results
@@ -87,7 +88,7 @@ module Blacklight::Eds
     #
     # @return [Blacklight::Eds::Response]
     #
-    # Compare with:
+    # This method overrides:
     # @see Blacklight::SearchService#facet_field_response
     #
     def facet_field_response(facet_field, req_params = nil, eds_params = nil)
@@ -108,7 +109,7 @@ module Blacklight::Eds
     #
     # @return [Array<(Blacklight::Eds::Response, Array<EdsDocument>)>]
     #
-    # Compare with:
+    # This method overrides:
     # @see Blacklight::SearchService#previous_and_next_documents_for_search
     #
     def previous_and_next_documents_for_search(index, req_params, user_params = nil)
@@ -147,7 +148,7 @@ module Blacklight::Eds
     #
     # @return [Array<(String, Array<EdsDocument>)>]
     #
-    # Compare with:
+    # This method overrides:
     # @see Blacklight::SearchService#opensearch_response
     #
     def opensearch_response(field = nil, req_params = nil, eds_params = nil)
@@ -168,7 +169,10 @@ module Blacklight::Eds
     #
     # @return [SearchBuilderEds]
     #
-    # === Implementation Notes
+    # This method overrides:
+    # @see Blacklight::SearchService#search_builder
+    #
+    # == Implementation Notes
     # This is here for debugging purposes; it can be safely removed.
     #
     def search_builder
@@ -183,7 +187,10 @@ module Blacklight::Eds
     #
     # @return [Blacklight::Eds::Repository]
     #
-    # === Implementation Notes
+    # This method overrides:
+    # @see Blacklight::SearchService#repository
+    #
+    # == Implementation Notes
     # There is actually a problem with the base method when called via
     # #generic_fetch_one because it seems to be referencing blacklight_config
     # of the original context.  Even `blacklight_config.repository` from
@@ -210,8 +217,8 @@ module Blacklight::Eds
     #
     # @return [Array<(Blacklight::Eds::Response, EdsDocument)>]
     #
-    # Compare with (for catalog search):
-    # @see Blacklight::Solr::SearchService#fetch_one
+    # This method overrides:
+    # @see Blacklight::SearchService#fetch_one
     #
     def fetch_one(id, eds_params = nil)
       eds_params = service_params.merge(eds_params || {})
@@ -231,8 +238,8 @@ module Blacklight::Eds
     #
     # @return [Array<(Blacklight::Lens::Response, Array<Blacklight::Document>)>]
     #
-    # Compare with (for catalog search):
-    # @see Blacklight::Solr::SearchService#fetch_many
+    # This method overrides:
+    # @see Blacklight::SearchService#fetch_many
     #
     def fetch_many(ids, eds_params = nil)
       ids       = Array.wrap(ids)

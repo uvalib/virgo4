@@ -54,11 +54,9 @@ module ExportHelper
   #
   # @param [Hash, nil] opt
   #
-  # @options opt [String] :vendor     Default: `application_name`.
-  # @options opt [String] :filter     Default: 'RefWorks Tagged Format'
-  # @options opt [String] :url        The Virgo path that yields import data.
-  #
-  # @return [String]
+  # @option opt [String] :vendor      Default: `application_name`.
+  # @option opt [String] :filter      Default: 'RefWorks Tagged Format'
+  # @option opt [String] :url         The Virgo path that yields import data.
   #
   # @overload refworks_export_url
   #   This is used as the form destination path when posting to RefWorks; the
@@ -68,6 +66,8 @@ module ExportHelper
   # @overload refworks_export_url(url: fullpath)
   #   This is used when initiating a RefWorks import by providing a callback
   #   URL, which outputs the results of #export_as_refworks.
+  #
+  # @return [String]
   #
   # @see self#REFWORKS_URL
   #
@@ -101,7 +101,7 @@ module ExportHelper
   #
   # @param [Hash] options
   #
-  # @options url_params [String] :id        Required: Document ID.
+  # @option url_params [String] :id         Required: Document ID.
   #
   # @return [String, nil]
   #
@@ -119,7 +119,7 @@ module ExportHelper
   #
   # @param [Hash] options
   #
-  # @options url_params [String] :id        Required: Document ID.
+  # @option url_params [String] :id         Required: Document ID.
   #
   # @return [String, nil]
   #
@@ -182,7 +182,7 @@ module ExportHelper
   # args[0]  [String, nil]            Document ID
   # args[-1] [Hash, nil]              Options
   #
-  # @options args[-1] [String] :id    Document ID
+  # @option args[-1] [String] :id     Document ID
   #
   # @return [String, nil]
   #
@@ -199,7 +199,7 @@ module ExportHelper
   # args[0]  [String, nil]            Document ID
   # args[-1] [Hash, nil]              Options
   #
-  # @options args[-1] [String] :id    Document ID
+  # @option args[-1] [String] :id     Document ID
   #
   # @return [String, nil]
   #
@@ -216,7 +216,7 @@ module ExportHelper
   # args[0]  [String, nil]            Document ID
   # args[-1] [Hash, nil]              Options
   #
-  # @options args[-1] [String] :id    Document ID
+  # @option args[-1] [String] :id     Document ID
   #
   # @return [String, nil]
   #
@@ -255,11 +255,11 @@ module ExportHelper
   # args[0]  [String, nil]            Document ID (here or in options)
   # args[-1] [Hash, nil]              Options
   #
-  # @options args[-1] [String] :format      Export format (required).
-  # @options args[-1] [String] :id          Document ID (required).
-  # @options args[-1] [String] :caller      For error reporting.
-  # @options args[-1] [String] :controller  Default: `current_lens_key`.
-  # @options args[-1] [String] :action      Default: 'show'.
+  # @option args[-1] [String] :format       Export format (required).
+  # @option args[-1] [String] :id           Document ID (required).
+  # @option args[-1] [String] :caller       For error reporting.
+  # @option args[-1] [String] :controller   Default: `current_lens_key`.
+  # @option args[-1] [String] :action       Default: 'show'.
   #
   # @return [String, nil]
   #

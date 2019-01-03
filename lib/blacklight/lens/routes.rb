@@ -90,7 +90,7 @@ module Blacklight::Lens
     module RouteSets
 
       DEFAULT_ROUTE_SETS.each do |lens|
-        eval <<-EOS
+        eval <<~EOF
           def #{lens}
             add_routes do
               get '#{lens}/home',       to: redirect('/#{lens}')
@@ -106,7 +106,7 @@ module Blacklight::Lens
                                         format: 'xml'
             end
           end
-        EOS
+        EOF
       end
 
     end

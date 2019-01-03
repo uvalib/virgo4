@@ -19,12 +19,50 @@ module ApplicationHelper
   end
 
   # Displayed only if a method is set up to avoid returning *nil*.
+  #
+  # @type [ActiveSupport::SafeBuffer]
+  #
+  # @see self#return_empty
+  #
   NO_LINK_DISPLAY = I18n.t('blacklight.no_link').html_safe.freeze
 
+  # Indicate whether a method should return *nil* if there was no data.
+  # If *false* then self#NO_LINK_DISPLAY is returned.
+  #
+  # @type [Hash{Symbol=>Boolean}]
+  #
+  # @see self#return_empty
+  #
   RETURN_NIL = {
     doi_link: false,
     url_link: true,
   }
+
+  # URL sign-on path.
+  #
+  # @type [String]
+  #
+  SIGN_ON_PATH = '/account/login'
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  # Generate a path to sign on and redirect to the given path.
+  #
+  # @param [String, nil] return_path  URL to redirect to after sign on.
+  #
+  # @return [String]
+  #
+  def signon_redirect(return_path = nil)
+    return_path = request&.path || root_url if return_path.blank?
+    full_path, anchor = return_path.split('#')
+    full_path << (full_path.include?('?') ? '&' : '?')
+    full_path << 'refresh=true' # TODO: Implement to avoid using the cached version of the destination page.
+    full_path << ('#' + anchor) if anchor.present?
+    full_path = CGI.escape(full_path)
+    "#{SIGN_ON_PATH}?redirect=#{full_path}"
+  end
 
   # ===========================================================================
   # :section: Blacklight configuration "helper_methods"
@@ -32,77 +70,59 @@ module ApplicationHelper
 
   public
 
-  # Render a field as hidden.
+  # Configuration :helper_method to display a URL as a clickable link for HTML
+  # response format, or as one or more URLs for JSON response format.
   #
-  # @param [Hash] opt                 Supplied by the presenter.
+  # @param [Hash] options             Supplied by the presenter.
   #
-  # @return [String, Array]
-  #
-  def raw_value(opt = nil)
-    values = (opt[:value] if opt.is_a?(Hash))
-    values = Array.wrap(values).reject(&:blank?)
-    (values.size > 1) ? values : values.first
-  end
-
-  # url_link
-  #
-  # @param [Hash]      value        Supplied by the presenter.
-  # @param [Hash, nil] opt          Supplied internally to join multiple items.
-  #
-  # @option value [Hash]   :html_options        See below.
-  # @option value [Hash]   :separator_options   See below.
-  # @option value [String] :separator
-  #
-  # @option opt   [String] :separator
-  #
-  # @return [Array<ActiveSupport::SafeBuffer>]
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [Array<ActiveSupport::SafeBuffer>]    If request.format.html?
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [Array<String>]                       If !request.format.html?
+  # @return [String]                              If !request.format.html?
   # @return [nil]                                 If no URLs were present.
   #
-  # Options separating multiple:
-  # @see ActionView::Helper::OutputSafetyHelper#to_sentence
+  # @see self#extract_config_value
   #
-  def url_link(value, opt = nil)
-    unless request.format.html?
-      return raw_value(value).to_s.split('|').first.presence
+  def url_link(options = nil)
+    values, opt = extract_config_value(options)
+    result = Array.wrap(values).map { |v| v&.split('|', -3) }.reject(&:blank?)
+    if rendering_non_html?(opt)
+      result.map!(&:first)
+      (values.is_a?(Array) || (result.size > 1)) ? result : result.first
+    elsif result.present?
+      separator = opt[:separator] || ' '
+      result.map! { |url, _, label| outlink((label || url), url) }
+      result.join(separator).html_safe
+    else
+      return_empty(__method__)
     end
-    value, opt = extract_config_value(value, opt)
-    separator = opt.delete(:separator) || ' '
-    result =
-      Array.wrap(value).map { |url|
-        parts = url.to_s.split('|', -3)
-        next if (url = parts.first).blank?
-        label = (parts.last.presence if parts.size > 1) || url
-        outlink(label, url, opt)
-      }.compact.join(separator).html_safe.presence
-    result || (NO_LINK_DISPLAY unless RETURN_NIL[__method__])
   end
 
-  # doi_link
+  # Configuration :helper_method to display a DOI as a clickable link for HTML
+  # response format only.
   #
-  # @param [Hash]      value        Supplied by the presenter.
-  # @param [Hash, nil] opt          Supplied internally to join multiple items.
+  # @param [Hash] options             Supplied by the presenter.
   #
-  # @option value [Hash]   :html_options        See below.
-  # @option value [Hash]   :separator_options   See below.
-  # @option value [String] :separator
-  #
-  # @option opt   [String] :separator
-  #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [Array<ActiveSupport::SafeBuffer>]    If request.format.html?
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [Array<String>]                       If !request.format.html?
+  # @return [String]                              If !request.format.html?
   # @return [nil]                                 If no URLs were present.
   #
-  def doi_link(value, opt = nil)
-    return raw_value(value) unless request.format.html?
-    value, opt = extract_config_value(value, opt)
-    separator = opt.delete(:separator)
-    result =
-      Array.wrap(value).map { |url|
-        next if url.blank?
-        label = url.sub(%r{^https?://.*doi\.org/}, '')
-        outlink(label, url, opt)
-      }.compact.join(separator).html_safe.presence
-    result || (NO_LINK_DISPLAY unless RETURN_NIL[__method__])
+  # @see self#extract_config_value
+  #
+  def doi_link(options = nil)
+    values, opt = extract_config_value(options)
+    result = Array.wrap(values).reject(&:blank?)
+    if rendering_non_html?(opt)
+      (values.is_a?(Array) || (result.size > 1)) ? result : result.first
+    elsif result.present?
+      separator = opt[:separator] || "<br/>\n"
+      result.map! { |v| outlink(v.sub(%r{^https?://.*doi\.org/}, ''), v) }
+      result.join(separator).html_safe
+    else
+      return_empty(__method__)
+    end
   end
 
   # ===========================================================================
@@ -110,6 +130,32 @@ module ApplicationHelper
   # ===========================================================================
 
   protected
+
+  # Indicate whether the ultimate target format is HTML.
+  #
+  # @param [Hash, nil] opt
+  #
+  def rendering_html?(opt)
+    ((opt[:format].to_s.downcase == 'html') if opt.is_a?(Hash)) ||
+      (request.format.html? if defined?(request))
+  end
+
+  # Indicate whether the ultimate target format is something other than HTML.
+  #
+  # @param [Hash, nil] opt
+  #
+  def rendering_non_html?(opt)
+    !rendering_html?(opt)
+  end
+
+  # Indicate whether the ultimate target format is JSON.
+  #
+  # @param [Hash, nil] opt
+  #
+  def rendering_json?(opt)
+    ((opt[:format].to_s.downcase == 'json') if opt.is_a?(Hash)) ||
+      (request.format.json? if defined?(request))
+  end
 
   # extract_config_options
   #
@@ -132,7 +178,7 @@ module ApplicationHelper
     opt ||= {}
     case value
       when Hash, Blacklight::Configuration::Field
-        opt   = extract_config_options(value[:config], opt)
+        opt   = value.merge(extract_config_options(value[:config], opt))
         value = value[:value]
       when Array
         opt   = opt.merge(separator: HTML_NEW_LINE) unless opt.key?(:separator)
@@ -167,6 +213,26 @@ module ApplicationHelper
       end
     end
     opt
+  end
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  private
+
+  # Return either #NO_LINK_DISPLAY or *nil*.
+  #
+  # @param [Symbol] method
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  # @return [nil]                         If directed by #RETURN_NIL
+  #
+  # @see self#NO_LINK_DISPLAY
+  # @see self#RETURN_NIL
+  #
+  def return_empty(method)
+    NO_LINK_DISPLAY unless RETURN_NIL[method]
   end
 
 end

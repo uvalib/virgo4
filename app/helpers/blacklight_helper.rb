@@ -80,21 +80,19 @@ module BlacklightHelper
   # They are picked up from there by a value "%{label}" in
   # blacklight.search.index.label
   #
-  # @overload render_index_field_label(options)
-  #   Use the default, document-agnostic configuration.
+  # @param [Array] args
   #
+  # @overload render_index_field_label(opt)
+  #   Use the default, document-agnostic configuration.
   #   @param [Hash] opt
   #
-  #   @option opts [String] :field
-  #
-  # @overload render_index_field_label(document, options)
+  # @overload render_index_field_label(doc, opt)
   #   Allow an extension point where information in the document may drive the
   #   value of the field.
-  #
   #   @param [Blacklight::Document] doc
   #   @param [Hash]                 opt
   #
-  #   @option opts [String] :field
+  # @option opt [String] :field
   #
   # @return [ActiveSupport::SafeBuffer]
   #
@@ -106,21 +104,19 @@ module BlacklightHelper
 
   # Render the show field label for a document
   #
-  # @overload render_document_show_field_label(options)
+  # @param [Array] args
+  #
+  # @overload render_document_show_field_label(opt)
   #   Use the default, document-agnostic configuration.
+  #   @param [Hash] opt
   #
-  #   @param [Hash] opts
-  #
-  #   @option opts [String] :field
-  #
-  # @overload render_document_show_field_label(document, options)
+  # @overload render_document_show_field_label(doc, opt)
   #   Allow an extension point where information in the document may drive the
   #   value of the field.
-  #
   #   @param [Blacklight::Document] doc
   #   @param [Hash]                 opt
   #
-  #   @option opts [String] :field
+  # @option opt [String] :field
   #
   # @return [ActiveSupport::SafeBuffer]
   #
@@ -197,14 +193,15 @@ module BlacklightHelper
   # json_presenter
   #
   # @param [Blacklight::Document, nil] doc
+  # @param [Symbol]                    view   Optional.
   #
   # @return [Blacklight::JsonPresenter] (or subclass)
   #
   # == Implementation Notes
   # Defined for consistency.
   #
-  def json_presenter(doc = nil)
-    json_presenter_class(doc).new(doc, self)
+  def json_presenter(doc = nil, view: nil)
+    json_presenter_class(doc).new(doc, self, view: view)
   end
 
   # thumbnail_presenter
@@ -232,8 +229,7 @@ module BlacklightHelper
   # Defined for consistency.
   #
   def json_presenter_class(doc = nil)
-    cfg = blacklight_config_for(doc)
-    cfg.json_presenter_class ||
+    blacklight_config_for(doc).json_presenter_class ||
       Blacklight::Lens::JsonPresenter
   end
 
@@ -248,8 +244,7 @@ module BlacklightHelper
   #
   def thumbnail_presenter_class(doc = nil)
     cfg = blacklight_config_for(doc)
-    cfg.thumbnail_presenter_class ||
-      cfg.index.thumbnail_presenter_class ||
+    cfg.thumbnail_presenter_class || cfg.index.thumbnail_presenter_class ||
       Blacklight::Lens::ThumbnailPresenter
   end
 

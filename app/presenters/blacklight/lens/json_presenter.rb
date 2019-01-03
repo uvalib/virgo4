@@ -31,41 +31,55 @@ module Blacklight::Lens
     # @param [Array] args
     #
     # @option args [Blacklight::Lens::Response]
+    # @option args [Blacklight::Controller]
     # @option args [Blacklight::Configuration]
     # @option args [ActiveRecord::Associations::CollectionProxy]
     #
+    # @option args.last [Symbol]  :view   One of :index or :show.
     # @option args.last [Boolean] :full   Show full details for each item
     # @option args.last [Boolean] :doc    Show document (for bookmarks);
     #                                       default: *true*.
     #
+    # This method overrides:
+    # @see Blacklight::JsonPresenter#initialize
+    #
     def initialize(*args)
       @options = args.extract_options!
       @options[:doc] = true unless @options.key?(:doc)
-      @response = @documents = @blacklight_config = @item_list = @facets = nil
-      facet_counts_type = Blacklight::Solr::Response::Facets::FacetField
-      args.each do |v|
+      @response = @item_list = @view_context = @blacklight_config =
+        @facets = @documents = nil
+      facet_counts_type = Blacklight::Lens::Response::Facets::FacetField
+      args.compact.each do |v|
+        @options[:view] ||= :show if v.is_a?(Blacklight::Document)
+        array = nil
         case v
-          when Blacklight::Solr::Response         then @response          = v
+          when Blacklight::Lens::Response         then @response          = v
           when ActiveRecord::Relation             then @item_list         = v
+          when Blacklight::Controller             then @view_context      = v
           when Blacklight::Configuration          then @blacklight_config = v
-          when Blacklight::Solr::Response::Facets then @facets            = v
+          when Blacklight::Lens::Response::Facets then @facets            = v
+          else array = Array.wrap(v).reject(&:blank?)
+        end
+        next unless array.present?
+        case array.first
+          when Blacklight::Facet, facet_counts_type
+            @facets = array
+          when Blacklight::Document
+            @documents = array
+            @options[:view] ||= :index
           else
-            array = Array.wrap(v).reject(&:blank?)
-            case array.first
-              when nil                                  then # ignore
-              when Blacklight::Document                 then @documents = array
-              when Blacklight::Facet, facet_counts_type then @facets    = array
-              else
-                error = "#{array.first.class} unexpected: #{array.inspect}"
-                raise error unless Virgo.production?
-                Log.warn("#{self.class}: #{error}")
-            end
+            error = "#{array.first.class} unexpected: #{array.inspect}"
+            raise error unless Virgo.production?
+            Log.warn("#{self.class}: #{error}")
         end
       end
       @facets            ||= @response&.dig(:facet_counts, :facet_fields) || {}
       @documents         ||= @response&.documents || []
       @item_list         ||= @documents
+      @blacklight_config ||= @view_context&.blacklight_config
       @blacklight_config ||= default_blacklight_config
+      @options[:view]    ||= :show
+      @options[:view] = @options[:view].to_sym if @options[:view].is_a?(String)
     end
 
     # documents
@@ -87,12 +101,15 @@ module Blacklight::Lens
     # @see Blacklight::JsonPresenter#search_facets
     #
     def search_facets
-      @facets || super
+      @facets || (@response ? super : [])
     end
 
     # Extract the pagination info from the response object.
     #
     # @return [Hash]
+    #
+    # This method overrides:
+    # @see Blacklight::JsonPresenter#pagination_info
     #
     def pagination_info
       @response ? super : {}
@@ -116,11 +133,11 @@ module Blacklight::Lens
     #
     def field_value(field, opt = nil)
       opt ||= {}
-      super(field, opt.merge(raw: true))
+      super(field, opt.merge(raw: true, blacklight_config: configuration))
     end
 
     # =========================================================================
-    # :section: Blacklight::ShowPresenter replacements
+    # :section: Blacklight::DocumentPresenter replacements
     # =========================================================================
 
     public
@@ -128,6 +145,9 @@ module Blacklight::Lens
     # For the sake of Blacklight::Lens::PresenterBehaviors#field_values.
     #
     # @return [Blacklight::Document]
+    #
+    # Compare with:
+    # @see Blacklight::DocumentPresenter#document
     #
     def document
       documents.first
@@ -137,15 +157,95 @@ module Blacklight::Lens
     #
     # @return [Blacklight::Configuration]
     #
+    # Compare with:
+    # @see Blacklight::DocumentPresenter#configuration
+    #
     def configuration
       @blacklight_config
     end
 
     # For consistency with Blacklight::ShowPresenter.
     #
-    # @return [ActionView::Base, nil]
+    # @return [Blacklight::Controller]
+    #
+    # Compare with:
+    # @see Blacklight::DocumentPresenter#view_context
     #
     def view_context
+      @view_context
+    end
+
+    # All the fields for this view that should be rendered.
+    #
+    # @return [Hash{String=>Blacklight::Configuration::Field}]
+    #
+    # Compare with:
+    # @see Blacklight::DocumentPresenter#fields_to_render
+    #
+    def fields_to_render
+      fields.select do |_, field_cfg|
+        render_field?(field_cfg) && has_value?(field_cfg)
+      end
+    end
+
+    # =========================================================================
+    # :section: Blacklight::DocumentPresenter replacements
+    # =========================================================================
+
+    protected
+
+    # Indicate whether the given field should be rendered in this context.
+    #
+    # @param [Blacklight::Configuration::Field] field_cfg
+    #
+    # Compare with:
+    # @see Blacklight::DocumentPresenter#render_field?
+    #
+    def render_field?(field_cfg)
+      if index_view
+        view_context.should_render_field?(field_cfg)
+      else
+        view_context.should_render_field?(field_cfg, document)
+      end
+    end
+
+    # Indicate whether a document has (or, might have, in the case of accessor
+    # methods) a value for the given metadata field.
+    #
+    # As a convenience, this simply returns *true* if #index_view is true.
+    #
+    # @param [Blacklight::Configuration::Field] field_cfg
+    #
+    # Compare with:
+    # @see Blacklight::DocumentPresenter#has_value?
+    #
+    def has_value?(field_cfg)
+      index_view ||
+        field_cfg.accessor ||
+        document.has?(field_cfg.field) ||
+        (document.has_highlight_field?(field_cfg.field) if field_cfg.highlight)
+    end
+
+    # =========================================================================
+    # :section: Blacklight::ShowPresenter replacements
+    # =========================================================================
+
+    protected
+
+    # fields
+    #
+    # @return [Hash{String=>Blacklight::Configuration::Field}]
+    #
+    # Compare with:
+    # @see Blacklight::ShowPresenter#fields
+    # @see Blacklight::IndexPresenter#fields
+    #
+    def fields
+      if index_view
+        configuration.index_fields_for(document)
+      else
+        configuration.show_fields_for(document)
+      end
     end
 
     # Get the configuration entry for a field.
@@ -154,10 +254,13 @@ module Blacklight::Lens
     #
     # @return [Blacklight::Configuration::Field]
     #
+    # Compare with:
+    # @see Blacklight::ShowPresenter#field_config
+    # @see Blacklight::IndexPresenter#field_config
+    #
     def field_config(field)
-      configuration.show_fields.fetch(field) do
-        Blacklight::Configuration::NullField.new(field)
-      end
+      (index_view ? configuration.index_fields : configuration.show_fields)
+        .fetch(field) { Blacklight::Configuration::NullField.new(field) }
     end
 
     # =========================================================================
@@ -226,6 +329,20 @@ module Blacklight::Lens
         )
         entry
       }.compact.as_json
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    protected
+
+    # Indicate whether :index fields are being rendered.
+    #
+    # @return [TrueClass, FalseClass]
+    #
+    def index_view
+      @options[:view] == :index
     end
 
   end

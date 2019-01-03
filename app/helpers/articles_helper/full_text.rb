@@ -61,20 +61,31 @@ module ArticlesHelper::FullText
 
   public
 
-  # Enhance fulltext content
+  # Enhance EBSCO EDS fulltext content, which is an HTML fragment with an
+  # extensive set of custom elements defined.
+  #
+  # This method applies a number of edits to the data, in addition to invoking
+  # some methods to apply transformations to the content to support proper
+  # linkages to internal and external URIs.
   #
   # @param [String, Array<String>]    content
   # @param [Hash, nil]                opt
   #
-  # @options opt [String] :separator  Used to join *content* elements;
+  # @option opt [String] :separator   Used to join *content* elements;
   #                                     default: '<br/>'.
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [String]
   #
   # @see self#render_fulltext_references!
   # @see self#render_fulltext_links!
   #
-  # === Examples
+  # == Usage Notes
+  # Although the result is HTML-ready, this method returns String to facilitate
+  # further transformations.  It has been observed that #gsub can exhibit
+  # unexpected behavior when operating on an ActiveSupport::SafeBuffer, so the
+  # caller is given the option of when to apply #html_safe to the result.
+  #
+  # == Examples
   #
   # @example Typical (with <anid>, <title>, <sbt>, <hd>, <aug>)
   #   /articles/eft__527588351
@@ -131,7 +142,7 @@ module ArticlesHelper::FullText
     # === Apply other modifications and return the display-ready content
     render_fulltext_references!(content)
     render_fulltext_links!(content)
-    content.html_safe
+    content.to_str
   end
 
   # ===========================================================================
@@ -192,7 +203,7 @@ module ArticlesHelper::FullText
   #
   # @return [String]
   #
-  # === Examples
+  # == Examples
   #
   # @example <reflink> and <bibl> with missing <bibl> entries reconstructed
   #   /articles/a9h__133661700
@@ -417,7 +428,7 @@ module ArticlesHelper::FullText
   # @see self#URL_SHORTENERS_PATTERN
   # @see self#URL_DOMAINS_PATTERN
   #
-  # === Examples
+  # == Examples
   #
   # @example Many implicit URLs:
   #   /articles/f5h__127929267

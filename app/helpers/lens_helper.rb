@@ -134,10 +134,10 @@ module LensHelper
   # @param [Hash, nil] opt              Options passed to the route helper
   #                                       (except for the options below).
   #
-  # @options opt [Symbol,String] :lens  This will be removed and used as then
+  # @option opt [Symbol,String] :lens   This will be removed and used as then
   #                                       the lens value if present.
   #
-  # @options opt [Boolean] :only_path   If *false* then the result is a full
+  # @option opt [Boolean] :only_path    If *false* then the result is a full
   #                                       URL rather than a relative path.
   #
   # @return [String]

@@ -83,7 +83,7 @@ module Blacklight::Marc::RoutesExt
         ", to: '#{lens}#zotero'" \
         ", as: 'zotero_#{lens}'" \
         ", defaults: { format: 'ris' }"
-      eval <<-EOS
+      eval <<~EOF
         def #{lens}
           add_routes do
             get '#{lens}/:id/librarian_view' #{lv_opt}
@@ -93,7 +93,7 @@ module Blacklight::Marc::RoutesExt
             # get '#{lens}/:id/zotero'       #{zo_opt} # TODO: remove?
           end
         end
-      EOS
+      EOF
     end
 
   end

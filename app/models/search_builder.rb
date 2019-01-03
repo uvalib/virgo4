@@ -39,10 +39,10 @@ class SearchBuilder < Blacklight::SearchBuilder
   #
   # @param [Array] options
   #
-  # @overload initialize(scope)       - When created externally.
-  #   @param [Object] scope           The source of filter methods.
+  # @overload initialize(scope)                 - When created externally.
+  #   @param [Object] scope                       The source of filter methods.
   #
-  # @overload initialize(processor_chain, scope)  - When used internally.
+  # @overload initialize(chain, scope)          - When used internally.
   #   @param [Array<Symbol>, TrueClass] chain     Filter methods used in place
   #                                                 of #default_processor_chain
   #   @param [Object] scope                       The source of filter methods.

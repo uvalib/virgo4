@@ -2,6 +2,9 @@
 #
 # frozen_string_literal: true
 # warn_indent:           true
+#
+# If "&raw=true" is included in the URL parameter then the original search
+# repository data will be included as the last portion of the result.
 
 json.links do
   json.self      full_url_for(url_for_document(@document))
@@ -13,13 +16,14 @@ json.data do
   json.id   @document.id
   json.type @document[type_field]
   json.attributes do
-    doc_presenter = show_presenter(@document)
-    doc_presenter.fields_to_render.each do |field_name, field|
-      json.set! field_name, doc_presenter.field_value(field_name)
+    @presenter.fields_to_render.each do |field_name, field|
+      json.set! field_name, @presenter.field_value(field_name)
     end
   end
 end
 
-if @document.respond_to?(:raw_source) && @document.raw_source.present?
-  json.set! 'raw_source', @document.raw_source
+if params[:raw]
+  if @document.respond_to?(:raw_source) && @document.raw_source.present?
+    json.set! 'raw_source', @document.raw_source
+  end
 end

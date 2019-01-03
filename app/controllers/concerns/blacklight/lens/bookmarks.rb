@@ -86,8 +86,7 @@ module Blacklight::Lens::Bookmarks
   # @see Blacklight::Bookmarks#index
   #
   def index
-    table = bookmark_table
-    @response, @document_list = action_documents(table)
+    @response, @document_list = action_documents(bookmark_table)
     @document_list =
       ActiveSupport::Deprecation::DeprecatedObjectProxy.new(
         @document_list,
@@ -98,7 +97,7 @@ module Blacklight::Lens::Bookmarks
       format.html { render layout: 'blacklight' }
       format.rss  { render layout: false }
       format.atom { render layout: false }
-      format.json { @presenter = json_presenter(@response, table) }
+      format.json { @presenter = json_presenter(@response) }
       additional_response_formats(format)
       document_export_formats(format)
     end
@@ -380,8 +379,7 @@ module Blacklight::Lens::Bookmarks
   # @return [Array<Bookmark>]
   #
   def bookmark_table
-    user = @user || token_or_current_or_guest_user
-    @bookmarks ||= user&.bookmarks || []
+    @bookmarks ||= (@user || token_or_current_or_guest_user)&.bookmarks || []
   end
 
   # The list of document IDs of the currently-bookmarked items.  Each entry is
@@ -403,13 +401,14 @@ module Blacklight::Lens::Bookmarks
   #
   # @param [Blacklight::Lens::Response]  response
   # @param [Array<Bookmark>, nil]        bookmarks
+  # @param [Symbol]                      view       Default: :index.
   #
   # @return [Blacklight::Lens::JsonPresenter]
   #
-  def json_presenter(response = nil, bookmarks = nil)
+  def json_presenter(response = nil, bookmarks = nil, view: :index)
     response  ||= @response
     bookmarks ||= bookmark_table
-    Blacklight::Lens::JsonPresenter.new(response, bookmarks)
+    json_presenter_class.new(response, bookmarks, view: view)
   end
 
   # ===========================================================================

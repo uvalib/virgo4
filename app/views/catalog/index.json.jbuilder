@@ -29,13 +29,11 @@ json.data do
     json.id   doc.id
     json.type doc[type_field]
     json.attributes do
-      doc_presenter = index_presenter(doc)
-      doc_presenter.fields_to_render.each do |field_name, field|
+      @presenter.fields_to_render.each do |field_name, field|
         json.partial! 'field',
-          field:         field,
-          field_name:    field_name,
-          document_url:  doc_url,
-          doc_presenter: doc_presenter
+          field:        field,
+          field_name:   field_name,
+          document_url: doc_url
       end
     end
 

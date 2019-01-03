@@ -37,6 +37,7 @@ module Blacklight::Eds
     # @see Blacklight::Lens::DocumentFactory#document_model
     #
     def self.document_model(_data, opt)
+      opt ||= {}
       opt[:document_model] || EdsDocument
     end
 

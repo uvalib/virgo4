@@ -98,10 +98,10 @@ class Config::Eds < Config::Base
       config.add_facet_field 'eds_publisher_facet'
       config.add_facet_field 'eds_content_provider_facet'
       # JSON-only facets
-      config.add_facet_field 'eds_library_location_facet',   helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'eds_library_collection_facet', helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'eds_author_university_facet',  helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'pub_year_tisim',               helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'eds_library_location_facet',   if: :json_request?
+      config.add_facet_field 'eds_library_collection_facet', if: :json_request?
+      config.add_facet_field 'eds_author_university_facet',  if: :json_request?
+      config.add_facet_field 'pub_year_tisim',               if: :json_request?
 
       # === Experimental facets
       now = Time.zone.now.year
@@ -143,14 +143,14 @@ class Config::Eds < Config::Base
       #     need for separate 'eds_source_title', 'eds_publication_info', and
       #     'eds_publication_date' entries.
 
-      config.add_index_field 'eds_title',                   helper_method: :raw_value, if: :json_request?
+      config.add_index_field 'eds_title',                   if: :json_request?
       config.add_index_field 'eds_publication_type',        helper_method: :eds_publication_type_label
       config.add_index_field 'eds_authors'
       config.add_index_field 'eds_composed_title',          helper_method: :eds_index_publication_info
       config.add_index_field 'eds_languages'
-      config.add_index_field 'eds_html_fulltext_available', helper_method: :fulltext_link
+      config.add_index_field 'eds_html_fulltext_available', helper_method: :eds_html_fulltext_link, if: :value_present?
       config.add_index_field 'eds_relevancy_score'
-      config.add_index_field 'eds_result_id',               helper_method: :raw_value, if: :json_request?
+      config.add_index_field 'eds_result_id',               if: :json_request?
 
       # =======================================================================
       # Show pages (item details)
@@ -170,9 +170,9 @@ class Config::Eds < Config::Base
       #     need for separate 'eds_source_title', 'eds_publication_info', and
       #     'eds_publication_date' entries.
 
-      config.add_show_field 'eds_title',                    helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'eds_title',                    if: :json_request?
       config.add_show_field 'eds_publication_type',         helper_method: :eds_publication_type_label
-      config.add_show_field 'eds_authors',                  helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'eds_authors',                  if: :json_request?
       config.add_show_field 'eds_document_type'             # TODO: Cope with extraneous text (e.g. "Artikel<br>PeerReviewed")
       config.add_show_field 'eds_publication_status'
       config.add_show_field 'eds_other_titles'
@@ -228,28 +228,28 @@ class Config::Eds < Config::Base
       config.add_show_field 'eds_accession_number'
       config.add_show_field 'eds_database_name'
       config.add_show_field 'eds_relevancy_score'
-      config.add_show_field 'eds_result_id',                helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'eds_result_id',                if: :json_request?
       # == Other
-      config.add_show_field 'all_subjects_search_links',    helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'bib_identifiers',              helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'bib_pub_date',                 helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'decode_sanitize_html',         helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'eds_extras_Format',            helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'eds_extras_NoteTitleSource',   helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'all_subjects_search_links',    if: :json_request?
+      config.add_show_field 'bib_identifiers',              if: :json_request?
+      config.add_show_field 'bib_pub_date',                 if: :json_request?
+      config.add_show_field 'decode_sanitize_html',         if: :json_request?
+      config.add_show_field 'eds_extras_Format',            if: :json_request?
+      config.add_show_field 'eds_extras_NoteTitleSource',   if: :json_request?
       # == Citations
-      config.add_show_field 'eds_citation_exports',         helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'eds_citation_styles',          helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'eds_citation_exports',         if: :json_request?
+      config.add_show_field 'eds_citation_styles',          if: :json_request?
       # == Availability (links and inline full text)
       config.add_show_field 'eds_pdf_fulltext_available'
       config.add_show_field 'eds_ebook_pdf_fulltext_available'
       config.add_show_field 'eds_ebook_epub_fulltext_available'
-      config.add_show_field 'eds_html_fulltext_available',  helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'eds_all_links',                helper_method: :all_eds_links
-      config.add_show_field 'eds_plink',                    helper_method: :ebsco_eds_plink
-      config.add_show_field 'eds_fulltext_link',            helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'eds_fulltext_links',           helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'eds_non_fulltext_links',       helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'eds_html_fulltext',            helper_method: :html_fulltext
+      config.add_show_field 'eds_html_fulltext_available',  if: :json_request?
+      config.add_show_field 'eds_all_links',                helper_method: :eds_all_links
+      config.add_show_field 'eds_plink',                    helper_method: :eds_plink
+      config.add_show_field 'eds_fulltext_link',            if: :json_request?
+      config.add_show_field 'eds_fulltext_links',           if: :json_request?
+      config.add_show_field 'eds_non_fulltext_links',       if: :json_request?
+      config.add_show_field 'eds_html_fulltext',            helper_method: :eds_html_fulltext
 
       # =======================================================================
       # Search fields
@@ -345,11 +345,12 @@ class Config::Eds < Config::Base
     def response_models!(config, added_values = nil)
       values =
         Blacklight::OpenStructWithHashAccess.new(
-          document_model:       EdsDocument,
-          document_factory:     Blacklight::Eds::DocumentFactory,
-          response_model:       Blacklight::Eds::Response,
-          repository_class:     Blacklight::Eds::Repository,
-          search_builder_class: SearchBuilderEds,
+          document_model:        EdsDocument,
+          document_factory:      Blacklight::Eds::DocumentFactory,
+          response_model:        Blacklight::Eds::Response,
+          repository_class:      Blacklight::Eds::Repository,
+          search_builder_class:  SearchBuilderEds,
+          field_retriever_class: Blacklight::Eds::FieldRetriever,
         )
       values = values.merge(added_values) if added_values.present?
       super(config, values)

@@ -264,28 +264,40 @@ module CatalogHelper
 
   # ===========================================================================
   # :section: Blacklight configuration "helper_methods"
+  #
+  # @see Blacklight::Rendering::HelperMethod#render_helper
   # ===========================================================================
 
   public
 
-  # format_facet_label
+  # Configuration :helper_method for rendering :format_facet.
+  #
+  # For HTML response format only, it wraps each content format type in a
+  # <span> for CSS styling.
   #
   # @param [Hash] options             Supplied by the presenter.
   #
-  # @return [ActiveSupport::SafeBuffer]
-  # @return [nil]                                 If no URLs were present.
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [nil]                                 If no data was present.
+  # @return [Array<String>]                       If request.format.json?
+  # @return [String]                              If request.format.json?
   #
+  # @see ApplicationHelper#extract_config_value
+  #
+  # Compare with:
   # @see ArticlesHelper#eds_publication_type_label
-  # @see Blacklight::Rendering::HelperMethod#render_helper
   #
   def format_facet_label(options = nil)
-    return raw_value(options) unless request.format.html?
-    values = (options[:value] if options.is_a?(Hash))
-    values = Array.wrap(values).reject(&:blank?)
-    return unless values.present?
-    values.map { |value|
-      content_tag(:span, value, class: 'label label-default')
-    }.join("&nbsp;\n").html_safe
+    values, opt = extract_config_value(options)
+    result = Array.wrap(values).reject(&:blank?)
+    if rendering_html?(opt)
+      result.map! { |v| content_tag(:span, v, class: 'label label-default') }
+      result.join("&nbsp;\n").html_safe.presence
+    elsif (result.size == 1) && !values.is_a?(Array)
+      result.first
+    else
+      result
+    end
   end
 
   # ===========================================================================

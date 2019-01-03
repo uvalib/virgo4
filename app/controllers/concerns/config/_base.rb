@@ -423,23 +423,26 @@ class Config::Base
     def response_models!(config, added_values = nil)
       values =
         Blacklight::OpenStructWithHashAccess.new(
+
           connection_config:          nil,
-          document_model:             LensDocument,
           document_factory:           Blacklight::Lens::DocumentFactory,
-          response_model:             Blacklight::Lens::Response,
-          repository_class:           Blacklight::Lens::Repository,
-          search_builder_class:       SearchBuilder,
+          document_model:             LensDocument,
           facet_paginator_class:      Blacklight::Solr::FacetPaginator,
+          field_presenter_class:      Blacklight::Lens::FieldPresenter,
+          field_retriever_class:      Blacklight::Lens::FieldRetriever,
+          repository_class:           Blacklight::Lens::Repository,
+          response_model:             Blacklight::Lens::Response,
+          search_builder_class:       SearchBuilder,
           thumbnail_presenter_class:  Blacklight::Lens::ThumbnailPresenter,
+
           index:
             Blacklight::Configuration::ViewConfig::Index.new(
-              document_presenter_class: Blacklight::Lens::IndexPresenter,
-              field_presenter_class:    Blacklight::Lens::FieldPresenter
+              document_presenter_class: Blacklight::Lens::IndexPresenter
             ),
+
           show:
             Blacklight::Configuration::ViewConfig::Show.new(
-              document_presenter_class: Blacklight::Lens::ShowPresenter,
-              field_presenter_class:    Blacklight::Lens::FieldPresenter
+              document_presenter_class: Blacklight::Lens::ShowPresenter
             ),
         )
       values.deep_merge!(added_values) if added_values.present?

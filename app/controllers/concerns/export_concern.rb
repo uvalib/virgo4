@@ -20,6 +20,7 @@ module ExportConcern
   include Blacklight::Lens::Catalog unless ONLY_FOR_DOCUMENTATION
   include Blacklight::Marc::Catalog unless ONLY_FOR_DOCUMENTATION
 
+  include BlacklightHelper
   include ExportHelper
 
   included do |base|
@@ -151,22 +152,21 @@ module ExportConcern
 
   protected
 
-  # Creates the @presenter used in "app/views/catalog/index.json.jbuilder".
+  # Creates the @presenter used in "catalog/{index,show}.json.jbuilder".
   #
-  # @param [Blacklight::Lens::Response]  response
-  # @param [Array<Blacklight::Document>] documents
+  # @param [Blacklight::Document, Array<Blacklight::Document>] docs
+  # @param [Symbol] view              Optional.
   #
   # @return [Blacklight::Lens::JsonPresenter]
   #
-  def json_presenter(response = nil, documents = nil)
-    response  ||= @response
-    documents ||= response&.documents
-    Blacklight::Lens::JsonPresenter.new(
-      response,
-      documents,
-      facets_from_request,
-      blacklight_config
-    )
+  # This method overrides:
+  # @see BlacklightHelper#json_presenter
+  #
+  def json_presenter(docs, view: nil)
+    view  ||= docs.is_a?(Array) ? :index : :show
+    facets  = (facets_from_request if view == :index)
+    context = self
+    json_presenter_class(context).new(docs, facets, context, view: view)
   end
 
 end

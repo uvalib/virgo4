@@ -259,6 +259,12 @@ module Blacklight::Lens
       field_value(field, fv_opt.merge(value: document[field]))
     end
 
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    private
+
     # A minimal implementation that is defined only if the current context does
     # not already have :content_tag.
     #

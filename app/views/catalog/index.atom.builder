@@ -5,38 +5,48 @@
 
 require 'base64'
 
+name = application_name
+
 xml.instruct!(:xml, encoding: 'UTF-8')
 
 xml.feed('xmlns' => 'http://www.w3.org/2005/Atom',
          'xmlns:opensearch' => 'http://a9.com/-/spec/opensearch/1.1/') do
 
   # === Title
-  title = t('blacklight.search.title', application_name: application_name)
-  xml.title title
+  xml.title t('blacklight.search.page_title.title', application_name: name)
 
   # === Author
   # An author is required, so we'll just use the app name.
-  xml.author { xml.name application_name }
+  xml.author { xml.name name }
 
   # === Links
-  search = search_state.to_h.merge(only_path: false)
-  xml.link rel: 'self', href: url_for(search)
-  xml.link rel: 'alternate', href: url_for(search.merge(format: 'html')), type: 'text/html'
-  xml.id   url_for(search.merge(format: 'html', content_format: nil, type: 'text/html'))
+  search    = search_state.to_h.merge(only_path: false)
+  alternate = search.merge(format: 'html')
+  id        = alternate.merge(content_format: nil, type: 'text/html')
+
+  xml.link rel: 'self',      href: url_for(search)
+  xml.link rel: 'alternate', href: url_for(alt), type: 'text/html'
+  xml.id   url_for(id)
 
   # === Navigational and context links
-  prev_page   = @response.prev_page.to_s.presence
-  next_page   = @response.next_page.to_s.presence
-  total_pages = @response.total_pages.to_s
-  xml.link rel: 'next',     href: url_for(search.merge(page: next_page)) if next_page
-  xml.link rel: 'previous', href: url_for(search.merge(page: prev_page)) if prev_page
-  xml.link rel: 'first',    href: url_for(search.merge(page: 1))
-  xml.link rel: 'last',     href: url_for(search.merge(page: total_pages))
+  next_page    = @response.next_page.to_s.presence
+  next_page  &&= search.merge(page: next_page)
+  prev_page    = @response.prev_page.to_s.presence
+  prev_page  &&= search.merge(page: prev_page)
+  first_page   = 1
+  first_page &&= search.merge(page: first_page)
+  last_page    = @response.total_pages.to_s.presence
+  last_page  &&= search.merge(page: last_page)
+
+  xml.link rel: 'next',     href: url_for(next_page)  if next_page
+  xml.link rel: 'previous', href: url_for(page_page)  if prev_page
+  xml.link rel: 'first',    href: url_for(first_page) if first_page
+  xml.link rel: 'last',     href: url_for(last_page)  if last_page
 
   # "search" doesn't seem to actually be legal, but is very common, and
   # used as an example in opensearch docs
   xml.link(
-    rel: 'search',
+    rel:  'search',
     type: 'application/opensearchdescription+xml',
     href: opensearch_url(format: 'xml')
   )

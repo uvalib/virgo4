@@ -36,18 +36,36 @@ module SearchConcern
   # @param [Array] args
   #
   # @overload search_service
+  #   Use #search_state for the default user parameters.
   #
   # @overload search_service(usr_params)
+  #   @param [Hash, ActionController::Parameters] usr_params
   #
   # @overload search_service(usr_params, context)
+  #   @param [Hash, ActionController::Parameters] usr_params
+  #   @param [Hash]                               context
   #
   # @overload search_service(usr_params, req)
+  #   @param [Hash, ActionController::Parameters] usr_params
+  #   @param [ActionDispatch::Request]            req
   #
   # @overload search_service(usr_params, req, context)
+  #   @param [Hash, ActionController::Parameters] usr_params
+  #   @param [ActionDispatch::Request]            req
+  #   @param [Hash]                               context
   #
   # @overload search_service(usr_params, user)
+  #   @param [Hash, ActionController::Parameters] usr_params
+  #   @param [User]                               user
   #
   # @overload search_service(usr_params, user, context)
+  #   @param [Hash, ActionController::Parameters] usr_params
+  #   @param [User]                               user
+  #   @param [Hash]                               context
+  #
+  # @option context [User]                    :user
+  # @option context [Hash]                    :service_params
+  # @option context [ActionDispatch::Request] :request
   #
   # @return [Blacklight::Lens::SearchService]
   #

@@ -193,8 +193,8 @@ module AboutHelper::Log
         .map { |li| ERB::Util.h(li.to_s) }
         .join("\n")
         .gsub(/(#{ANSI_PREFIX}#{ANSI_CODE}){2,}/u) do |sequences|
-        ANSI_PREFIX.tr('\\', '') + sequences.gsub(/#{ANSI_PREFIX}/u, '')
-      end
+          ANSI_PREFIX.tr('\\', '') + sequences.gsub(/#{ANSI_PREFIX}/u, '')
+        end
 
     # Break the string into parts that start with one or more ANSI code(s),
     # wrap the parts in elements with CSS class(es) associated with the codes,

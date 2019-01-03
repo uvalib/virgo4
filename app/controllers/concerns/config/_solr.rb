@@ -146,16 +146,16 @@ class Config::Solr < Config::Base
       config.add_facet_field 'source_f'
       config.add_facet_field 'location2_f'
       # JSON-only facets
-      config.add_facet_field 'barcode_f',            helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'date_first_indexed_f', helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'date_indexed_f',       helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'date_received_f',      helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'fund_code_f',          helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'location_f',           helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'oclc_f',               helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'issn_f',               helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'shadowed_location_f',  helper_method: :raw_value, if: :json_request?
-      config.add_facet_field 'topic_form_genre_f',   helper_method: :raw_value, if: :json_request?
+      config.add_facet_field 'barcode_f',            if: :json_request?
+      config.add_facet_field 'date_first_indexed_f', if: :json_request?
+      config.add_facet_field 'date_indexed_f',       if: :json_request?
+      config.add_facet_field 'date_received_f',      if: :json_request?
+      config.add_facet_field 'fund_code_f',          if: :json_request?
+      config.add_facet_field 'location_f',           if: :json_request?
+      config.add_facet_field 'oclc_f',               if: :json_request?
+      config.add_facet_field 'issn_f',               if: :json_request?
+      config.add_facet_field 'shadowed_location_f',  if: :json_request?
+      config.add_facet_field 'topic_form_genre_f',   if: :json_request?
 
       # === Experimental facets
       now = Time.zone.now.year
@@ -290,10 +290,10 @@ class Config::Solr < Config::Base
       # [1] Blacklight::Lens::IndexPresenter#label shows title and format so
       #     they should not be included here for HTML -- only for JSON.
 
-      config.add_index_field 'title_a',              helper_method: :raw_value, if: :json_request?
-      config.add_index_field 'subtitle_a',           helper_method: :raw_value, if: :json_request?
-      config.add_index_field 'title_vern_a',         helper_method: :raw_value, if: :json_request?
-      config.add_index_field 'subtitle_vern_a',      helper_method: :raw_value, if: :json_request? # NOTE: not in index
+      config.add_index_field 'title_a',              if: :json_request?
+      config.add_index_field 'subtitle_a',           if: :json_request?
+      config.add_index_field 'title_vern_a',         if: :json_request?
+      config.add_index_field 'subtitle_vern_a',      if: :json_request? # NOTE: not in index
       config.add_index_field 'format_a',             helper_method: :format_facet_label
       config.add_index_field 'author_vern_a'
       config.add_index_field 'author_a'
@@ -324,12 +324,12 @@ class Config::Solr < Config::Base
       # [1] Blacklight::Lens::ShowPresenter#heading shows title and author so
       #     they should not be included here for HTML -- only for JSON.
 
-      config.add_show_field 'title_a',               helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'title_vern_a',          helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'subtitle_a',            helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'subtitle_vern_a',       helper_method: :raw_value, if: :json_request? # NOTE: not in index
-      config.add_show_field 'author_a',              helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'author_vern_a',         helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'title_a',               if: :json_request?
+      config.add_show_field 'title_vern_a',          if: :json_request?
+      config.add_show_field 'subtitle_a',            if: :json_request?
+      config.add_show_field 'subtitle_vern_a',       if: :json_request? # NOTE: not in index
+      config.add_show_field 'author_a',              if: :json_request?
+      config.add_show_field 'author_vern_a',         if: :json_request?
       config.add_show_field 'format_a',              helper_method: :format_facet_label
       config.add_show_field 'title_uniform_a'
       config.add_show_field 'title_series_a'
@@ -383,20 +383,20 @@ class Config::Solr < Config::Base
       config.add_show_field 'shadowed_location_a'
       config.add_show_field 'summary_holdings_a'
       config.add_show_field 'barcode_e'
-      config.add_show_field 'library_a',             helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'location_a',            helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'call_number_broad_a',   helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'call_number_narrow_a',  helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'instrument_raw_a',      helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'library_a',             if: :json_request?
+      config.add_show_field 'location_a',            if: :json_request?
+      config.add_show_field 'call_number_broad_a',   if: :json_request?
+      config.add_show_field 'call_number_narrow_a',  if: :json_request?
+      config.add_show_field 'instrument_raw_a',      if: :json_request?
       config.add_show_field 'shelfkey'
       config.add_show_field 'reverse_shelfkey'
       config.add_show_field 'marc_error_a'
       config.add_show_field 'date_received_a'
       config.add_show_field 'date_indexed_a'
       config.add_show_field 'date_first_indexed_a'
-      config.add_show_field 'hathi_id_a',            helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'source_a',              helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'fullrecord',            helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'hathi_id_a',            if: :json_request?
+      config.add_show_field 'source_a',              if: :json_request?
+      config.add_show_field 'fullrecord',            if: :json_request?
 
       # === Unimplemented fields
       # config.add_show_field 'abstract_display'
@@ -709,11 +709,12 @@ class Config::Solr < Config::Base
     def response_models!(config, added_values = nil)
       values =
         Blacklight::OpenStructWithHashAccess.new(
-          document_model:       SolrDocument,
-          document_factory:     Blacklight::Solr::DocumentFactory,
-          response_model:       Blacklight::Solr::Response,
-          repository_class:     Blacklight::Solr::Repository,
-          search_builder_class: SearchBuilderSolr,
+          document_factory:      Blacklight::Solr::DocumentFactory,
+          document_model:        SolrDocument,
+          field_retriever_class: Blacklight::Solr::FieldRetriever,
+          repository_class:      Blacklight::Solr::Repository,
+          response_model:        Blacklight::Solr::Response,
+          search_builder_class:  SearchBuilderSolr,
         )
       values = values.merge(added_values) if added_values.present?
       super(config, values)
@@ -757,7 +758,7 @@ class Config::Solr < Config::Base
     #
     # @see Config::Base#blacklight_gallery!
     #
-    # == Usage Note
+    # == Usage Notes
     # This holds the engine-generated code that would be specific to the Solr
     # search repository, however the parts relating to OpenSeaDragon are unused
     # and currently untested.  This could/should be adapted to our IIIF setup.

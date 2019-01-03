@@ -142,10 +142,10 @@ class Config::SolrFake < Config::Base
       # [1] Blacklight::Lens::IndexPresenter#label shows title and format so
       #     they should not be included here for HTML -- only for JSON.
 
-      config.add_index_field 'title_display',           label: 'Title',          helper_method: :raw_value, if: :json_request?
-      config.add_index_field 'subtitle_display',        label: 'Subtitle',       helper_method: :raw_value, if: :json_request?
-      config.add_index_field 'title_vern_display',      label: 'Title',          helper_method: :raw_value, if: :json_request?
-      config.add_index_field 'subtitle_vern_display',   label: 'Subtitle',       helper_method: :raw_value, if: :json_request?
+      config.add_index_field 'title_display',           label: 'Title',          if: :json_request?
+      config.add_index_field 'subtitle_display',        label: 'Subtitle',       if: :json_request?
+      config.add_index_field 'title_vern_display',      label: 'Title',          if: :json_request?
+      config.add_index_field 'subtitle_vern_display',   label: 'Subtitle',       if: :json_request?
       config.add_index_field 'format',                  label: 'Format',         helper_method: :format_facet_label
       config.add_index_field 'author_display',          label: 'Author'
       config.add_index_field 'author_vern_display',     label: 'Author'
@@ -168,12 +168,12 @@ class Config::SolrFake < Config::Base
       # [1] Blacklight::Lens::ShowPresenter#heading shows title and author so
       #     they should not be included here for HTML -- only for JSON.
 
-      config.add_show_field 'title_display',          label: 'Title',            helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'title_vern_display',     label: 'Title',            helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'subtitle_display',       label: 'Subtitle',         helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'subtitle_vern_display',  label: 'Subtitle',         helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'author_display',         label: 'Author',           helper_method: :raw_value, if: :json_request?
-      config.add_show_field 'author_vern_display',    label: 'Author',           helper_method: :raw_value, if: :json_request?
+      config.add_show_field 'title_display',          label: 'Title',            if: :json_request?
+      config.add_show_field 'title_vern_display',     label: 'Title',            if: :json_request?
+      config.add_show_field 'subtitle_display',       label: 'Subtitle',         if: :json_request?
+      config.add_show_field 'subtitle_vern_display',  label: 'Subtitle',         if: :json_request?
+      config.add_show_field 'author_display',         label: 'Author',           if: :json_request?
+      config.add_show_field 'author_vern_display',    label: 'Author',           if: :json_request?
       config.add_show_field 'format',                 label: 'Format',           helper_method: :format_facet_label
       config.add_show_field 'url_fulltext_display',   label: 'URL',              helper_method: :url_link
       config.add_show_field 'url_suppl_display',      label: 'More Information', helper_method: :url_link
@@ -307,7 +307,7 @@ class Config::SolrFake < Config::Base
     #
     # @see Config::Base#blacklight_gallery!
     #
-    # == Usage Note
+    # == Usage Notes
     # This holds the engine-generated code that would be specific to the Solr
     # search repository, however the parts relating to OpenSeaDragon are unused
     # and currently untested.

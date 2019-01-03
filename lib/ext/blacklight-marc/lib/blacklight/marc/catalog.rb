@@ -45,7 +45,7 @@ module Blacklight::Marc::CatalogExt
   # @param [Blacklight::Configuration::Field] _config   Unused.
   # @param [Hash, nil]                        opt
   #
-  # @options opt [String, Array<String>] :document
+  # @option opt [String, Array<String>] :document
   #
   # This method overrides:
   # @see Blacklight::Marc::Catalog#render_librarian_view_control?
@@ -59,7 +59,7 @@ module Blacklight::Marc::CatalogExt
   # @param [Blacklight::Configuration::Field] _config   Unused.
   # @param [Hash, nil]                        opt
   #
-  # @options opt [String, Array<String>] :document
+  # @option opt [String, Array<String>] :document
   #
   # This method overrides:
   # @see Blacklight::Marc::Catalog#render_refworks_action?
@@ -73,7 +73,7 @@ module Blacklight::Marc::CatalogExt
   # @param [Blacklight::Configuration::Field] _config   Unused.
   # @param [Hash, nil]                        opt
   #
-  # @options opt [String, Array<String>] :document
+  # @option opt [String, Array<String>] :document
   #
   # This method overrides:
   # @see Blacklight::Marc::Catalog#render_endnote_action?

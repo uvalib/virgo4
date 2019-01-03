@@ -19,6 +19,19 @@ module Blacklight::Lens
     include Blacklight::Lens
 
     # =========================================================================
+    # :section:
+    # =========================================================================
+
+    public
+
+    # Indicates whether the field should be retrieved exactly as it was
+    # provided by the search repository.
+    #
+    # @return [TrueClass, FalseClass]   Default: *false*
+    #
+    attr_reader :raw
+
+    # =========================================================================
     # :section: Blacklight::FieldRetriever overrides
     # =========================================================================
 
@@ -34,6 +47,9 @@ module Blacklight::Lens
     #
     # @see Blacklight::SearchService#initialize
     #
+    # This method overrides:
+    # @see Blacklight::FieldRetriever#initialize
+    #
     def initialize(document, field_config, opt = nil)
       super(document, field_config)
       @raw = opt&.fetch(:raw, false)
@@ -41,16 +57,14 @@ module Blacklight::Lens
 
     # Retrieve the field values.
     #
-    # Multi-valued fields (like :subject_a or :barcode_e) will be returned in
-    # an array; single value fields (like :shelfkey or :fullrecord) will be
-    # returned as a string.
-    #
     # @return [Array, String, nil]
     #
+    # This method overrides:
+    # @see Blacklight::FieldRetriever#fetch
+    #
     def fetch
-      if @raw
-        values = Array.wrap(retrieve_simple)
-        (field =~ /_[a-z]$/) ? values : values.first
+      if raw
+        field_config.accessor ? retieve_using_accessor : retrieve_simple
       else
         super
       end

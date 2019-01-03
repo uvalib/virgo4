@@ -52,15 +52,11 @@ module ArticlesHelper
   #
   FULL_TEXT_ANCHOR = 'full-text'
 
-  # URL sign-on path.
-  #
-  # @type [String]
-  #
-  SIGN_ON_PATH = '/account/login'
-
   # Displayed only if a method is set up to avoid returning *nil*.
   #
   # @type [ActiveSupport::SafeBuffer]
+  #
+  # @see self#return_empty
   #
   EBSCO_NO_LINK = I18n.t('blacklight.no_link').html_safe.freeze
 
@@ -69,9 +65,12 @@ module ArticlesHelper
   #
   # @type [Hash{Symbol=>Boolean}]
   #
+  # @see self#return_empty
+  #
   RETURN_NIL = {
     best_fulltext:              false,
-    eds_links:                  false,
+    eds_all_links:              false,
+    eds_plink:                  true,
     eds_publication_type_label: true,
   }.freeze
 
@@ -102,62 +101,105 @@ module ArticlesHelper
 
   public
 
-  # eds_publication_type_label
+  # Configuration :helper_method for rendering :eds_publication_type.
+  #
+  # For HTML response format only, it wraps each content format type in a
+  # <span> for CSS styling.
   #
   # @param [Hash] options             Supplied by the presenter.
   #
-  # @return [ActiveSupport::SafeBuffer]
-  # @return [nil]                                 If no URLs were present.
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [nil]                                 If no data was present.
+  # @return [Array<String>]                       If request.format.json?
+  # @return [String]                              If request.format.json?
   #
+  # @see ApplicationHelper#extract_config_value
+  #
+  # Compare with:
   # @see CatalogHelper#format_facet_label
   #
   def eds_publication_type_label(options = nil)
-    return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
-    separator = opt.delete(:separator) || "&nbsp;\n"
-    result =
-      Array.wrap(values).map { |v|
-        content_tag(:span, v, class: 'label label-default') if v.present?
-      }.compact.join(separator).html_safe.presence
-    result || (EBSCO_NO_LINK unless RETURN_NIL[__method__])
+    result = Array.wrap(values).reject(&:blank?)
+    if rendering_non_html?(opt)
+      (values.is_a?(Array) || (result.size > 1)) ? result : result.first
+    elsif result.present?
+      separator = opt[:separator] || "<br/>\n"
+      result.map! { |v| content_tag(:span, v, class: 'label label-default') }
+      result.join(separator).html_safe
+    else
+      return_empty(__method__)
+    end
   end
 
-  # eds_index_publication_info
+  # Configuration :helper_method for rendering :eds_composed_title.
   #
-  # The `options[:value]` will be :eds_composed_title but if it's blank, show
-  # the :eds_publication_date instead.
+  # For HTML response format only, if the value of :eds_composed_title (from
+  # `options[:value]`) is blank then :eds_publication_date is used.
   #
   # @param [Hash] options             Supplied by the presenter.
   #
-  # @return [ActiveSupport::SafeBuffer, nil]
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [Array<String>]                       If request.format.json?
+  # @return [String]                              If request.format.json?
+  # @return [nil]                                 If no data was present.
+  #
+  # @see ApplicationHelper#extract_config_value
   #
   # TODO: This never gets triggered if :eds_composed_title is missing...
   # Maybe dealing with fields in this way needs to be handled through
   # IndexPresenter.
   #
   def eds_index_publication_info(options = nil)
-    return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
-    separator = opt.delete(:separator) || "<br/>\n"
-    unless values.present?
-      doc = (options[:document] if options.respond_to?(:[]))
-      values = (doc[:eds_publication_date] if doc.is_a?(Blacklight::Document))
+    result = Array.wrap(values).reject(&:blank?)
+    if rendering_html?(opt)
+      separator = opt[:separator] || "<br/>\n"
+      if result.blank? && (doc = opt[:document]).is_a?(Blacklight::Document)
+        result = Array.wrap(doc['eds_publication_date']).reject(&:blank?)
+      end
+      result.join(separator).html_safe.presence
+    else
+      (values.is_a?(Array) || (result.size > 1)) ? result : result.first
     end
-    Array.wrap(values).join(separator).html_safe.presence
   end
 
-  # eds_abstract
+  # Configuration :helper_method for rendering :eds_abstract.
   #
   # @param [Hash] options             Supplied by the presenter.
   #
-  # @return [ActiveSupport::SafeBuffer, nil]
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [Array<String>]                       If request.format.json?
+  # @return [String]                              If request.format.json?
+  # @return [nil]                                 If no data was present.
   #
-  # === Implementation Notes
-  # Some items have abstracts with implied sections where the "subheading" is
-  # simply a <b> element not otherwise distinguished in the text.  This method
-  # makes these cases explicit.
+  # @see ApplicationHelper#extract_config_value
   #
-  # === Examples
+  # == Description
+  # Although in many cases it is simple text -- in general, the content of this
+  # EBSCO EDS field is an HTML fragment, meaning that it may contain HTML
+  # entities ('&amp;lt;', '&amp;nbsp;', etc) as well as elements like
+  # '&lt;b&gt;', '&lt;i&gt;', etc.
+  #
+  # Abstracts from some publishers contain implied sections where the
+  # "subheading" appears either as:
+  #
+  #   (1) A single word and a colon following a break ("<br>");
+  #   (2) A single uppercase word and a colon optionally following a '*'.
+  #   (2) A single word and a colon enclosed in a bold ("&lt;b&gt;") element.
+  #
+  # This method makes these explicit by wrapping these in a :div with class
+  # "subheading" for CSS styling.
+  #
+  # Because this field is fundamentally HTML, this method is applied equally
+  # regardless of the response format (HTML or otherwise).
+  #
+  # == Usage Notes
+  # This method is applied equally regardless of the response format (HTML or
+  # otherwise).  For JSON response format, the URL parameter "&raw=true" can be
+  # used to obtain the original value of field.
+  #
+  # == Examples
   #
   # @example With implied sections after <br>
   #   /articles/cmedm__30552144
@@ -166,159 +208,186 @@ module ArticlesHelper
   #   /articles/a9h__133419289
   #
   def eds_abstract(options = nil)
-    return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
-    separator = opt.delete(:separator) || "<br/>\n"
+    separator = opt[:separator] || "<br/>\n"
     result = Array.wrap(values).reject(&:blank?).join(separator)
+
+    # === Insert breaks before bullets
+    result.gsub!(EBSCO_BREAK_BEFORE_REGEX, '<br/>\1 ')
 
     # === Make implied sections explicit
     if result.gsub!(%r{<br\s*/?>([^:\s]+:)\s*}) { abstract_subsection($1) }
       # (1) For implied sections that follow a <br>, the first implied section
       # will be at the start of the abstract without a <br>.
       result.sub!(/\A([^:\s]+:)\s*/) { abstract_subsection($1) }
+    elsif result.gsub!(%r{(\*?\s*)([A-Z]{3,}\s*:)}) { abstract_subsection($2) }
+      # (2)
     else
-      # (2) Handle implied sections within <b>.
+      # (3) Handle implied sections within <b>.
       result.gsub!(/<b>\s*([^:<]*:)\s*<\/b>/) { abstract_subsection($1) }
     end
 
-    result.html_safe.presence
+    # === Eliminate leading and trailing breaks
+    result.sub!(%r{^\s*(</?\s*br\s*/?\s*>\s*)+}i, '')
+    result.sub!(%r{(</?\s*br\s*/?\s*>\s*)+\s*$}i, '')
+
+    if rendering_html?(opt)
+      result.html_safe.presence
+    else
+      result = result.split(separator)
+      (values.is_a?(Array) || (result.size > 1)) ? result : result.first
+    end
   end
 
   # best_fulltext
   #
-  # @param [Hash] options
+  # @param [Hash] options             Supplied by the presenter.
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [Array<String>]                       If request.format.json?
+  # @return [String]                              If request.format.json?
+  # @return [nil]                                 If no data was present.
+  #
+  # @see ApplicationHelper#extract_config_value
+  #
+  # TODO: This :helper_method needs to be revisited...
   #
   def best_fulltext(options = nil)
-    return raw_value(options) unless request.format.html?
     values, opt = extract_config_value(options)
     values = (values.first.presence if values.is_a?(Hash))
-    array_of_hashes = (values['links'].to_a if values.is_a?(Hash))
-    result =
-      if array_of_hashes.present?
-        controller = 'articles' # TODO: generalize
-        separator  = opt.delete(:separator)
-        guest = eds_guest?
-        id    = values['id'].to_s.tr('.', '_')
-        BEST_FULLTEXT_TYPES.map { |type|
-          hash = array_of_hashes.find { |hash| hash['type'] == type }
-          url  = hash && hash['url']
-          next unless url.present?
-          # Use the new fulltext route and controller to avoid time-bombed PDF
-          # links.
-          pdf = %w(pdf ebook-pdf).include?(type)
-          url = "/#{controller}/#{id}/#{type}/fulltext" if pdf
-          # Replace 'URL' label for catalog links.
-          label = (type == 'cataloglink') ? 'Catalog Link' : hash['label']
-          label = 'Full Text' if label.blank?
-          authorized_link(guest, label, url)
-        }.compact.join(separator).html_safe.presence
-      end
-    result || (EBSCO_NO_LINK unless RETURN_NIL[__method__])
-  end
-
-  # html_fulltext
-  #
-  # @param [Hash] options
-  #
-  # @return [ActiveSupport::SafeBuffer]
-  #
-  def html_fulltext(options = nil)
-    return raw_value(options) unless request.format.html?
-    values, opt = extract_config_value(options)
-    content  = render_fulltext(values, opt)
-    anchor   = content_tag(:div, '', id: FULL_TEXT_ANCHOR, class: 'anchor')
-    scroller = content_tag(:div, content, class: 'scroller')
-    anchor + scroller
-  end
-
-  # fulltext_link
-  #
-  # @param [Hash] options
-  #
-  # @return [ActiveSupport::SafeBuffer, nil]
-  #
-  def fulltext_link(options = nil)
-    return raw_value(options) unless request.format.html?
-    doc = options.is_a?(Hash) ? options[:document] : options
-    return unless doc.is_a?(Blacklight::Document)
-    return unless doc[:eds_html_fulltext_available]
-    label = I18n.t('ebsco_eds.links.view', default: 'View')
-    url = url_for(
-      controller: Blacklight::Lens.key_for_doc(doc),
-      action:     :show,
-      id:         doc.id,
-      anchor:     FULL_TEXT_ANCHOR
-    )
-    authorized_link(eds_guest?, label, url)
-  end
-
-  # ebsco_eds_plink
-  #
-  # Multiple links are wrapped in "<ul class='list-unstyled'></ul>", although,
-  # under normal circumstances, there should only be one :eds_plink value.
-  #
-  # @param [String, Array<String>, Hash] options  Link value(s).
-  #
-  # @return [ActiveSupport::SafeBuffer]
-  # @return [nil]                                 If no URLs were present.
-  #
-  def ebsco_eds_plink(options = nil)
-    return raw_value(options) unless request.format.html?
-    values, _ = extract_config_value(options)
-    url = Array.wrap(values).first
-    outlink(EDS_PLINK_LABEL, url) if url.present?
-  end
-
-  # eds_links
-  #
-  # Multiple links are wrapped in "<ul class='list-unstyled'></ul>".
-  #
-  # @param [String, Array<String>, Hash] options  Link value(s).
-  #
-  # @option options [String] :value
-  #
-  # @return [ActiveSupport::SafeBuffer]
-  # @return [nil]                                 If no URLs were present.
-  #
-  def eds_links(options = nil)
-    all_eds_links(options, EBSCO_LINK_TARGETS)
-  end
-
-  # all_eds_links
-  #
-  # Multiple links are wrapped in "<ul class='list-unstyled'></ul>".
-  #
-  # @param [String, Array<String>, Hash] options  Link value(s).
-  # @param [Array]  types                         Default: all types.
-  # @param [String] separator                     Default: "\n".
-  #
-  # @option options [String] :value
-  #
-  # @return [ActiveSupport::SafeBuffer]
-  # @return [nil]                                 If no URLs were present.
-  #
-  def all_eds_links(options = nil, types = nil, separator = "\n")
-    return raw_value(options) unless request.format.html?
-    values =
-      case options
-        when Hash  then options[:value]
-        when Array then options.map { |value| { url: value } }
-        else            { url: options.to_s }
-      end
-    types = types.presence
-    links =
-      Array.wrap(values).map { |hash|
-        next if hash.blank? || (types && !types.include?(hash['type']))
-        make_eds_link(hash)
+    controller = 'articles' # TODO: generalize
+    separator  = opt[:separator]
+    raw        = opt[:raw] || rendering_non_html?(opt)
+    id         = values['id'].to_s.tr('.', '_')
+    result = (values['links'].to_a if values.is_a?(Hash))
+    result &&=
+      BEST_FULLTEXT_TYPES.map { |type|
+        hash = result.find { |hash| hash['type'] == type }
+        url  = hash && hash['url']
+        next unless url.present?
+        # Use the new fulltext route and controller to avoid time-bombed PDF
+        # links.
+        pdf = %w(pdf ebook-pdf).include?(type)
+        url = "/#{controller}/#{id}/#{type}/fulltext" if pdf
+        # Replace 'URL' label for catalog links.
+        label = (type == 'cataloglink') ? 'Catalog Link' : hash['label']
+        label = 'Full Text' if label.blank?
+        make_eds_link(label: label, url: url, raw: raw)
       }.compact
-    if links.blank?
-      EBSCO_NO_LINK unless RETURN_NIL[__method__]
-    elsif links.size == 1
-      links.first
+    if raw
+      (values.is_a?(Array) || (result.size > 1)) ? result : result.first
+    elsif result.present?
+      result.join(separator).html_safe
     else
-      content_tag(:ul, links.join(separator).html_safe, class: 'list-unstyled')
+      return_empty(__method__)
+    end
+  end
+
+  # Configuration :helper_method for rendering :eds_html_fulltext.
+  #
+  # @param [Hash] options             Supplied by the presenter.
+  #
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [String]                              If request.format.json?
+  #
+  # @see ArticlesHelper::FullText#render_fulltext
+  # @see ApplicationHelper#extract_config_value
+  #
+  # == Usage Notes
+  # This method is applied equally regardless of the response format (HTML or
+  # otherwise).  For JSON response format, the URL parameter "&raw=true" can be
+  # used to obtain the original value of field.
+  #
+  def eds_html_fulltext(options = nil)
+    values, opt = extract_config_value(options)
+    content = render_fulltext(values, opt)
+    if rendering_html?(opt)
+      anchor   = content_tag(:div, '', id: FULL_TEXT_ANCHOR, class: 'anchor')
+      scroller = content_tag(:div, content.html_safe, class: 'scroller')
+      anchor + scroller
+    else
+      content.to_str
+    end
+  end
+
+  # Configuration :helper_method for rendering :eds_html_fulltext_available.
+  #
+  # @param [Hash] options             Supplied by the presenter.
+  #
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [Array<String>]                       If request.format.json?
+  # @return [String]                              If request.format.json?
+  # @return [nil]                                 If no data was present.
+  #
+  def eds_html_fulltext_link(options = nil)
+    values, opt = extract_config_value(options)
+    result = Array.wrap(values).reject(&:blank?)
+    return unless result.present? && (doc = opt[:document])
+    label = I18n.t('ebsco_eds.links.view', default: 'View')
+    url =
+      url_for(
+        controller: Blacklight::Lens.key_for_doc(doc),
+        action:     :show,
+        id:         doc.id,
+        anchor:     FULL_TEXT_ANCHOR
+      )
+    make_eds_link(label: label, url: url)
+  end
+
+  # Configuration :helper_method for rendering :eds_plink.
+  #
+  # For HTML response format only, the URL is rendered as a link.  (There
+  # should only be one :eds_plink value.)
+  #
+  # @param [Hash] options             Supplied by the presenter.
+  #
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [Array<String>]                       If request.format.json?
+  # @return [String]                              If request.format.json?
+  # @return [nil]                                 If no data was present.
+  #
+  def eds_plink(options = nil)
+    values, opt = extract_config_value(options)
+    result = Array.wrap(values).reject(&:blank?)
+    if rendering_non_html?(opt)
+      (values.is_a?(Array) || (result.size > 1)) ? result : result.first
+    elsif result.present?
+      outlink(EDS_PLINK_LABEL, result.first)
+    else
+      return_empty(__method__)
+    end
+  end
+
+  # Configuration :helper_method for rendering :eds_all_links.
+  #
+  # For HTML response format only, the URLs are rendered as links.
+  #
+  # @param [Hash] options             Supplied by the presenter.
+  #
+  # @return [Array<ActiveSupport::SafeBuffer>]    If request.format.html?
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [Array<String>]                       If request.format.json?
+  # @return [String]                              If request.format.json?
+  # @return [nil]                                 If no data was present.
+  #
+  def eds_all_links(options = nil)
+    values, opt = extract_config_value(options)
+    non_html = rendering_non_html?(opt)
+    types    = opt.delete(:type)
+    result =
+      Array.wrap(values).reject(&:blank?).map { |value|
+        hash = value.is_a?(Hash) ? value.symbolize_keys : { url: value }
+        next unless types.blank? || types.include?(value[:type])
+        hash.except(:expires).merge(raw: non_html)
+      }.compact
+    if non_html
+      result.map! { |hash| make_eds_link(**hash) }
+      (values.is_a?(Array) || (result.size > 1)) ? result : result.first
+    elsif result.present?
+      separator = opt[:separator] || "<br/>\n"
+      result.map { |hash| make_eds_link(**hash) }.join(separator).html_safe
+    else
+      return_empty(__method__)
     end
   end
 
@@ -334,74 +403,62 @@ module ArticlesHelper
     current_or_guest_user.guest
   end
 
-  # authorized_link
-  #
-  # @param [TrueClass, FalseClass, String] guest
-  # @param [String]                        label
-  # @param [String]                        url
-  # @param [Hash, nil]                     opt
-  #
-  # @return [String, nil]
-  #
-  def authorized_link(guest, label, url, opt = nil)
-    return unless url.present?
-    guest   = %w(true yes on).include?(guest.downcase) if guest.is_a?(String)
-    guest   = eds_guest?                               if guest.nil?
-    label ||= I18n.t('ebsco_eds.links.default')
-    opt   ||= {}
-    anchor  = url.start_with?('#')
-    direct  = anchor || !url.start_with?('http') || url.start_with?(root_url)
-    if guest
-      label += I18n.t('ebsco_eds.links.sign_on')
-      url = request.path + url if anchor
-      url = "?redirect=#{u(url)}"
-      url = "#{SIGN_ON_PATH}#{url}"
-      link_to(label, url, opt)
-    elsif direct
-      link_to(label, url, opt)
-    else
-      outlink(label, url, opt)
-    end
-  end
-
   # make_eds_link
   #
-  # @param [Array] *args
+  # @param [String]          label
+  # @param [String]          url
+  # @param [String]          icon
+  # @param [Boolean]         raw
+  # @param [Boolean, String] guest
+  # @param [String]          type
+  # @param [String]          separator    Ignored.
+  # @param [Hash]            opt
   #
-  # @option args.last [String]  'label'
-  # @option args.last [String]  'url'
-  # @option args.last [String]  'icon'
-  # @option args.last [String]  'type'      Ignored.
-  # @option args.last [String]  'expires'   Ignored.
-  # @option args.last [Boolean] :guest
+  # @return [ActiveSupport::SafeBuffer]   If request.format.html?
+  # @return [String]                      If request.format.json?
+  # @return [nil]                         If no URL was present.
   #
-  # @return [ActiveSupport::SafeBuffer]
-  # @return [nil]                           If no URL was provided.
-  #
-  def make_eds_link(*args)
-
-    # Take values from options if present.
-    opt   = args.extract_options!.except('type', 'expires')
-    label = opt.delete('label').presence
-    url   = opt.delete('url').presence
-    icon  = opt.delete('icon').presence
-    guest = opt.delete('guest')
-    guest = opt.delete(:guest) || guest
-    opt.delete('type')
-    opt.delete('expires')
-
-    # Values from the argument list are given preference.
-    label = args.shift || label
-    url   = args.shift || url
-    icon  = args.shift || icon
-
-    # Show the link, routing through the sign-on if necessary.
+  def make_eds_link(
+    label:      nil,
+    url:        nil,
+    icon:       nil,
+    raw:        nil,
+    guest:      nil,
+    type:       nil,
+    separator:  nil,
+    opt:        {}
+  )
     return unless url.present?
-    label = image_tag(icon) if icon.to_s.match(/^http/)
-    label ||= EDS_LINK_LABEL
-    url = '#' + FULL_TEXT_ANCHOR if url == 'detail'
-    authorized_link(guest, label, url, opt)
+    opt   = opt.except(:type, :expires)
+    raw ||= rendering_non_html?(opt)
+    guest = %w(true yes on).include?(guest.downcase) if guest.is_a?(String)
+    guest = eds_guest?                               if guest.nil?
 
+    if raw
+      label ||= EDS_LINK_LABEL
+    elsif icon.to_s.start_with?('http')
+      label = image_tag(icon)
+    else
+      label ||= I18n.t('ebsco_eds.links.default')
+    end
+
+    url = ((type == 'html') ? ('#' + FULL_TEXT_ANCHOR) : '') if url == 'detail'
+    url = request.path + url if url.start_with?('#')
+
+    if raw && url.present?
+      url
+    elsif raw && guest
+      label + I18n.t('ebsco_eds.links.sign_on')
+    elsif raw
+      label
+    elsif url.start_with?('http') && !url.start_with?(root_url)
+      outlink(label, url, opt)
+    elsif guest
+      label += I18n.t('ebsco_eds.links.sign_on')
+      link_to(label, signon_redirect(url), opt)
+    else
+      link_to(label, url, opt)
+    end
   end
 
   # ===========================================================================
@@ -410,6 +467,26 @@ module ArticlesHelper
 
   private
 
+  # Return either #EBSCO_NO_LINK or *nil*.
+  #
+  # @param [Symbol] method
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  # @return [nil]                         If directed by #RETURN_NIL
+  #
+  # @see self#EBSCO_NO_LINK
+  # @see self#RETURN_NIL
+  #
+  def return_empty(method)
+    EBSCO_NO_LINK unless RETURN_NIL[method]
+  end
+
+  # Wrap *s* in an element to make it a subsection heading for an abstract.
+  #
+  # @param [String] s
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
   def abstract_subsection(s)
     content_tag(:div, s.to_s.html_safe, class: 'subheading')
   end

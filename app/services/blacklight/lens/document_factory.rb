@@ -63,6 +63,7 @@ module Blacklight::Lens
     # @see Blacklight::DocumentFactory#document_model
     #
     def self.document_model(_data, opt)
+      opt ||= {}
       opt[:document_model] || SolrDocument
     end
 
@@ -85,7 +86,8 @@ module Blacklight::Lens
     # @return [LensDocument]
     #
     def self.create(data, response, opt)
-      lens = opt[:lens] || opt[:blacklight_config]&.fetch(:lens_key, nil)
+      opt ||= {}
+      lens = opt[:lens] || opt.dig(:blacklight_config, :lens_key)
       document_model(data, opt).new(data, response, lens)
     end
 

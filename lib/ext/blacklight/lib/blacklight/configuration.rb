@@ -254,6 +254,13 @@ module Blacklight::ConfigurationExt
     #
     def sort_fields(*) super end
 
+    # Include a metadata facet field which can be used in queries to the search
+    #  repository, and which may be displayed as a search limiter.
+    #
+    # This method is dynamically generated from the Blacklight::Configuration
+    # class definition via `define_field_access :facet_field` as a "shortcut"
+    # for `add_blacklight_field('facet_field',*)`.
+    #
     # @return [Blacklight::Configuration::FacetField]
     #
     # @see #define_field_access
@@ -262,6 +269,13 @@ module Blacklight::ConfigurationExt
     #
     def add_facet_field(*) super end
 
+    # Include a metadata field to be retrieved and displayed for each document
+    # entry in search results.
+    #
+    # This method is dynamically generated from the Blacklight::Configuration
+    # class definition via `define_field_access :index_field` as a "shortcut"
+    # for `add_blacklight_field('index_field',*)`.
+    #
     # @return [Blacklight::Configuration::IndexField]
     #
     # @see #define_field_access
@@ -270,6 +284,13 @@ module Blacklight::ConfigurationExt
     #
     def add_index_field(*) super end
 
+    # Include a metadata field to be retrieved and displayed for a document on
+    # the item details show page.
+    #
+    # This method is dynamically generated from the Blacklight::Configuration
+    # class definition via `define_field_access :show_field` as a "shortcut"
+    # for `add_blacklight_field('show_field',*)`.
+    #
     # @return [Blacklight::Configuration::ShowField]
     #
     # @see #define_field_access
@@ -278,6 +299,15 @@ module Blacklight::ConfigurationExt
     #
     def add_show_field(*) super end
 
+    # Include a metadata search field which is supported by the search
+    # repository as a specific kind of search type, and which may be displayed
+    # as a selection in the search type dropdown menu adjacent to the search
+    # term input.
+    #
+    # This method is dynamically generated from the Blacklight::Configuration
+    # class definition via `define_field_access :search_field` as a "shortcut"
+    # for `add_blacklight_field('search_field',*)`.
+    #
     # @return [Blacklight::Configuration::SearchField]
     #
     # @see #define_field_access
@@ -286,6 +316,15 @@ module Blacklight::ConfigurationExt
     #
     def add_search_field(*) super end
 
+    # Include a metadata search field which is supported by the search
+    # repository to return results in a specified order, and which may be
+    # displayed as a selection in the sort dropdown menu on each search results
+    # index page.
+    #
+    # This method is dynamically generated from the Blacklight::Configuration
+    # class definition via `define_field_access :sort_field` as a "shortcut"
+    # for `add_blacklight_field('sort_field',*)`.
+    #
     # @return [Blacklight::Configuration::SortField]
     #
     # @see #define_field_access

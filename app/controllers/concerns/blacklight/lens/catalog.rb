@@ -57,7 +57,7 @@ module Blacklight::Lens::Catalog
       format.html { store_preferred_view }
       format.rss  { render layout: false }
       format.atom { render layout: false }
-      format.json { @presenter = json_presenter(@response) }
+      format.json { @presenter = json_presenter(@response.documents) }
       additional_response_formats(format)
       document_export_formats(format)
     end
@@ -76,7 +76,18 @@ module Blacklight::Lens::Catalog
   # @see Blacklight::Catalog#show
   #
   def show
-    super
+    @response, @document = search_service.fetch(params[:id])
+    @response =
+      ActiveSupport::Deprecation::DeprecatedObjectProxy.new(
+        @response,
+        'The @response instance variable is deprecated; ' \
+        'use @document.response instead.'
+      )
+    respond_to do |format|
+      format.html { @search_context = setup_next_and_previous_documents }
+      format.json { @presenter = json_presenter(@document) }
+      additional_export_formats(@document, format)
+    end
   end
 
   # == GET /catalog/raw/:id

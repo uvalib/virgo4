@@ -211,13 +211,14 @@ module Blacklight::Eds::Document
   # @see self#relates_to
   #
   RELATES_TO_REGEX = %r{
-    (\s*\[?\s*)                       # Optional outer left bracket        ($1)
-    (<(relatesTo)\s*([^>]*)\s*>)      # Start tag and attributes     ($2,$3,$4)
+    (\s*;?\s*)                        # Semicolon (instead of break)       ($1)
+    (\s*\[?\s*)                       # Optional outer left bracket        ($2)
+    (<(relatesTo)\s*([^>]*)\s*>)      # Start tag and attributes     ($3,$4,$5)
       \s*\[?\s*                       # Optional inner left bracket
-      ([^\[\]<]+)                     # Reference number                   ($5)
+      ([^\[\]<]+)                     # Reference number                   ($6)
       \s*\]?\s*                       # Optional inner right bracket
-    (</\s*\3\s*>)                     # Close tag                          ($6)
-    (\s*\]?\s*)                       # Optional outer right bracket       ($7)
+    (</\s*\4\s*>)                     # Close tag                          ($7)
+    (\s*\]?\s*)                       # Optional outer right bracket       ($8)
   }ix
 
   # Used to turn terms into search links via #gsub.
@@ -246,7 +247,7 @@ module Blacklight::Eds::Document
   #
   # @see self#mesh_link
   #
-  MESH_LINK = 'https://www.ncbi.nlm.nih.gov/mesh/?term=%s'
+  MESH_LINK = 'https://www.ncbi.nlm.nih.gov/mesh?term=%s'
 
   # Used to turn NAICS terms into external links via #gsub.
   #
@@ -335,7 +336,9 @@ module Blacklight::Eds::Document
             s = mesh_link(s)   if process[:mesh]
             s = naics_link(s)  if process[:naics]
             s = mailto_link(s) if process[:email]
-            process[:html] ? s.html_safe : s
+            s = s.strip        if s.is_a?(String)
+            s = s.html_safe    if process[:html]
+            s
           end
         end
       end
@@ -375,7 +378,7 @@ module Blacklight::Eds::Document
   #
   def sanitize(s, allow_html = nil)
     # Correct over-quoting seen on EBSCO <searchLink> elements.
-    s = s.gsub(/%22"|"%22/, %q(")) #if allow_html
+    s = s.gsub(/%22"|"%22/, %q("))
     if allow_html
       s # TODO: partial sanitize
     else
@@ -407,7 +410,7 @@ module Blacklight::Eds::Document
   #
   # @see HtmlHelper#email_link
   #
-  # === Examples
+  # == Examples
   #
   # @example With mailing addresses in :eds_authors_composed
   #   /articles/ehh__119126750
@@ -442,13 +445,13 @@ module Blacklight::Eds::Document
   # @see self#RELATES_TO_REGEX
   # @see HtmlHelper#path_link
   #
-  # === Implementation Notes
+  # == Implementation Notes
   # Using CSS to add separation between <relatesTo> and its neighboring content
   # works visually, but this does not convey if the results are HTML-sanitized
   # (e.g. when copying to the clipboard).  Instead, this method ensures that
   # actual spaces are present on either side of the element.
   #
-  # === Examples
+  # == Examples
   #
   # @example Multiple authors with one affiliation
   #   /articles/a9h__129618192
@@ -465,10 +468,11 @@ module Blacklight::Eds::Document
   #
   def relates_to(s)
     s.gsub(RELATES_TO_REGEX) do
-      lsb, open_tag, number, close_tag, rsb = $1, $2, $5, $6, $7
-      lsb = ' ' if lsb.nil? || lsb.empty? || (lsb = lsb.tr('[', '')).empty?
-      rsb = ' ' if rsb.nil? || rsb.empty? || (rsb = rsb.tr(']', '')).empty?
-      [lsb, open_tag, '[', number, ']', close_tag, rsb].join
+      list_join, lsb, open_tag, number, close_tag, rsb = $1, $2, $3, $6, $7, $8
+      list_join = '<br/>' if list_join&.include?(';')
+      lsb = ' ' if lsb.blank? || (lsb = lsb.tr('[', '')).empty?
+      rsb = ' ' if rsb.blank? || (rsb = rsb.tr(']', '')).empty?
+      [list_join, lsb, open_tag, '[', number, ']', close_tag, rsb].join
     end
   end
 
@@ -481,7 +485,7 @@ module Blacklight::Eds::Document
   # @see self#SEARCH_LINK_REGEX
   # @see HtmlHelper#path_link
   #
-  # === Examples
+  # == Examples
   #
   # @example Multiple search links
   #   /articles/a9h__133661705
@@ -518,11 +522,17 @@ module Blacklight::Eds::Document
   # @see self#MESH_LINK
   # @see HtmlHelper#outlink
   #
+  # == Examples
+  #
+  # @example MeSH terms from element label
+  #   /articles/cmedm__27875992
+  #
   def mesh_link(s)
     s.gsub(MESH_REGEX) do
       open_tag, attr, label, close_tag = $1, $3, $4, $5
       opt  = attr_to_options(attr)
-      url  = MESH_LINK % opt[:term]
+      term = opt[:term] || CGI.unescapeHTML(label)
+      url  = MESH_LINK % term
       link = outlink(label.html_safe, url)
       [open_tag, link, close_tag].join
     end
@@ -538,7 +548,7 @@ module Blacklight::Eds::Document
   # @see self#NAICS_LINK
   # @see HtmlHelper#outlink
   #
-  # === Examples
+  # == Examples
   #
   # @example Valid and invalid NAICS codes
   #   /articles/a9h__133661705
