@@ -1,0 +1,39 @@
+<%# app/views/catalog/_search_results.html.erb -%>
+<%-
+
+  lens      ||= current_lens_key
+  h1_header ||= t('blacklight.search.header')
+  h2_header ||= t('blacklight.search.search_results')
+
+  @page_title =
+    t('blacklight.search.page_title.title',
+      application_name: lens.to_s.singularize.capitalize,
+      constraints:      render_search_to_page_title(params),
+    )
+-%>
+
+<%- content_for(:head) do -%>
+  <%= render_opensearch_response_metadata %>
+  <%= rss_feed_link_tag %>
+  <%= atom_feed_link_tag %>
+  <%= json_api_link_tag %>
+<%- end -%>
+
+<%- content_for(:container_header) do -%>
+  <h1 class="sr-only top-content-title"><%= h1_header -%></h1>
+  <%= render 'constraints' %>
+<%- end -%>
+
+<%= render 'search_header' %>
+
+<h2 class="sr-only"><%= h2_header -%></h2>
+
+<%- if @response.empty? -%>
+  <%= render 'zero_results' %>
+<%- elsif render_grouped_response? -%>
+  <%= render_grouped_document_index %>
+<%- else -%>
+  <%= render_document_index %>
+<%- end -%>
+
+<%= render 'results_pagination' %>

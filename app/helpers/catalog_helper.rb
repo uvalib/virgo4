@@ -147,6 +147,77 @@ module CatalogHelper
     bookmark_record(doc).present?
   end
 
+  # render_search_to_page_title
+  #
+  # @param [Hash] params
+  #
+  # @return [String]
+  #
+  # This method overrides:
+  # @see Blacklight::CatalogHelperBehavior#render_search_to_page_title
+  #
+  def render_search_to_page_title(params)
+    constraints = []
+
+    # Query
+    if (q = params[:q]).present?
+
+      # Surround with quotation marks if not already that way.
+      q = %Q("#{q}") unless q =~ /^(["']).*\1$/
+
+      # Add the query to the constraints, adding the search type if it's
+      # different than the default search type.
+      label =
+        if (search_key = params[:search_field]).present?
+          default_key = default_search_field&.fetch(:key, nil)
+          label_for_search_field(search_key) unless search_key == default_key
+        end
+      constraints <<
+        if label.present?
+          t('blacklight.search.page_title.constraint', label: label, value: q)
+        else
+          q
+        end
+    end
+
+    # Exclusive facets
+    if (f = params[:f]).present?
+      constraints +=
+       f.to_unsafe_h.map { |k, v| render_search_to_page_title_filter(k, v) }
+    end
+
+    # Inclusive facets # TODO: Maybe this is adequate; maybe it isn't.
+    if (f = params[:f_inclusive]).present?
+      constraints +=
+        f.to_unsafe_h.map { |k, v| render_search_to_page_title_filter(k, v) }
+    end
+
+    constraints.join(' / ')
+  end
+
+  # render_search_to_page_title_filter
+  #
+  # @param [Symbol, String] facet
+  # @param [Array<String>]  values
+  #
+  # This method overrides:
+  # @see Blacklight::CatalogHelperBehavior#render_search_to_page_title_filter
+  #
+  def render_search_to_page_title_filter(facet, values)
+    scope = 'blacklight.search.page_title'
+    cfg   = facet_configuration_for_field(facet)
+    label = facet_field_label(cfg.key)
+    value =
+      if values.size < 3
+        values.map { |value|
+          '"' + facet_display_value(facet, value) + '"'
+        }.to_sentence
+      else
+        t(:many_constraint_values, scope: scope, values: values.size)
+      end
+    t(:constraint, scope: scope, label: label, value: value)
+  end
+
   # ===========================================================================
   # :section:
   # ===========================================================================

@@ -244,7 +244,7 @@ en:
       # i18n key 'title' is deprecated and will be removed in Blacklight 6.0
       title:            '%{application_name} Search Results'
       page_title:
-        title:          '%{constraints} - %{application_name} Search Results'
+        title:          '%{application_name} results for %{constraints}'
         constraint:     '%{label}: %{value}'
         many_constraint_values: '%{values} selected'
       search_results:           'Search Results'
