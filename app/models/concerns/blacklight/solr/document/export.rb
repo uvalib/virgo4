@@ -155,6 +155,46 @@ module Blacklight::Solr::Document
       end
     end
 
+    # Indicate whether the document includes MARC metadata.
+    #
+    # This method overrides:
+    # @see Blacklight::Lens::Document::Export#has_marc?
+    #
+    def has_marc?
+      to_marc.present?
+    end
+
+    # =========================================================================
+    # :section: Blacklight::Lens::Document::Export overrides
+    # =========================================================================
+
+    protected
+
+    # Get a document's MARC metadata field.
+    #
+    # @return [MARC::Record, nil]
+    #
+    # Compare with:
+    # @see Blacklight::Solr::Document::Marc#marc_source
+    #
+    def marc_source
+      @_marc_source ||= fetch(_marc_source_field, nil)
+    end
+
+    # Generate MARC from a document's metadata.
+    #
+    # @return [MARC::Record]
+    #
+    # Compare with:
+    # @see Blacklight::Solr::Document::Marc#load_marc
+    #
+    # == Usage Notes
+    # The including class should override this method as needed.
+    #
+    def load_marc
+      super if marc_source.present?
+    end
+
   end
 
 end

@@ -50,6 +50,17 @@ module Blacklight::Lens::Document
 
     protected
 
+    # Get a document's MARC metadata field.
+    #
+    # @return [MARC::Record, nil]
+    #
+    # Compare with:
+    # @see Blacklight::Solr::Document::Marc#marc_source
+    #
+    def marc_source
+      nil
+    end
+
     # Generate MARC from a document's metadata.
     #
     # @return [MARC::Record]

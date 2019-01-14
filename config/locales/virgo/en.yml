@@ -329,7 +329,7 @@ en:
 
       # Solr metadata fields
       author:                           'Author'
-      author_added_entry:               'Creator'
+      author_added_entry:               'Advisor'
       author_director:                  'Director'
       author_vern:                      'Author' # in the original language
       barcode:                          '[barcode]'
@@ -368,7 +368,7 @@ en:
       pda_coutts_library:               '[pda_coutts_library]'
       pda_isbn:                         '[pda_isbn]'
       published_date:                   'Publication Era'
-      published_daterange:              'Publication Dates'
+      published_daterange:              'Publication Date'
       region:                           'Geographic Region'
       release:                          'Release'
       reverse_shelfkey:                 '[reverse_shelfkey]'
