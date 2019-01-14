@@ -257,7 +257,7 @@ module AboutHelper::Common
   #
   # @see self#FIELD_TYPES
   #
-  def in_configuration?(field, type: type, config: config)
+  def in_configuration?(field, type: nil, config: nil)
     config ||= default_blacklight_config
     type = type ? Array.wrap(type) : FIELD_TYPES
     case type
