@@ -59,7 +59,7 @@ class Config::Solr < Config::Base
     alt_title_field:    'title_vern_a',
     author_field:       'author_a',
     alt_author_field:   'author_vern_a',
-    thumbnail_field:    'thumbnail_url_display' # TODO: not in index yet
+    thumbnail_field:    'thumbnail_url_a'
   }
 
   # === Sort field values ===
@@ -140,7 +140,7 @@ class Config::Solr < Config::Base
       config.add_facet_field 'call_number_narrow_f'
       config.add_facet_field 'language_f'
       config.add_facet_field 'region_f'
-      config.add_facet_field 'published_date'
+      config.add_facet_field 'published_date' # NOTE: does not end with '_f'
       config.add_facet_field 'use_f'
       config.add_facet_field 'license_class_f'
       config.add_facet_field 'source_f'
@@ -204,7 +204,6 @@ class Config::Solr < Config::Base
       # config.add_facet_field 'music_composition_era_facet'
       # config.add_facet_field 'policy_facet'
       # config.add_facet_field 'ports_of_call_facet'
-      # config.add_facet_field 'published_date_display'
       # config.add_facet_field 'recording_format_facet'
       # config.add_facet_field 'recording_type_facet'
       # config.add_facet_field 'recordings_and_scores_facet'
@@ -298,7 +297,7 @@ class Config::Solr < Config::Base
       config.add_index_field 'author_vern_a'
       config.add_index_field 'author_a'
       config.add_index_field 'language_a'
-      config.add_index_field 'published_date'
+      config.add_index_field 'published_date_a'
       config.add_index_field 'published_daterange'
       config.add_index_field 'digital_collection_a'
       config.add_index_field 'library_a'
@@ -324,6 +323,7 @@ class Config::Solr < Config::Base
       # [1] Blacklight::Lens::ShowPresenter#heading shows title and author so
       #     they should not be included here for HTML -- only for JSON.
 
+      config.add_show_field 'full_title_a',          if: :json_request?
       config.add_show_field 'title_a',               if: :json_request?
       config.add_show_field 'title_vern_a',          if: :json_request?
       config.add_show_field 'subtitle_a',            if: :json_request?
@@ -331,18 +331,23 @@ class Config::Solr < Config::Base
       config.add_show_field 'author_a',              if: :json_request?
       config.add_show_field 'author_vern_a',         if: :json_request?
       config.add_show_field 'format_a',              helper_method: :format_facet_label
+      config.add_show_field 'doc_type_a'
       config.add_show_field 'title_uniform_a'
       config.add_show_field 'title_series_a'
       config.add_show_field 'title_added_entry_a'
       config.add_show_field 'title_alternate_a'
+      config.add_show_field 'author_full_a'
       config.add_show_field 'author_added_entry_a'
       config.add_show_field 'author_director_a'
       config.add_show_field 'video_director_a'
+      config.add_show_field 'degree_a'
+      config.add_show_field 'grant_info_a'
       config.add_show_field 'journal_title_a'
       config.add_show_field 'journal_title_addl_a'
       config.add_show_field 'journal_addnl_title_a'
-      config.add_show_field 'published_date'
+      config.add_show_field 'published_date_a'
       config.add_show_field 'published_daterange'
+      config.add_show_field 'production_date_a'
       config.add_show_field 'date_coverage_a'
       config.add_show_field 'date_bulk_coverage_a'
       config.add_show_field 'composition_era_a'
@@ -364,17 +369,20 @@ class Config::Solr < Config::Base
       config.add_show_field 'oclc_t'
       config.add_show_field 'region_a'
       config.add_show_field 'digital_collection_a'
+      config.add_show_field 'abstract_a'
       config.add_show_field 'subject_a'
       config.add_show_field 'subject_era_a'
       config.add_show_field 'subject_summary_a'
       config.add_show_field 'topic_form_genre_a'
       config.add_show_field 'title_notes_a'
       config.add_show_field 'local_notes_a'
+      config.add_show_field 'notes_a'
       config.add_show_field 'url_a',                 helper_method: :url_link
       config.add_show_field 'url_supp_a',            helper_method: :url_link
       config.add_show_field 'pda_catkey_a'
       config.add_show_field 'pda_coutts_library_a'
       config.add_show_field 'pda_isbn_a'
+      config.add_show_field 'rights_a'
       config.add_show_field 'cc_type_t'
       config.add_show_field 'cc_uri_a',              helper_method: :url_link
       config.add_show_field 'rights_url_a',          helper_method: :url_link
@@ -394,12 +402,12 @@ class Config::Solr < Config::Base
       config.add_show_field 'date_received_a'
       config.add_show_field 'date_indexed_a'
       config.add_show_field 'date_first_indexed_a'
+      config.add_show_field 'thumbnail_url_a',       if: :json_request?
       config.add_show_field 'hathi_id_a',            if: :json_request?
       config.add_show_field 'source_a',              if: :json_request?
       config.add_show_field 'fullrecord',            if: :json_request?
 
       # === Unimplemented fields
-      # config.add_show_field 'abstract_display'
       # config.add_show_field 'access_display'
       # config.add_show_field 'accession_display'
       # config.add_show_field 'act_display'
@@ -409,7 +417,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'anchor_script_thumbnail_url_display'
       # config.add_show_field 'aus_display'
       # config.add_show_field 'aut_display'
-      # config.add_show_field 'author_full_display'
       # config.add_show_field 'availability_display'
       # config.add_show_field 'avalon_url_display'
       # config.add_show_field 'book_plate_name_display'
@@ -434,7 +441,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'date_bulk_coverage_display'
       # config.add_show_field 'date_coverage_display'
       # config.add_show_field 'date_display'
-      # config.add_show_field 'degree_display'
       # config.add_show_field 'denomination_display'
       # config.add_show_field 'desc_meta_file_display'
       # config.add_show_field 'description_display'
@@ -442,7 +448,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'despined_barcodes_display'
       # config.add_show_field 'digitized_item_pid_display'
       # config.add_show_field 'display_aspect_ratio_display'
-      # config.add_show_field 'doc_type_facet'
       # config.add_show_field 'drt_display'
       # config.add_show_field 'dst_display'
       # config.add_show_field 'duration_display'
@@ -455,7 +460,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'full_hierarchy_display'
       # config.add_show_field 'genre_display'
       # config.add_show_field 'geographic_subject_display'
-      # config.add_show_field 'grant_info_display'
       # config.add_show_field 'group_display'
       # config.add_show_field 'hathi_id_display'
       # config.add_show_field 'hierarchy_display'
@@ -482,7 +486,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'mus_display'
       # config.add_show_field 'music_catagory_facet'
       # config.add_show_field 'note_display'
-      # config.add_show_field 'notes_display'
       # config.add_show_field 'nrt_display'
       # config.add_show_field 'online_url_display'
       # config.add_show_field 'pan_display'
@@ -497,8 +500,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'pre_display'
       # config.add_show_field 'prn_display'
       # config.add_show_field 'pro_display'
-      # config.add_show_field 'production_date_display'
-      # config.add_show_field 'published_date_display'
       # config.add_show_field 'published_display'
       # config.add_show_field 'publisher_display'
       # config.add_show_field 'raw_ead_display'
@@ -519,8 +520,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'tei_url_display'
       # config.add_show_field 'temporal_subject_display'
       # config.add_show_field 'terms_of_use_display'
-      # config.add_show_field 'thumbnail_display'
-      # config.add_show_field 'thumbnail_url_display'
       # config.add_show_field 'timestamp'
       # config.add_show_field 'toc_display'
       # config.add_show_field 'unit_display'

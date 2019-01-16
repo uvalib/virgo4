@@ -85,13 +85,13 @@ module ApplicationHelper
   #
   def url_link(options = nil)
     values, opt = extract_config_value(options)
-    result = Array.wrap(values).map { |v| v&.split('|', -3) }.reject(&:blank?)
+    result = Array.wrap(values).map { |v| v&.split('|', -3) }
     if rendering_non_html?(opt)
       result.map!(&:first)
       (values.is_a?(Array) || (result.size > 1)) ? result : result.first
     elsif result.present?
       separator = opt[:separator] || ' '
-      result.map! { |url, _, label| outlink((label || url), url) }
+      result.map! { |url, _, label| outlink((label.presence || url), url) }
       result.join(separator).html_safe
     else
       return_empty(__method__)
