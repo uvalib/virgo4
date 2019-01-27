@@ -134,9 +134,9 @@ module HtmlHelper
     html_opt = { target: '_blank' }
     html_opt.merge!(opt) if opt.is_a?(Hash)
     if html_opt[:target] == '_blank'
-      html_opt[:rel] ||= 'noopener'
       html_opt[:title] &&= "#{html_opt[:title]}\n(opens in a new window)"
       html_opt[:title] ||= 'Opens in a new window'
+      html_opt[:rel]   ||= 'noopener'
     end
     link_to(*link_args, html_opt, &block)
   end

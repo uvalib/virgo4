@@ -55,9 +55,9 @@ class Config::Solr < Config::Base
   SEMANTIC_FIELDS = {
     display_type_field: 'format_a', # TODO: Could remove to avoid partial lookups by display type if "_default" is the only appropriate partial.
     title_field:        'title_a',
-    subtitle_field:     'subtitle_a',
+    subtitle_field:     'subtitle_a', # %w(subtitle_a title_sub_a) # TODO: ???
     alt_title_field:    'title_vern_a',
-    author_field:       'author_a',
+    author_field:       'author_a', # %w(author_a creator_a) # TODO: ???
     alt_author_field:   'author_vern_a',
     thumbnail_field:    'thumbnail_url_a'
   }
@@ -75,8 +75,8 @@ class Config::Solr < Config::Base
   BY_RECEIVED_DATE   = "#{BY_RECEIPT} desc"
   BY_NEWEST          = "#{BY_YEAR} desc, #{BY_RECEIPT} desc, #{BY_TITLE} asc"
   BY_OLDEST          = "#{BY_YEAR} asc, #{BY_RECEIPT} asc, #{BY_TITLE} asc"
-  IN_TITLE_ORDER     = "#{BY_TITLE} asc, #{BY_AUTHOR} asc"
-  IN_TITLE_REVERSE   = "#{BY_TITLE} desc, #{BY_AUTHOR} asc"
+  IN_TITLE_ORDER     = "#{BY_JTITLE} asc, #{BY_TITLE} asc, #{BY_AUTHOR} asc"
+  IN_TITLE_REVERSE   = "#{BY_JTITLE} desc, #{BY_TITLE} desc, #{BY_AUTHOR} asc"
   IN_AUTHOR_ORDER    = "#{BY_AUTHOR} asc, #{BY_TITLE} asc"
   IN_AUTHOR_REVERSE  = "#{BY_AUTHOR} desc, #{BY_TITLE} asc"
   IN_SHELF_ORDER     = "#{BY_CALL_NUMBER} asc, #{BY_TITLE} asc"
@@ -135,26 +135,41 @@ class Config::Solr < Config::Base
       add_facets!(config, MUSIC_TYPES)
       config.add_facet_field 'subject_f'
       config.add_facet_field 'subject_era_f'
+      config.add_facet_field 'collection_f'
       config.add_facet_field 'digital_collection_f'
       config.add_facet_field 'call_number_broad_f'
       config.add_facet_field 'call_number_narrow_f'
       config.add_facet_field 'language_f'
       config.add_facet_field 'region_f'
-      config.add_facet_field 'published_date' # NOTE: does not end with '_f'
+      config.add_facet_field 'published_date_f'
       config.add_facet_field 'use_f'
       config.add_facet_field 'license_class_f'
+      config.add_facet_field 'rights_f'
       config.add_facet_field 'source_f'
       config.add_facet_field 'location2_f'
       # JSON-only facets
+      config.add_facet_field 'alternate_id_f',       if: :json_request?
       config.add_facet_field 'barcode_f',            if: :json_request?
+      config.add_facet_field 'category_f',           if: :json_request?
       config.add_facet_field 'date_first_indexed_f', if: :json_request?
       config.add_facet_field 'date_indexed_f',       if: :json_request?
       config.add_facet_field 'date_received_f',      if: :json_request?
+      config.add_facet_field 'doc_type_f',           if: :json_request?
+      config.add_facet_field 'feature_f',            if: :json_request?
       config.add_facet_field 'fund_code_f',          if: :json_request?
-      config.add_facet_field 'location_f',           if: :json_request?
-      config.add_facet_field 'oclc_f',               if: :json_request?
+      config.add_facet_field 'genre_f',              if: :json_request?
+      config.add_facet_field 'group_f',              if: :json_request?
+      config.add_facet_field 'has_optional_f',       if: :json_request?
       config.add_facet_field 'issn_f',               if: :json_request?
+      config.add_facet_field 'location_f',           if: :json_request?
+      config.add_facet_field 'marc_display_f',       if: :json_request?
+      config.add_facet_field 'media_retrieval_id_f', if: :json_request?
+      config.add_facet_field 'oclc_f',               if: :json_request?
+      config.add_facet_field 'series_title_f',       if: :json_request?
       config.add_facet_field 'shadowed_location_f',  if: :json_request?
+      config.add_facet_field 'signature_f',          if: :json_request?
+      config.add_facet_field 'subject_genre_f',      if: :json_request?
+      config.add_facet_field 'title_f',              if: :json_request?
       config.add_facet_field 'topic_form_genre_f',   if: :json_request?
 
       # === Experimental facets
@@ -175,7 +190,6 @@ class Config::Solr < Config::Base
 =end
 
       # === Unimplemented facets
-      # config.add_facet_field 'alternate_id_facet'
       # config.add_facet_field 'anchor_script_facet'
       # config.add_facet_field 'aspace_version_facet'
       # config.add_facet_field 'author_prev_facet'
@@ -183,22 +197,15 @@ class Config::Solr < Config::Base
       # config.add_facet_field 'belongs_to_facet'
       # config.add_facet_field 'book_plate_facet'
       # config.add_facet_field 'call_number_facet'
-      # config.add_facet_field 'category_facet'
-      # config.add_facet_field 'collection_facet'
       # config.add_facet_field 'content_model_facet'
       # config.add_facet_field 'content_type_facet'
-      # config.add_facet_field 'feature_facet'
       # config.add_facet_field 'format_diff_facet'
       # config.add_facet_field 'format_extra_facet'
       # config.add_facet_field 'format_old_facet'
       # config.add_facet_field 'format_orig_facet'
-      # config.add_facet_field 'genre_facet'
-      # config.add_facet_field 'group_facet'
       # config.add_facet_field 'guide_book_facet'
-      # config.add_facet_field 'has_optional_facet'
       # config.add_facet_field 'hierarchy_level_facet'
       # config.add_facet_field 'libloctype_facet'
-      # config.add_facet_field 'media_retrieval_id_facet'
       # config.add_facet_field 'ml_number_facet'
       # config.add_facet_field 'music_catagory_facet'
       # config.add_facet_field 'music_composition_era_facet'
@@ -208,8 +215,6 @@ class Config::Solr < Config::Base
       # config.add_facet_field 'recording_type_facet'
       # config.add_facet_field 'recordings_and_scores_facet'
       # config.add_facet_field 'released_facet'
-      # config.add_facet_field 'series_title_facet'
-      # config.add_facet_field 'signature_facet'
       # config.add_facet_field 'torchbearer_facet'
       # config.add_facet_field 'video_director_facet'
       # config.add_facet_field 'video_genre_facet'
@@ -331,26 +336,34 @@ class Config::Solr < Config::Base
       config.add_show_field 'author_a',              if: :json_request?
       config.add_show_field 'author_vern_a',         if: :json_request?
       config.add_show_field 'format_a',              helper_method: :format_facet_label
-      config.add_show_field 'doc_type_a'
+      config.add_show_field 'format_orig_a'
+      config.add_show_field 'genre_a'
+      config.add_show_field 'title_sub_a'            # TODO: move to SEMANTIC_FIELDS ???
       config.add_show_field 'title_uniform_a'
       config.add_show_field 'title_series_a'
+      config.add_show_field 'series_title_a'
       config.add_show_field 'title_added_entry_a'
       config.add_show_field 'title_alternate_a'
+      config.add_show_field 'creator_a'              # TODO: move to SEMANTIC_FIELDS ???
       config.add_show_field 'author_full_a'
       config.add_show_field 'author_added_entry_a'
       config.add_show_field 'author_director_a'
       config.add_show_field 'video_director_a'
       config.add_show_field 'degree_a'
+      config.add_show_field 'sponsoring_agency_a'
       config.add_show_field 'grant_info_a'
       config.add_show_field 'journal_title_a'
-      config.add_show_field 'journal_title_addl_a'
+      config.add_show_field 'journal_title_addnl_a'
       config.add_show_field 'journal_addnl_title_a'
       config.add_show_field 'published_a'
       config.add_show_field 'published_date_a'
       config.add_show_field 'published_daterange'
       config.add_show_field 'production_date_a'
+      config.add_show_field 'date_a'
       config.add_show_field 'date_coverage_a'
       config.add_show_field 'date_bulk_coverage_a'
+      config.add_show_field 'endDate_t'
+      config.add_show_field 'startDate_t'
       config.add_show_field 'composition_era_a'
       config.add_show_field 'music_composition_form_a'
       config.add_show_field 'form_a'
@@ -363,26 +376,35 @@ class Config::Solr < Config::Base
       config.add_show_field 'language_a'
       config.add_show_field 'lc_call_number_a'
       config.add_show_field 'call_number_a'
+      config.add_show_field 'media_retrieval_id_a'
       config.add_show_field 'isbn_a'
       config.add_show_field 'isbn_isbn_a'
       config.add_show_field 'issn_a'
       config.add_show_field 'lccn_a'
       config.add_show_field 'oclc_t'
       config.add_show_field 'region_a'
+      config.add_show_field 'collection_f'
       config.add_show_field 'digital_collection_a'
       config.add_show_field 'abstract_a'
+      config.add_show_field 'group_a'
+      config.add_show_field 'category_a'
+      config.add_show_field 'signature_a'
       config.add_show_field 'subject_a'
       config.add_show_field 'subject_era_a'
       config.add_show_field 'subject_summary_a'
       config.add_show_field 'topic_form_genre_a'
       config.add_show_field 'title_notes_a'
       config.add_show_field 'local_notes_a'
+      config.add_show_field 'note_a'
       config.add_show_field 'notes_a'
+      config.add_show_field 'media_description_t'
       config.add_show_field 'url_a',                 helper_method: :url_link
       config.add_show_field 'url_supp_a',            helper_method: :url_link
       config.add_show_field 'pda_catkey_a'
       config.add_show_field 'pda_coutts_library_a'
       config.add_show_field 'pda_isbn_a'
+      config.add_show_field 'local_rights_statement_a'
+      config.add_show_field 'access_a'
       config.add_show_field 'rights_a'
       config.add_show_field 'cc_type_t'
       config.add_show_field 'cc_uri_a',              helper_method: :url_link
@@ -392,6 +414,7 @@ class Config::Solr < Config::Base
       config.add_show_field 'shadowed_location_a'
       config.add_show_field 'summary_holdings_a'
       config.add_show_field 'barcode_e'
+      config.add_show_field 'doc_type_a',            if: :json_request?
       config.add_show_field 'library_a',             if: :json_request?
       config.add_show_field 'location_a',            if: :json_request?
       config.add_show_field 'call_number_broad_a',   if: :json_request?
@@ -409,7 +432,6 @@ class Config::Solr < Config::Base
       config.add_show_field 'fullrecord',            if: :json_request?
 
       # === Unimplemented fields
-      # config.add_show_field 'access_display'
       # config.add_show_field 'accession_display'
       # config.add_show_field 'act_display'
       # config.add_show_field 'admin_meta_file_display'
@@ -424,7 +446,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'book_plate_thumb_url_display'
       # config.add_show_field 'book_plate_url_display'
       # config.add_show_field 'breadcrumbs_display'
-      # config.add_show_field 'category_display'
       # config.add_show_field 'cmp_display'
       # config.add_show_field 'cnd_display'
       # config.add_show_field 'cng_display'
@@ -435,13 +456,9 @@ class Config::Solr < Config::Base
       # config.add_show_field 'contributor_display'
       # config.add_show_field 'cre_display'
       # config.add_show_field 'created_date_display'
-      # config.add_show_field 'creator_display'
       # config.add_show_field 'ctb_display'
       # config.add_show_field 'custom_show_field_display'
       # config.add_show_field 'datafile_name_display'
-      # config.add_show_field 'date_bulk_coverage_display'
-      # config.add_show_field 'date_coverage_display'
-      # config.add_show_field 'date_display'
       # config.add_show_field 'denomination_display'
       # config.add_show_field 'desc_meta_file_display'
       # config.add_show_field 'description_display'
@@ -457,11 +474,8 @@ class Config::Solr < Config::Base
       # config.add_show_field 'edt_display'
       # config.add_show_field 'extent_display'
       # config.add_show_field 'feature_display'
-      # config.add_show_field 'form_display'
       # config.add_show_field 'full_hierarchy_display'
-      # config.add_show_field 'genre_display'
       # config.add_show_field 'geographic_subject_display'
-      # config.add_show_field 'group_display'
       # config.add_show_field 'hathi_id_display'
       # config.add_show_field 'hierarchy_display'
       # config.add_show_field 'hierarchy_level_display'
@@ -469,15 +483,14 @@ class Config::Solr < Config::Base
       # config.add_show_field 'id'
       # config.add_show_field 'iiif_presentation_metadata_display'
       # config.add_show_field 'individual_call_number_display'
-      # config.add_show_field 'instrument_raw_display'
       # config.add_show_field 'issued_date_display'
       # config.add_show_field 'itr_display'
       # config.add_show_field 'ive_display'
       # config.add_show_field 'keywords_display'
+      # config.add_show_field 'linked_author_display'
       # config.add_show_field 'linked_responsibility_statement_display'
-      # config.add_show_field 'media_description_display'
+      # config.add_show_field 'linked_title_display'
       # config.add_show_field 'media_resource_id_display'
-      # config.add_show_field 'media_retrieval_id_display'
       # config.add_show_field 'media_type_display'
       # config.add_show_field 'medium_display'
       # config.add_show_field 'mint_display'
@@ -486,7 +499,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'msd_display'
       # config.add_show_field 'mus_display'
       # config.add_show_field 'music_catagory_facet'
-      # config.add_show_field 'note_display'
       # config.add_show_field 'nrt_display'
       # config.add_show_field 'online_url_display'
       # config.add_show_field 'pan_display'
@@ -512,11 +524,9 @@ class Config::Solr < Config::Base
       # config.add_show_field 'scope_content_display'
       # config.add_show_field 'scopecontent_display'
       # config.add_show_field 'score'
-      # config.add_show_field 'signature_display'
       # config.add_show_field 'sng_display'
       # config.add_show_field 'special_collections_holding_display'
       # config.add_show_field 'spk_display'
-      # config.add_show_field 'sponsoring_agency_display'
       # config.add_show_field 'tei_url_display'
       # config.add_show_field 'temporal_subject_display'
       # config.add_show_field 'terms_of_use_display'
