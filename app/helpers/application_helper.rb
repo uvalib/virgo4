@@ -125,6 +125,37 @@ module ApplicationHelper
     end
   end
 
+  # Configuration :helper_method to display search term(s) as a clickable link
+  # for HTML response format only.
+  #
+  # @param [Hash] options             Supplied by the presenter.
+  #
+  # @return [Array<ActiveSupport::SafeBuffer>]    If request.format.html?
+  # @return [ActiveSupport::SafeBuffer]           If request.format.html?
+  # @return [Array<String>]                       If !request.format.html?
+  # @return [String]                              If !request.format.html?
+  # @return [nil]                                 If no terms were present.
+  #
+  # @see self#extract_config_value
+  #
+  def search_link(options = nil)
+    values, opt = extract_config_value(options)
+    result = Array.wrap(values).reject(&:blank?)
+    if rendering_non_html?(opt)
+      (values.is_a?(Array) || (result.size > 1)) ? result : result.first
+    elsif result.present?
+      separator = opt[:separator] || "<br/>\n"
+      result.map { |terms|
+        path_opt = search_state.to_h.except(:page, :action, :id)
+        #path_opt[:q] = terms.match?(/\s/) ? %Q("#{terms}") : terms
+        path_opt[:q] = terms
+        link_to(terms, search_action_path(path_opt))
+      }.join(separator).html_safe
+    else
+      return_empty(__method__)
+    end
+  end
+
   # ===========================================================================
   # :section:
   # ===========================================================================

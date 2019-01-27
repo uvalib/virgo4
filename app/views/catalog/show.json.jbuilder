@@ -24,6 +24,6 @@ end
 
 if params[:raw]
   if @document.respond_to?(:raw_source) && @document.raw_source.present?
-    json.set! 'raw_source', @document.raw_source
+    json.set! 'raw_data', @document.raw_source
   end
 end

@@ -53,11 +53,11 @@ class Config::Solr < Config::Base
   # accessed if the main metadata field is missing or empty).
   #
   SEMANTIC_FIELDS = {
-    display_type_field: 'format_a', # TODO: Could remove to avoid partial lookups by display type if "_default" is the only appropriate partial.
+    display_type_field: 'format_a',
     title_field:        'title_a',
-    subtitle_field:     'subtitle_a', # %w(subtitle_a title_sub_a) # TODO: ???
+    subtitle_field:     %w(subtitle_a title_sub_a),
     alt_title_field:    'title_vern_a',
-    author_field:       'author_a', # %w(author_a creator_a) # TODO: ???
+    author_field:       'author_a',
     alt_author_field:   'author_vern_a',
     thumbnail_field:    'thumbnail_url_a'
   }
@@ -147,7 +147,6 @@ class Config::Solr < Config::Base
       config.add_facet_field 'rights_f'
       config.add_facet_field 'source_f'
       config.add_facet_field 'location2_f'
-      # JSON-only facets
       config.add_facet_field 'alternate_id_f',       if: :json_request?
       config.add_facet_field 'barcode_f',            if: :json_request?
       config.add_facet_field 'category_f',           if: :json_request?
@@ -298,6 +297,7 @@ class Config::Solr < Config::Base
       config.add_index_field 'subtitle_a',           if: :json_request?
       config.add_index_field 'title_vern_a',         if: :json_request?
       config.add_index_field 'subtitle_vern_a',      if: :json_request? # NOTE: not in index
+      config.add_index_field 'title_sub_a',          if: :json_request?
       config.add_index_field 'format_a',             helper_method: :format_facet_label
       config.add_index_field 'author_vern_a'
       config.add_index_field 'author_a'
@@ -331,6 +331,7 @@ class Config::Solr < Config::Base
       config.add_show_field 'full_title_a',          if: :json_request?
       config.add_show_field 'title_a',               if: :json_request?
       config.add_show_field 'title_vern_a',          if: :json_request?
+      config.add_show_field 'title_sub_a',           if: :json_request?
       config.add_show_field 'subtitle_a',            if: :json_request?
       config.add_show_field 'subtitle_vern_a',       if: :json_request? # NOTE: not in index
       config.add_show_field 'author_a',              if: :json_request?
@@ -338,13 +339,15 @@ class Config::Solr < Config::Base
       config.add_show_field 'format_a',              helper_method: :format_facet_label
       config.add_show_field 'format_orig_a'
       config.add_show_field 'genre_a'
-      config.add_show_field 'title_sub_a'            # TODO: move to SEMANTIC_FIELDS ???
       config.add_show_field 'title_uniform_a'
-      config.add_show_field 'title_series_a'
-      config.add_show_field 'series_title_a'
       config.add_show_field 'title_added_entry_a'
       config.add_show_field 'title_alternate_a'
-      config.add_show_field 'creator_a'              # TODO: move to SEMANTIC_FIELDS ???
+      config.add_show_field 'title_series_a'
+      config.add_show_field 'series_title_a'
+      config.add_show_field 'journal_title_a'
+      config.add_show_field 'journal_title_addnl_a'
+      config.add_show_field 'journal_addnl_title_a'
+      config.add_show_field 'creator_a'              # NOTE: Only for Libra ETD
       config.add_show_field 'author_full_a'
       config.add_show_field 'author_added_entry_a'
       config.add_show_field 'author_director_a'
@@ -352,9 +355,6 @@ class Config::Solr < Config::Base
       config.add_show_field 'degree_a'
       config.add_show_field 'sponsoring_agency_a'
       config.add_show_field 'grant_info_a'
-      config.add_show_field 'journal_title_a'
-      config.add_show_field 'journal_title_addnl_a'
-      config.add_show_field 'journal_addnl_title_a'
       config.add_show_field 'published_a'
       config.add_show_field 'published_date_a'
       config.add_show_field 'published_daterange'
@@ -389,7 +389,7 @@ class Config::Solr < Config::Base
       config.add_show_field 'group_a'
       config.add_show_field 'category_a'
       config.add_show_field 'signature_a'
-      config.add_show_field 'subject_a'
+      config.add_show_field 'subject_a',             helper_method: :search_link
       config.add_show_field 'subject_era_a'
       config.add_show_field 'subject_summary_a'
       config.add_show_field 'topic_form_genre_a'
