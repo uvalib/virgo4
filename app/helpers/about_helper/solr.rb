@@ -21,11 +21,14 @@ module AboutHelper::Solr
 
   # A table of the Solr field name suffixes for each Blacklight field type.
   #
-  # @type [Hash{Symbol=>String}]
+  # @type [Hash{Symbol=>(String|Array<String>)}]
   #
   # @see self#get_solr_fields
   #
-  SOLR_TYPES = I18n.t('blacklight.about.solr.fields.types').deep_freeze
+  SOLR_TYPES =
+    I18n.t('blacklight.about.solr.fields.types')
+      .deep_symbolize_keys
+      .deep_freeze
 
   # Definitions of the parts of the JSON returned from the Solr luke handler.
   #
@@ -34,7 +37,9 @@ module AboutHelper::Solr
   # @see self#get_solr_information
   #
   SOLR_INFO_DATA_TEMPLATE =
-    I18n.t('blacklight.about.solr.info.data_template').deep_freeze
+    I18n.t('blacklight.about.solr.info.data_template')
+      .deep_symbolize_keys
+      .deep_freeze
 
   # Definitions of the parts of the JSON returned from the Solr luke handler.
   #
@@ -43,7 +48,9 @@ module AboutHelper::Solr
   # @see self#get_solr_statistics
   #
   SOLR_STATS_DATA_TEMPLATE =
-    I18n.t('blacklight.about.solr_stats.data_template').deep_freeze
+    I18n.t('blacklight.about.solr_stats.data_template')
+      .deep_symbolize_keys
+      .deep_freeze
 
   # Definitions of the parts of the JSON returned from the Solr luke handler.
   #
@@ -52,7 +59,9 @@ module AboutHelper::Solr
   # @see self#solr_stats_columns
   #
   SOLR_STATS_COLUMNS =
-    I18n.t('blacklight.about.solr_stats.columns').deep_freeze
+    I18n.t('blacklight.about.solr_stats.columns')
+      .map(&:deep_symbolize_keys)
+      .deep_freeze
 
   # ===========================================================================
   # :section:
@@ -78,21 +87,28 @@ module AboutHelper::Solr
     lens_configs = lens_keys.map { |k| [k, blacklight_config_for(k)] }.to_h
 
     SOLR_TYPES.map { |type, entry|
-      prefix, suffix, show_as = value_array(entry, :prefix, :suffix, :show_as)
-      show_as = suffix.presence && show_as.presence
+      prefix, suffix = value_array(entry, :prefix, :suffix)
+      prefix = Array.wrap(prefix).presence
+      suffix = Array.wrap(suffix).presence
       table =
-        fields.map { |field, count|
-          field = field.to_s
-          next unless prefix.blank? || field.start_with?(prefix)
-          next unless suffix.blank? || field.end_with?(suffix)
-          names = show_as ? [field.sub(/#{suffix}$/, show_as), field] : [field]
+        fields.map { |base_name, all_counts|
+          base_name = base_name.to_s
+          next if prefix&.none? { |v| base_name.start_with?(v) }
+          counts = suffix ? all_counts.slice(*suffix) : all_counts
+          next if counts.blank?
+          field_name = field_count = nil
           matching_config =
-            lens_configs.select { |_, config|
-              names.any? { |name|
-                in_configuration?(name, type: type, config: config)
-              }
-            }
-          [field, { count: count.to_s.presence, lenses: matching_config.keys }]
+            lens_configs.select do |_, config|
+              counts.any? do |variation, count|
+                name = "#{base_name}#{variation}"
+                next unless in_configuration?(name, type: type, config: config)
+                field_count ||= count if count
+                field_name  ||= name
+              end
+            end
+          field_count ||= all_counts.values.find(&:present?).to_s.presence
+          field_name  ||= base_name + (suffix ? suffix.first : type.to_s)
+          [field_name, { count: field_count, lenses: matching_config.keys }]
         }.compact.to_h
       [type, table]
     }.to_h
@@ -355,17 +371,23 @@ module AboutHelper::Solr
 
   public
 
-  # Get a table of the fields defined in the Solr instance along with the count
-  # of documents that have that field (or *nil* for non-indexed field types).
+  # Get a table of the base field names defined in the Solr instance where the
+  # value is a hash of each variation for that name and its associated document
+  # count. (Non-indexed variations will have *nil* instead of a numeric count).
   #
-  # @return [Hash{String=>Numeric}]
-  # @return [Hash{String=>nil}]
+  # @return [Hash{String=>Hash{String=>Numeric}}]
   #
   # @see https://wiki.apache.org/solr/LukeRequestHandler
   #
   def get_solr_field_data
-    data = get_solr_data_luke
-    data.map { |field, entry| [field, entry[:docs].presence] }.to_h
+    {}.tap do |result|
+      get_solr_data_luke.each_pair do |field, entry|
+        base = entry[:dynamicBase].to_s.sub(/^\*/, '')
+        name = field.to_s.sub(/#{base}$/, '')
+        result[name] ||= {}
+        result[name][base] = entry[:docs]
+      end
+    end
   end
 
   # Get a table of all of the fields defined in the Solr instance along with

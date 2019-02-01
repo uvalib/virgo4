@@ -164,6 +164,8 @@ class Config::Solr < Config::Base
       config.add_facet_field 'marc_display_f',       if: :json_request?
       config.add_facet_field 'media_retrieval_id_f', if: :json_request?
       config.add_facet_field 'oclc_f',               if: :json_request?
+      config.add_facet_field 'policy_f',             if: :json_request?
+      config.add_facet_field 'released_f',           if: :json_request?
       config.add_facet_field 'series_title_f',       if: :json_request?
       config.add_facet_field 'shadowed_location_f',  if: :json_request?
       config.add_facet_field 'signature_f',          if: :json_request?
@@ -208,12 +210,10 @@ class Config::Solr < Config::Base
       # config.add_facet_field 'ml_number_facet'
       # config.add_facet_field 'music_catagory_facet'
       # config.add_facet_field 'music_composition_era_facet'
-      # config.add_facet_field 'policy_facet'
       # config.add_facet_field 'ports_of_call_facet'
       # config.add_facet_field 'recording_format_facet'
       # config.add_facet_field 'recording_type_facet'
       # config.add_facet_field 'recordings_and_scores_facet'
-      # config.add_facet_field 'released_facet'
       # config.add_facet_field 'torchbearer_facet'
       # config.add_facet_field 'video_director_facet'
       # config.add_facet_field 'video_genre_facet'
@@ -350,20 +350,22 @@ class Config::Solr < Config::Base
       config.add_show_field 'creator_a'              # NOTE: Only for Libra ETD
       config.add_show_field 'author_full_a'
       config.add_show_field 'author_added_entry_a'
+      config.add_show_field 'ctb_a'
       config.add_show_field 'author_director_a'
       config.add_show_field 'video_director_a'
       config.add_show_field 'degree_a'
       config.add_show_field 'sponsoring_agency_a'
       config.add_show_field 'grant_info_a'
+      config.add_show_field 'year_a'
+      config.add_show_field 'startDate_t'            # NOTE: no 'startDate_a'
+      config.add_show_field 'endDate_t'              # NOTE: no 'endDate_a'
+      config.add_show_field 'date_t'                 # NOTE: no 'date_a'
       config.add_show_field 'published_a'
       config.add_show_field 'published_date_a'
       config.add_show_field 'published_daterange'
       config.add_show_field 'production_date_a'
-      config.add_show_field 'date_a'
       config.add_show_field 'date_coverage_a'
       config.add_show_field 'date_bulk_coverage_a'
-      config.add_show_field 'endDate_t'
-      config.add_show_field 'startDate_t'
       config.add_show_field 'composition_era_a'
       config.add_show_field 'music_composition_form_a'
       config.add_show_field 'form_a'
@@ -383,11 +385,13 @@ class Config::Solr < Config::Base
       config.add_show_field 'lccn_a'
       config.add_show_field 'oclc_t'
       config.add_show_field 'region_a'
+      config.add_show_field 'denomination_a'
+      config.add_show_field 'mint_a'
       config.add_show_field 'collection_f'
       config.add_show_field 'digital_collection_a'
       config.add_show_field 'abstract_a'
-      config.add_show_field 'group_a'
       config.add_show_field 'category_a'
+      config.add_show_field 'group_a'
       config.add_show_field 'signature_a'
       config.add_show_field 'subject_a',             helper_method: :search_link
       config.add_show_field 'subject_era_a'
@@ -395,9 +399,11 @@ class Config::Solr < Config::Base
       config.add_show_field 'topic_form_genre_a'
       config.add_show_field 'title_notes_a'
       config.add_show_field 'local_notes_a'
+      config.add_show_field 'accession_a'
       config.add_show_field 'note_a'
       config.add_show_field 'notes_a'
-      config.add_show_field 'media_description_t'
+      config.add_show_field 'media_description_a'
+      config.add_show_field 'desc_meta_file_a'
       config.add_show_field 'url_a',                 helper_method: :url_link
       config.add_show_field 'url_supp_a',            helper_method: :url_link
       config.add_show_field 'pda_catkey_a'
@@ -405,34 +411,40 @@ class Config::Solr < Config::Base
       config.add_show_field 'pda_isbn_a'
       config.add_show_field 'local_rights_statement_a'
       config.add_show_field 'access_a'
-      config.add_show_field 'rights_a'
-      config.add_show_field 'cc_type_t'
+      config.add_show_field 'use_a'
+      config.add_show_field 'license_class_a'
+      config.add_show_field 'cc_type_a'
       config.add_show_field 'cc_uri_a',              helper_method: :url_link
+      config.add_show_field 'rights_a'
       config.add_show_field 'rights_url_a',          helper_method: :url_link
       config.add_show_field 'rs_uri_a',              helper_method: :url_link
+      config.add_show_field 'rights_wrapper_a'
+      config.add_show_field 'rights_wrapper_url_a',  helper_method: :url_link
+      config.add_show_field 'library_a'
+      config.add_show_field 'location_a'
+      config.add_show_field 'location2_a'
       config.add_show_field 'fund_code_a'
+      config.add_show_field 'barcode_e'              # NOTE: no 'barcode_a'
       config.add_show_field 'shadowed_location_a'
       config.add_show_field 'summary_holdings_a'
-      config.add_show_field 'barcode_e'
-      config.add_show_field 'doc_type_a',            if: :json_request?
-      config.add_show_field 'library_a',             if: :json_request?
-      config.add_show_field 'location_a',            if: :json_request?
-      config.add_show_field 'call_number_broad_a',   if: :json_request?
-      config.add_show_field 'call_number_narrow_a',  if: :json_request?
-      config.add_show_field 'instrument_raw_a',      if: :json_request?
+      config.add_show_field 'iiif_presentation_metadata_a'
       config.add_show_field 'shelfkey'
       config.add_show_field 'reverse_shelfkey'
-      config.add_show_field 'marc_error_a'
       config.add_show_field 'date_received_a'
       config.add_show_field 'date_indexed_a'
       config.add_show_field 'date_first_indexed_a'
-      config.add_show_field 'thumbnail_url_a',       if: :json_request?
-      config.add_show_field 'hathi_id_a',            if: :json_request?
-      config.add_show_field 'source_a',              if: :json_request?
+      config.add_show_field 'marc_error_a'
+      config.add_show_field 'call_number_broad_a',   if: :json_request?
+      config.add_show_field 'call_number_narrow_a',  if: :json_request?
+      config.add_show_field 'doc_type_a',            if: :json_request?
       config.add_show_field 'fullrecord',            if: :json_request?
+      config.add_show_field 'hathi_id_a',            if: :json_request?
+      config.add_show_field 'instrument_raw_a',      if: :json_request?
+      config.add_show_field 'main_title_a',          if: :json_request?
+      config.add_show_field 'source_a',              if: :json_request?
+      config.add_show_field 'thumbnail_url_a',       if: :json_request?
 
       # === Unimplemented fields
-      # config.add_show_field 'accession_display'
       # config.add_show_field 'act_display'
       # config.add_show_field 'admin_meta_file_display'
       # config.add_show_field 'anchor_script_display'
@@ -456,11 +468,8 @@ class Config::Solr < Config::Base
       # config.add_show_field 'contributor_display'
       # config.add_show_field 'cre_display'
       # config.add_show_field 'created_date_display'
-      # config.add_show_field 'ctb_display'
       # config.add_show_field 'custom_show_field_display'
       # config.add_show_field 'datafile_name_display'
-      # config.add_show_field 'denomination_display'
-      # config.add_show_field 'desc_meta_file_display'
       # config.add_show_field 'description_display'
       # config.add_show_field 'description_note_display'
       # config.add_show_field 'despined_barcodes_display'
@@ -481,7 +490,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'hierarchy_level_display'
       # config.add_show_field 'hst_display'
       # config.add_show_field 'id'
-      # config.add_show_field 'iiif_presentation_metadata_display'
       # config.add_show_field 'individual_call_number_display'
       # config.add_show_field 'issued_date_display'
       # config.add_show_field 'itr_display'
@@ -493,7 +501,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'media_resource_id_display'
       # config.add_show_field 'media_type_display'
       # config.add_show_field 'medium_display'
-      # config.add_show_field 'mint_display'
       # config.add_show_field 'mod_display'
       # config.add_show_field 'modified_chicago_citation_display'
       # config.add_show_field 'msd_display'
@@ -519,8 +526,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'repository_address_display'
       # config.add_show_field 'resource_display'
       # config.add_show_field 'responsibility_statement_display'
-      # config.add_show_field 'rights_wrapper_display'
-      # config.add_show_field 'rights_wrapper_url_display'
       # config.add_show_field 'scope_content_display'
       # config.add_show_field 'scopecontent_display'
       # config.add_show_field 'score'
@@ -537,7 +542,6 @@ class Config::Solr < Config::Base
       # config.add_show_field 'upc_full_display'
       # config.add_show_field 'video_run_time_display'
       # config.add_show_field 'video_target_audience_display'
-      # config.add_show_field 'year_display'
 
       # =======================================================================
       # Search fields

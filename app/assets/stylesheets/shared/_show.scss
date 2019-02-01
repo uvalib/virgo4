@@ -97,13 +97,13 @@ body.blacklight-show .document {
         word-break: keep-all;
     }
 
-    // TODO: temporary; field should not actually be displayed as a URL
-    dd.blacklight-rights_url_a {
-        word-break: keep-all;
-    }
-
-    // TODO: temporary; field should not actually be displayed as a URL
-    dd.blacklight-rs_uri_a {
+    // TODO: temporary; fields should not actually be displayed as URLs
+    dd.blacklight-cc_uri_a,
+    dd.blacklight-iiif_presentation_metadata_a,
+    dd.blacklight-rights_url_a,
+    dd.blacklight-rights_wrapper_url_a,
+    dd.blacklight-rs_uri_a,
+    dd.blacklight-thumbnail_url_a {
         word-break: keep-all;
     }
 }
