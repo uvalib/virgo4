@@ -56,7 +56,7 @@
     outlink('University of Virginia', URL::UVA_HOME, link_opts)
   ].join(' ').html_safe # TODO: I18n
   virgo_version =
-    content_tag(:span, "v. #{BUILD_VERSION}", class: 'version-number')
+    content_tag(:span, "#{BUILD_VERSION}", class: 'version-number')
   info_line << [copyright, virgo_version].join(item_separator).html_safe
 
   # Other links.

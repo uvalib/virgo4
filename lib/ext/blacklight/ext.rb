@@ -12,6 +12,50 @@ require 'blacklight'
 # Hook up logger.
 Log ||= Blacklight.logger
 
+# Load search repository definitions from blacklight.yml.
+#
+# Unlike the original Blacklight method, this allows the use of YAML aliases.
+#
+# @return [Hash]
+#
+# This method overrides:
+# @see Blacklight#blacklight_yml
+#
+# == Implementation Note
+# Defining a module to prepend to Blacklight could not successfully cause the
+# definition of `self.blacklight_yml` to be overridden in time.  This explicit
+# definition was the only way to redefine the function early enough for the
+# files internal to the Blacklight gem to pick up the definition during
+# loading.
+#
+def Blacklight.blacklight_yml
+  @blacklight_yml ||=
+    begin
+      require 'erb'
+      require 'yaml'
+      result = msg = err = nil
+      cfg    = blacklight_config_file
+      txt    = IO.read(cfg)
+      erb    = ERB.new(txt).result(binding)
+      result = YAML.safe_load(erb, [], [], true)
+    rescue Errno::ENOENT
+      msg = "You are missing a configuration file: #{cfg}."
+      err = 'Have you run "rails generate blacklight:install"?'
+    rescue StandardError, SyntaxError => e
+      msg = "#{cfg} was found, but could not be parsed with ERB."
+      err = e.inspect
+    rescue => e
+      msg = "#{cfg} was found, but could not be parsed."
+      err = e.inspect
+    ensure
+      if result.present?
+        result
+      elsif msg.present?
+        raise "#{msg}\n#{err}"
+      end
+    end
+end
+
 # As of Blacklight 7, Blacklight::BlacklightHelperBehavior and
 # Blacklight::CatalogHelperBehavior require modules that are not specified by
 # a full namespace.  Because of the way that the gem overrides are occuring,

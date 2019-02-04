@@ -58,6 +58,18 @@
             }
         }
     }
+
+    .sort-submit-buttons {
+
+        display:         flex;
+        flex-direction:  row;
+        justify-content: space-between;
+        margin:          2rem 0;
+
+        .submit-buttons {
+            margin: auto 0 0 auto;
+        }
+    }
 }
 
 .blacklight-advanced-facet-select {
