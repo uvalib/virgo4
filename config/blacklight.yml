@@ -8,24 +8,24 @@
 _solr_uva_prod:                                                  &SOLR_UVA_PROD
   adapter: solr
   url: <%=
-         ENV['SOLR_URL'] ||
-         "http://junco.lib.virginia.edu:8080/solr/test_core"
+    ENV['SOLR_URL'] ||
+    'http://junco.lib.virginia.edu:8080/solr/test_core'
   %>
 
-# Development Solr instance (UVa on-Grounds or via VPN).
+# Solr instance for Rails development environments (UVa on-Grounds or via VPN).
 _solr_uva_dev:                                                    &SOLR_UVA_DEV
-  adapter: solr
-  url: <%=
-         ENV['SOLR_URL'] ||
-         "http://junco.lib.virginia.edu:8080/solr/test_core"
-  %>
+  <<: *SOLR_UVA_PROD
+
+# Solr instance for Rails test environments (UVa on-Grounds or via VPN).
+_solr_uva_test:                                                  &SOLR_UVA_TEST
+  <<: *SOLR_UVA_PROD
 
 # Local development fake Solr instance.
 _solr_local:                                                        &SOLR_LOCAL
   adapter: solr
   url: <%=
-         ENV['SOLR_URL'] ||
-         "http://junco.lib.virginia.edu:8080/solr/test_core"
+    ENV['SOLR_URL'] ||
+    "http://127.0.0.1:#{ENV['TEST_JETTY_PORT'] || 8983}/solr/blacklight-core"
   %>
 
 # =============================================================================
@@ -34,24 +34,12 @@ _solr_local:                                                        &SOLR_LOCAL
 
 # For the 'production' Rails environment (local).
 production:                                                    &SOLR_LOCAL_PROD
-  adapter: solr
-  url: <%=
-         ENV['SOLR_URL'] ||
-         "http://junco.lib.virginia.edu:8080/solr/test_core"
-  %>
+  <<: *SOLR_UVA_PROD
 
 # For the 'development' Rails environment (local).
 development:                                                    &SOLR_LOCAL_DEV
-  adapter: solr
-  url: <%=
-         ENV['SOLR_URL'] ||
-         "http://junco.lib.virginia.edu:8080/solr/test_core"
-  %>
+  <<: *SOLR_UVA_DEV
 
 # For the 'test' Rails environment (local).
 test:                                                          &SOLR_LOCAL_TEST
-  adapter: solr
-  url: <%=
-         ENV['SOLR_URL'] ||
-         "http://junco.lib.virginia.edu:8080/solr/test_core"
-  %>
+  <<: *SOLR_UVA_TEST

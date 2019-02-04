@@ -307,7 +307,7 @@ module BlacklightConfigurationHelper
   #
   # @param [Blacklight::Document] doc
   #
-  # @return [Symbol, String]
+  # @return [Symbol, nil]
   #
   # This method overrides:
   # @see Blacklight::ConfigurationHelperBehavior#document_show_link_field
@@ -317,7 +317,7 @@ module BlacklightConfigurationHelper
   def document_show_link_field(doc)
     fields = index_view_config(doc).title_field
     fields = Array.wrap(fields).map(&:to_sym)
-    fields.first { |f| doc.has?(f) } || fields.first || doc.id
+    fields.first { |f| doc.has?(f) } || fields.first
   end
 
   # Default sort field.

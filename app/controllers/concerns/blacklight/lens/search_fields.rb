@@ -76,8 +76,8 @@ module Blacklight::Lens::SearchFields
   # @return [Blacklight::Configuration::SearchField, nil]
   #
   # == Implementation Notes
-  # This method has been removed in Blacklight 7, but the currently-available
-  # version of Blacklight Advanced Search still uses it.
+  # This method has been removed in Blacklight 7, but it is still a convenient
+  # shorthand notation.
   #
   def search_field_def_for_key(key, lens = nil)
     blacklight_config_for(lens).search_fields[key.to_s]

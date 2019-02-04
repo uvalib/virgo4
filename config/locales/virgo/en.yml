@@ -503,6 +503,7 @@ en:
       year_multisort_i:                 'Year'
 
       # EBSCO EDS metadata fields
+      #abstract:                        'Abstract' # defined above
       abstract_supplied_copyright:      '[abstract_supplied_copyright]'
       access_level:                     '[access_level]'
       accession_number:                 '[accession_number]'
@@ -513,6 +514,10 @@ en:
       author_university:                'Author University'
       authors:                          'Author'
       authors_composed:                 '[authors_composed]'
+      bib_identifiers:                  '[bib_identifiers]'
+      bib_pub_date:                     '[bib_pub_date]'
+      citation_exports:                 '[citation_exports]'
+      citation_styles:                  '[citation_styles]'
       code_naics:                       'NAICS Code'
       composed_title:                   'Published in'
       content_provider:                 'Content Provider'
@@ -521,12 +526,16 @@ en:
       covers:                           '[covers]'
       database_id:                      '[database_id]'
       database_name:                    '[database_name]'
+      decode_sanitize_html:             '[decode_sanitize_html]'
       descriptors:                      'Subjects'
       document_doi:                     'DOI'
       document_oclc:                    'OCLC'
       document_type:                    'Document Type'
       ebook_epub_fulltext_available:    '[ebook_epub_fulltext_available]'
       ebook_pdf_fulltext_available:     '[ebook_pdf_fulltext_available]'
+      extras_Format:                    '[extras_Format]'
+      extras_NoteTitleSource:           '[extras_NoteTitleSource]'
+      extras_TitleTranslated:           '[extras_TitleTranslated]'
       fulltext_link:                    '[fulltext_link]'
       fulltext_links:                   'Fulltext'
       fulltext_word_count:              'Word Count'
@@ -544,6 +553,8 @@ en:
       languages:                        'Language'
       library_collection:               'Library Collection'
       library_location:                 'Library Location'
+      non_fulltext_links:               '[non_fulltext_links]'
+      #notes:                           'Notes' # defined above
       other_titles:                     'Other Title'
       page_count:                       'Page Count'
       page_start:                       'Start Page'
@@ -561,6 +572,7 @@ en:
       publication_year:                 'Publication Year'
       publication_year_range:           'Date Range'
       publisher:                        'Publisher'
+      quick_view_images:                '[quick_view_images]'
       relevancy_score:                  '[relevancy_score]'
       result_id:                        '[result_id]'
       search_limiters:                  'Search Limiter'
@@ -658,8 +670,10 @@ en:
         title:                'Changes to %{lens} search'
       advanced:
         title:                '%{lens} Advanced Search'
-        label:                'More options'
-        tooltip:              'Advanced %{lens} search'
+        label:                'Advanced'
+        tooltip: >
+          Advanced %{lens} search for multiple search limit selections and
+          searching by additional metadata fields.
 
     # -------------------------------------------------------------------------
     # Combined (Catalog+Articles) lens

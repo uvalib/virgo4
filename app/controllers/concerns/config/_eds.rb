@@ -236,6 +236,7 @@ class Config::Eds < Config::Base
       config.add_show_field 'decode_sanitize_html',         if: :json_request?
       config.add_show_field 'eds_extras_Format',            if: :json_request?
       config.add_show_field 'eds_extras_NoteTitleSource',   if: :json_request?
+      config.add_show_field 'eds_extras_TitleTranslated',   if: :json_request?
       # == Citations
       config.add_show_field 'eds_citation_exports',         if: :json_request?
       config.add_show_field 'eds_citation_styles',          if: :json_request?

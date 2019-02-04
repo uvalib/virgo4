@@ -1,16 +1,16 @@
 <%# app/views/advanced/_advanced_search_submit_btns.html.erb -%>
 <%-
   sort_label   ||= t('blacklight_advanced_search.form.sort_label')
-  sort_fields  ||= blacklight_config.sort_fields
+  sort_fields  ||= active_sort_fields
   sort_fields = sort_fields.map { |field, _| [sort_field_label(field), field] }
   current_sort ||= current_sort_field&.key
 
   sort_menu      = options_for_select(sort_fields, h(current_sort))
   current_search = blacklight_config.advanced_search.url_key
 
-  start_over_label ||= t('blacklight_advanced_search.form.start_over')
-  start_over_path  ||= advanced_search_path
-  start_over_opt   ||= { class: 'btn btn-default advanced-search-start-over' }
+  clear_label  ||= t('blacklight_advanced_search.form.start_over')
+  clear_path   ||= advanced_search_path
+  clear_opt    ||= { class: 'btn btn-secondary advanced-search-start-over' }
 
   search_label ||= t('blacklight_advanced_search.form.search_btn')
   search_opt   ||= {
@@ -20,13 +20,13 @@
 
 -%>
 
-<div class="sort-buttons float-md-left">
+<div class="sort-buttons pull-left">
   <%= label_tag(:sort, sort_label, class: 'control-label') %>
   <%= select_tag(:sort, sort_menu, class: 'form-control sort-select') %>
   <%= hidden_field_tag(:search_field, current_search) %>
 </div>
 
-<div class="submit-buttons float-md-right">
-  <%= link_to(start_over_label, start_over_path, start_over_opt) %>
+<div class="submit-buttons pull-right">
+  <%= link_to(clear_label, clear_path, clear_opt) %>
   <%= submit_tag(search_label, search_opt) %>
 </div>
