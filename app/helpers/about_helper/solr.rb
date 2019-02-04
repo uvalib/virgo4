@@ -484,14 +484,16 @@ module AboutHelper::Solr
   # TODO: Retrieve from blacklight.yml
   #
   def solr_url(interactive = false)
-    proto = 'http'
-    host  = 'junco.lib.virginia.edu'
-    port  = '8080'
-    path  = ["#{proto}://#{host}:#{port}"]
-    path << 'solr'
-    path << '#' if interactive
-    path << 'test_core'
-    path.join('/')
+    #proto = 'http'
+    #host  = 'junco.lib.virginia.edu'
+    #port  = '8080'
+    #path  = ["#{proto}://#{host}:#{port}"]
+    #path << 'solr'
+    #path << '#' if interactive
+    #path << 'test_core'
+    #path.join('/')
+    return ENV['SOLR_URL'] if interactive == false
+    return ENV['SOLR_URL'].gsub( "/solr/", "/solr/#/" )
   end
 
 end
