@@ -173,23 +173,6 @@ class Config::Solr < Config::Base
       config.add_facet_field 'title_f',              if: :json_request?
       config.add_facet_field 'topic_form_genre_f',   if: :json_request?
 
-      # === Experimental facets
-      now = Time.zone.now.year
-      config.add_facet_field 'example_query_facet_field', query: {
-        years_5:  { label: 'within 5 Years',  fq: "pub_date:[#{now-5}  TO *]" },
-        years_10: { label: 'within 10 Years', fq: "pub_date:[#{now-10} TO *]" },
-        years_25: { label: 'within 25 Years', fq: "pub_date:[#{now-25} TO *]" }
-      }, label: 'Publication Range'
-
-=begin # NOTE: turning this off for now...
-      config.add_facet_field(
-        'example_pivot_field',
-        label:  'Pivot Field',
-        pivot:  %w(format_f language_f),
-        unless: :json_request?
-      )
-=end
-
       # === Unimplemented facets
       # config.add_facet_field 'anchor_script_facet'
       # config.add_facet_field 'aspace_version_facet'
