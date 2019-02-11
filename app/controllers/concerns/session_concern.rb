@@ -125,38 +125,45 @@ module SessionConcern
     session[:origin] = origin || :root
   end
 
-  # For RSS, defaults to 'received' unless specified as 'published'.
-  # For :digital_collection_facet, defaults to 'published'.
-  # Otherwise, default to 'relevance' but only if there was a query.
-  # As a fallback, sort on 'received'
+  # Change or eliminate :sort based on the request URL.  Additionally, remove
+  # :sort, :view and/or :per_page for main page and lens home pages.
   #
   # @return [void]
   #
   def resolve_sort
-    return if params.except(:controller, :action).empty?
-    return unless Blacklight::Lens.key_for(self, false)
-    sort      = params[:sort].presence
-    new_sort  = nil
-    relevance = relevance_sort_key
-    received  = date_received_sort_key
-    published = 'newest'
-    if params[:format] == 'rss'
-      # Special case for RSS; otherwise sort by date_received.
-      new_sort = received  unless sort == published
-    elsif has_query?
-      # If there is a query, sort by relevance unless a sort was specified.
-      new_sort = relevance unless sort.present?
+    base_params = params.except(:controller, :action)
+    return unless base_params.present? && Blacklight::Lens.key_for(self, false)
+    changed = false
+    sort = base_params.delete(:sort)
+    view = base_params.delete(:view)
+    prpg = base_params.delete(:per_page)
+    if base_params.blank?
+      # For the main page and lens home pages, eliminate parameters that would
+      # needlessly result in a cache miss.
+      changed = params.delete(:sort)     if sort.present?
+      changed = params.delete(:view)     if view.present?
+      changed = params.delete(:per_page) if prpg.present?
     else
-      # If there is no query, sorting by relevance doesn't make sense; by
-      # default, sort digital collections by published date.
-      dig_coll = params[:f]&.include?(:digital_collection_facet)
-      def_sort = dig_coll ? published : received
-      new_sort = def_sort if sort.blank? || (sort == relevance)
+      # For search results, change the sort if required.
+      relevance = relevance_sort_key
+      received  = date_received_sort_key
+      published = 'newest'
+      new_sort =
+        if params[:format] == 'rss'
+          # Special case for RSS; otherwise sort by date_received.
+          received unless sort == published
+        elsif has_query?
+          # If there is a query, sort by relevance unless a sort was specified.
+          relevance unless sort.present?
+        elsif sort == relevance
+          # If there is no query, sorting by relevance doesn't make sense;
+          # default to sorting by date received except for digital collections.
+          params[:f]&.include?(:digital_collection_f) ? published : received
+        end
+      changed = (sort != new_sort) if new_sort.present?
+      params[:sort] = new_sort if changed
     end
-    if new_sort && (sort != new_sort)
-      params[:sort] = new_sort
-      will_redirect
-    end
+    will_redirect if changed
   end
 
   # Clean up URL parameters and redirect.
@@ -175,13 +182,13 @@ module SessionConcern
     params.delete_if { |k, v| k.blank? || v.blank? }
     %w(utf8).each { |k| params.delete(k) }
     params.delete(:op) if params[:op] == 'AND'
-    reset_search = (params.delete(:commit) == 'Search')
-    debug_session = params.delete(:debug_session)
+    params.delete(:commit)
+    debugging = params.delete(:virgo_debug)
 
     # Update session if indicated.
-    case debug_session.to_s.downcase
-      when 'true'  then session[:debug_session] = true
-      when 'false' then session.delete(:debug_session)
+    case debugging.to_s.downcase
+      when 'true'  then session[:virgo_debug] = true
+      when 'false' then session.delete(:virgo_debug)
     end
 
     # If parameters were removed, redirect to the corrected URL.

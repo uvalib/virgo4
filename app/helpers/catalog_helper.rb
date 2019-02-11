@@ -341,7 +341,7 @@ module CatalogHelper
 
   public
 
-  # Configuration :helper_method for rendering :format_facet.
+  # Configuration :helper_method for rendering a format metadata field value.
   #
   # For HTML response format only, it wraps each content format type in a
   # <span> for CSS styling.

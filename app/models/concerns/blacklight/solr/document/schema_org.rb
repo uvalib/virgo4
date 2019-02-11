@@ -18,7 +18,7 @@ module Blacklight::Solr::Document
     include Blacklight::Lens::Document::SchemaOrg
     extend  Blacklight::Lens::Document::SchemaOrg
 
-    # :format_facet is a multi-valued field; the entries in this mapping are in
+    # :format_f is a multi-valued field; the entries in this mapping are in
     # order of precedence.
     FORMAT_FACET_TO_SCHEMA_ORG = itemtype_mapping(
       Dataset:                :Dataset,
@@ -65,7 +65,7 @@ module Blacklight::Solr::Document
     # @return [String]
     #
     def itemtype
-      doc_type = itemtype_lookup(FORMAT_FACET_TO_SCHEMA_ORG, :format_facet)
+      doc_type = itemtype_lookup(FORMAT_FACET_TO_SCHEMA_ORG, :format_f)
       itemtype_table[doc_type] || super
     end
 

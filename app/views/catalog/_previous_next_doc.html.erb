@@ -5,6 +5,7 @@
   # Modify behavior if the original page was not a search listing.
   origin ||= session[:origin]&.to_sym
   total  ||= search_session['total']
+  anchor ||= nil
 
   from_lens = Blacklight::Lens.valid_key?(origin)
   from_lens ||= (origin == :root) # TODO: For now...
@@ -20,8 +21,17 @@
       ].join(' | ').html_safe
     end
 
-  start_over_label ||= t('blacklight.search.start_over')
-  start_over_opt   ||= { class: 'catalog_startOverLink btn btn-primary' }
+  start_over_link =
+    unless origin == :bookmarks
+      label = t('blacklight.search.start_over')
+      path  = start_over_path
+      opt   = { class: 'catalog_startOverLink btn btn-primary' }
+      link_to(label, path, opt)
+    end
+
+  back_opt = { origin: origin, class: 'btn btn-outline-secondary' }
+  back_opt[:anchor] = anchor if anchor.present?
+  back_link = link_back_to_catalog(back_opt)
 -%>
 
 <div class='pagination-search-widgets'>
@@ -29,7 +39,7 @@
     <%= page_links %>
   </div>
   <div class="clearfix constraints-container">
-    <%= link_to start_over_label, start_over_path, start_over_opt %>
-    <%= link_back_to_catalog(class: 'btn btn-outline-secondary') %>
+    <%= start_over_link %>
+    <%= back_link %>
   </div>
 </div>

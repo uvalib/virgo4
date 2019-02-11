@@ -18,6 +18,17 @@ module EBSCO::EDS::ConfigurationExt
   # Lifetime of the auth token.
   AUTH_TOKEN_EXPIRATION = 30.minutes
 
+  TMP_ROOT_DIR =
+    ENV['TMPDIR']&.sub(/^([^\/])/, "#{Rails.root}/\\1")&.freeze || Dir.tmpdir
+
+  # Temporary directory that will hold the Faraday cache directory for
+  # :file_store.
+  CACHE_ROOT_DIR =
+    ENV.fetch('CACHE_DIR', File.join(TMP_ROOT_DIR, 'cache')).freeze
+
+  # Faraday cache directory for :file_store.
+  FARADAY_CACHE_DIR = File.join(CACHE_ROOT_DIR, 'faraday', 'eds').freeze
+
   DEFAULT_CONFIG = {
     debug:                            false,
     guest:                            true,
@@ -45,7 +56,7 @@ module EBSCO::EDS::ConfigurationExt
     max_results_per_page:             100,
     ebook_preferred_format:           'ebook-pdf',
     use_cache:                        true,
-    eds_cache_dir:                    (ENV['TMPDIR'] || '/tmp').freeze,
+    eds_cache_dir:                    FARADAY_CACHE_DIR,
     auth_cache_expires_in:            (AUTH_TOKEN_EXPIRATION - 5.minutes),
     info_cache_expires_in:            1.day,
     retrieve_cache_expires_in:        DEFAULT_EXPIRATION,

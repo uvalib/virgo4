@@ -23,11 +23,13 @@ module Faraday
 
     public
 
-    # call
+    # This provides debugging information for Solr responses and exceptions.
     #
     # @param [Faraday::Env] env
     #
     # @return [Faraday::Response, nil]
+    #
+    # @see RSolr::Client#execute
     #
     def call(env)
       @app.call(env).on_complete do |response|
@@ -35,19 +37,9 @@ module Faraday
           "#{self.class}: response status #{response.status.inspect}"
         }
       end
-
-    rescue Faraday::ClientError => e
-      Log.info { "#{self.class}: #{e.class} caught #{e}" }
-      raise
-
-    rescue Faraday::Error => e
-      Log.info { "#{self.class}: #{e.class} caught #{e}" }
-      raise RSolr::Error::Http.new(e.response)
-
     rescue Exception => e
-      Log.info { "#{self.class}: Faraday caught #{e}" }
+      Log.info { "#{self.class}: Faraday caught #{e.class}: #{e}" }
       raise
-
     end
 
   end

@@ -143,6 +143,26 @@ module BlacklightUrlHelper
     "track_#{current_lens.key}_path"
   end
 
+  # Get the path to the search action with any parameters (e.g. view type)
+  # that should be persisted across search sessions.
+  #
+  # @param [String] _query_params     Unused.
+  #
+  # @return [String]
+  #
+  # This method overrides:
+  # @see Blacklight::UrlHelperBehavior#start_over_path
+  #
+  # == Implementation Notes
+  # Unlike the Blacklight method, this intentionally removes the :view
+  # parameter to simplify the path.  Since :preferred_view will already be in
+  # the session there's no need to communicate this setting through the
+  # parameters.
+  #
+  def start_over_path(_query_params = nil)
+    search_action_path(view: nil)
+  end
+
   # Create a link back to the index screen, keeping the user's facet, query and
   # paging choices intact by using session.
   #

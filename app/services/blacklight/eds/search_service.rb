@@ -103,16 +103,20 @@ module Blacklight::Eds
 
     # Get the previous and next document from a search result.
     #
-    # @param [Integer] index
-    # @param [Hash]    req_params
-    # @param [Hash]    user_params
+    # @param [Integer]   index
+    # @param [Hash]      req_params
+    # @param [Hash, nil] other_params
     #
     # @return [Array<(Blacklight::Eds::Response, Array<EdsDocument>)>]
     #
     # This method overrides:
     # @see Blacklight::SearchService#previous_and_next_documents_for_search
     #
-    def previous_and_next_documents_for_search(index, req_params, user_params = nil)
+    def previous_and_next_documents_for_search(
+      index,
+      req_params,
+      other_params = nil
+    )
       pagination_params = previous_and_next_document_params(index)
       start = pagination_params.delete(:start)
       rows  = pagination_params.delete(:rows)
@@ -121,16 +125,19 @@ module Blacklight::Eds
           .with(req_params)
           .start(start)
           .rows(rows)
-          .merge(user_params || {})
+          .merge(user_params || {}) # TODO: should this be other_params?
           .merge(pagination_params)
+
       # Add an EDS current page index for next-previous search.
       next_index = index + 1
       eds_params = service_params.merge('previous-next-index': next_index)
       response = repository.search(query, eds_params)
+
+      # Previous or next document will be *nil* at the ends of results.
       docs     = response.documents
       prev_doc = (docs.first if index > 0)
       next_doc = (docs.last  if next_index < response.total)
-      [response, [prev_doc, next_doc]]
+      return response, [prev_doc, next_doc]
     end
 
     # A solr query method.

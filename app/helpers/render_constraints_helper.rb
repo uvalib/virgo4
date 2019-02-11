@@ -59,17 +59,17 @@ module RenderConstraintsHelper
   # @see Blacklight::RenderConstraintsHelperBehavior#render_filter_element
   #
   def render_filter_element(facet, values, path)
-    facet_config = facet_configuration_for_field(facet)
-    facet_key    = facet_config.key
-    facet_label  = facet_field_label(facet_key)
+    cfg   = facet_configuration_for_field(facet)
+    label = facet_field_label(cfg.key)
+    css   = %W(filter filter-#{facet.parameterize})
     Array.wrap(values).map { |value|
       next unless value.present?
-      render_constraint_element(
-        facet_label,
-        facet_display_value(facet, value),
-        remove:  search_action_path(path.remove_facet_params(facet, value)),
-        classes: %W(filter filter-#{facet.parameterize})
-      )
+      path_opt = path.remove_facet_params(facet, value)
+      search   = path_opt.except(:controller, :action, :sort, :view, :per_page)
+      path_opt.except!(:sort, :view, :per_page) if search.blank?
+      rm_path = search_action_path(path_opt)
+      value   = facet_display_value(facet, value)
+      render_constraint_element(label, value, remove: rm_path, classes: css)
     }.compact.join("\n").html_safe
   end
 

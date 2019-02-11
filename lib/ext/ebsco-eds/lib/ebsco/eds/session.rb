@@ -151,20 +151,20 @@ module EBSCO::EDS::SessionExt
       end
 
     # Setup caching options that will be used in #connection.
-    @cache_opt =
-      if @use_cache
-        {
-          store:                  :file_store,
-          cache_dir:              @cache_dir,
-          logger:                 @logger,
-          auth_expire:            @auth_expire,
-          info_expire:            @info_expire,
-          search_expire:          @search_expire,
-          retrieve_expire:        @retrieve_expire,
-          export_format_expire:   @export_format_expire,
-          citation_styles_expire: @citation_styles_expire
-        }
-      end
+    @cache_store = @cache_opt = nil
+    if @use_cache
+      @cache_store = ActiveSupport::Cache::FileStore.new(@cache_dir)
+      @cache_opt = {
+        store:                  @cache_store,
+        logger:                 @logger,
+        auth_expire:            @auth_expire,
+        info_expire:            @info_expire,
+        search_expire:          @search_expire,
+        retrieve_expire:        @retrieve_expire,
+        export_format_expire:   @export_format_expire,
+        citation_styles_expire: @citation_styles_expire
+      }
+    end
 
     # Other values that need to be initialized.
     @conn_adapter   = @config[:adapter]
@@ -387,6 +387,8 @@ module EBSCO::EDS::SessionExt
   #
   # This method overrides:
   # @see EBSCO::EDS::Session#connection
+  #
+  # @see Faraday::EdsCachingMiddlewareExt#initialize
   #
   def connection(use_cache: @use_cache, token: @session_token)
     Faraday.new(@conn_opt) do |conn|

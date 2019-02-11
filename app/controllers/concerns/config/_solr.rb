@@ -218,6 +218,13 @@ class Config::Solr < Config::Base
             else                             20
           end
 
+        # NOTE: Temporarily "turn off" all JSON-only facets.
+        # In total, this brings initial load time of the main page down to
+        # ~7 seconds from ~12 seconds.  (Note that actually commenting-out the
+        # facet definition does not improve load times over simply setting the
+        # facet limit to zero.)
+        field.limit = 0 if field.respond_to?(:if) && field.if == :json_request?
+
         field.sort =
           case key
             when 'call_number_broad_f'  then 'index'

@@ -83,7 +83,7 @@
   }.map { |id, value|
     content_tag(:div, value, id: id)
   }.join(' ').html_safe
-  debugging = session[:debug_session] || Rails.env.development?
+  debugging = session[:virgo_debug] || Rails.env.development?
 
 -%>
 

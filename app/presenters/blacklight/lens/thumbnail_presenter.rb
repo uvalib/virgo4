@@ -42,7 +42,7 @@ module Blacklight::Lens
     # @return [String]
     #
     # This method overrides:
-    # @Blacklight::ThumbnailPresenter#thumbnail_tag
+    # @see Blacklight::ThumbnailPresenter#thumbnail_tag
     #
     def thumbnail_tag(image_opt = nil, url_opt = nil)
       image_opt ||= {}
@@ -67,7 +67,7 @@ module Blacklight::Lens
     # @return [String]
     #
     # This method overrides:
-    # @Blacklight::ThumbnailPresenter#default_thumbnail
+    # @see Blacklight::ThumbnailPresenter#default_thumbnail
     #
     def default_thumbnail
       view_config.default_thumbnail || DEFAULT_THUMBNAIL

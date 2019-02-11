@@ -43,7 +43,7 @@
   locals   = { document_counter: counter }
 -%>
 
-<%= render 'previous_next_doc' %>
+<%= render 'previous_next_doc', anchor: doc_id %>
 
 <div id="document" class="<%= css_class -%>" <%= data %> <%= itemtype %>>
   <div id="<%= doc_id -%>">
