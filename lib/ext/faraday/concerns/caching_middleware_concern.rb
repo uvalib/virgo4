@@ -31,17 +31,17 @@ module Faraday
     # Faraday cache directory for :file_store.
     FARADAY_CACHE_DIR = File.join(CACHE_ROOT_DIR, 'faraday').freeze
 
+    # Redis server cache configuration.
+    RAILS_CONFIG = Rails.application.config_for(:redis).deep_symbolize_keys
+
     # Default expiration time.
     DEFAULT_EXPIRATION = 1.hour
 
     # Default options appropriate for any including class.
     #
     DEFAULT_OPTIONS = {
-      logger:        Rails.logger,
-      http_header:   'x-faraday-cache',
-      cache_dir:     FARADAY_CACHE_DIR,
-      store:         :file_store,
-      store_options: {},
+      store:  :redis_cache_store,
+      logger: Rails.logger,
     }.freeze
 
     # =========================================================================
@@ -83,9 +83,11 @@ module Faraday
     def initialize(app, opt = nil)
       @app = app
       opt  = DEFAULT_OPTIONS.deep_merge(opt || {})
+      @namespace = opt[:namespace]
+      raise 'including class must define :namespace' if @namespace.blank?
       @logger          = opt[:logger]
       @cache_dir       = opt[:cache_dir]
-      @http_header     = opt[:http_header]
+      @http_header     = opt[:http_header] || "x-faraday-#{@namespace}-cache"
       @store           = opt[:store]
       @store_options   = opt[:store_options]
       @cacheable_paths = Array.wrap(opt[:cacheable_paths]).presence
@@ -314,12 +316,19 @@ module Faraday
     #
     def initialize_store
       if (type = @store).is_a?(Symbol)
-        @store =
-          if type == :file_store
-            ActiveSupport::Cache.lookup_store(type, @cache_dir, @store_options)
-          else
-            ActiveSupport::Cache.lookup_store(type, @store_options)
-          end
+        params  = []
+        options = @store_options&.dup || {}
+        case type
+          when :file_store
+            @cache_dir ||= File.join(FARADAY_CACHE_DIR, @namespace)
+            @cache_dir ||= FARADAY_CACHE_DIR
+            params << @cache_dir
+          when :redis_cache_store
+            options.merge!(RAILS_CONFIG)
+            options.merge!(namespace: @namespace)
+        end
+        params << options
+        @store = ActiveSupport::Cache.lookup_store(type, *params)
       end
       unless @store.is_a?(ActiveSupport::Cache::Store)
         raise "expected Symbol, got #{@store.class} #{@store.inspect}"

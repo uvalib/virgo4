@@ -23,11 +23,11 @@ module Faraday
 
     # Default options.
     #
+    # NOTE: These supersede the settings defined in:
     # @see EBSCO::EDS::ConfigurationExt#DEFAULT_CONFIG
     #
     DEFAULT_OPTIONS = {
-      http_header:            'x-faraday-eds-cache',
-      cache_dir:              File.join(FARADAY_CACHE_DIR, 'eds'),
+      namespace:              'eds',
       auth_expire:            (AUTH_TOKEN_EXPIRATION - 5.minutes),
       info_expire:            1.day,
       retrieve_expire:        DEFAULT_EXPIRATION,
@@ -55,7 +55,10 @@ module Faraday
 
     public
 
-    # Initialize
+    # Initialize an instance.
+    #
+    # NOTE: Options from EBSCO::EDS::Session#connection are ignored in favor
+    # of maintaining those settings in this class definition.
     #
     # @param [Faraday::Middleware] app
     # @param [Array]               args
@@ -75,7 +78,7 @@ module Faraday
     # @see Faraday::CachingMiddlewareConcern#initialize
     #
     def initialize(app, *args)
-      opt = DEFAULT_OPTIONS.deep_merge(args.last || {})
+      opt = DEFAULT_OPTIONS.dup
 
       # auth_expire must be less than the 30 minute auth token expiration.
       @auth_expire = [opt[:auth_expire], DEFAULT_OPTIONS[:auth_expire]].min

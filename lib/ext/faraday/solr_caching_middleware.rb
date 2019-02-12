@@ -27,8 +27,7 @@ module Faraday
     # Default options.
     #
     DEFAULT_OPTIONS = {
-      http_header:     'x-faraday-solr-cache',
-      cache_dir:       File.join(FARADAY_CACHE_DIR, 'solr'),
+      namespace:       'solr',
       expires_in:      DEFAULT_EXPIRATION,
       cacheable_paths: %w(
         /get?
@@ -43,7 +42,7 @@ module Faraday
 
     public
 
-    # Initialize
+    # Initialize an instance.
     #
     # @param [Faraday::Middleware] app
     # @param [Hash, nil]           opt

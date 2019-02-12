@@ -1,0 +1,30 @@
+# config/redis.yml
+
+# Configuration for Redis caching.
+#
+# If ENV['REDIS_URL'] is present it trumps host/port/password/db settings.
+# If ENV['REDIS_TIMEOUT'] is present it trumps individual timeout settings.
+#
+default: &DEFAULT
+
+  thread_safe: true
+
+  host:     <%= ENV['REDIS_HOST'] || 'localhost' %>
+  port:     <%= ENV['REDIS_PORT'] || '6379' %>
+  password: <%= ENV['REDIS_PASSWD'] %>
+  db:       <%= ENV['REDIS_DB'] %>
+  url:      <%= ENV['REDIS_URL'] %>
+
+  connect_timeout: 10
+  read_timeout:    1
+  write_timeout:   1
+  timeout:         <%= ENV['REDIS_TIMEOUT'] %>
+
+production:
+  <<: *DEFAULT
+
+development:
+  <<: *DEFAULT
+
+test:
+  <<: *DEFAULT
