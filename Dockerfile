@@ -18,6 +18,7 @@ RUN apk add --no-cache \
     libxslt-dev \
     nodejs \
     sqlite-dev \
+    mariadb-dev \
     tzdata \
     yarn
 
