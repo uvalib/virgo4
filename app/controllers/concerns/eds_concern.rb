@@ -74,48 +74,56 @@ module EdsConcern
     message ||= I18n.t('blacklight.search.errors.unknown')
     if details.present?
       message = message.chomp('.') << +' (' << details.chomp('.') << ')'
+    elsif code.present?
+      message = message.chomp('.') << " [#{code}]"
     end
     message = I18n.t('blacklight.search.errors.ebsco_eds', error: message)
 
     # Act based on the type of error.
     case code.to_i
-      when 101, 102, 103, 104, 105, 113, 130, 131, 132, 133, 134, 135,
-        1100, 1103
-        # TODO: Determine whether this is correct for all of these error codes
-        flash[:notice] =
-          I18n.t('blacklight.search.errors.authorization.eds')
-        Log.debug(exception, '[ignore]')
-        redirect_to articles_home_path
+
+      when 104, 108, 113, 127, 128, 133..135, 139..141, 144, 1100..1103
+        # === Authentication error
+        # Nothing in /articles will work in this case so redirecting to
+        # articles_home_path would just result in a "redirect loop".
+        Log.error(exception)
+        flash[:notice] = I18n.t('blacklight.search.errors.authorization.eds')
+        redirect_to root_path
+
       when 106
-        # EBSCO::EDS::BadRequest
-        # "Unknown error encountered"
+        # === "Unknown error encountered"
+        Log.warn(exception)
         flash[:notice] =
           I18n.t('blacklight.search.errors.receive.eds', error: message)
-        Log.warn(exception)
-        redirect_to articles_home_path
+        redirect_to root_path
+
       when 107
+        # === "Authentication Token Missing"
+        Log.error(exception)
         flash[:notice] =
           I18n.t('blacklight.search.errors.authorization.eds_blocked')
-        Log.error(exception)
-        redirect_to articles_home_path
+        redirect_to root_path
+
       when 109
-        # EBSCO::EDS::BadRequest
-        # "Session Token Invalid"
+        # === "Session Token Invalid"
+        # This condition triggers automatic acquisition of a new session token
+        # and it occurs regularly during the normal course of a session so
+        # there's no need to alert or redirect.
         Log.debug(exception, '[ignore]')
-      when 114
-        # EBSCO::EDS::BadRequest
-        # "Retrieval Request AN must contain a valid value."
-        flash.now[:notice] = message
+
+      when 114, 137, 148, 150..152
+        # === E.g.: "Retrieval Request AN must contain a valid value."
+        # An error when already on an articles index page or show page for an
+        # action that wasn't expected to go to a different page.
         Log.warn(exception)
-      when 1102
-        flash[:notice] = message
-        Log.debug(exception, '[ignore]')
-        redirect_to articles_home_path
+        flash.now[:notice] = message
+
       else
-        flash[:notice] = message
         Log.error(exception)
+        flash[:notice] = message
         redirect_to articles_home_path
     end
+
   end
 
 end
