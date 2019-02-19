@@ -18,6 +18,30 @@ module EBSCO::EDS::ResultsExt
     Publisher
   ).freeze
 
+  # A number of potential search limiters are supplied by the EBSCO response
+  # but only "peer reviewed" is known to be valid for our EBSCO profile.
+  #
+  # This table documents that fact while allowing for the possibility that
+  # other limiter(s) may be determined to be useful in the future.
+  #
+  # @type [Hash{String=>Boolean}]
+  #
+  # @see self#solr_search_limiters
+  #
+  SEARCH_LIMITERS = {
+    FR:  false, # "References Available"
+    FT:  false, # "Full Text"
+    FT1: false, # "Available in Library Collection"
+    RV:  true,  # "Scholarly (Peer Reviewed) Journals"
+  }.stringify_keys.freeze
+
+  # The list of search limiters that will be honored by the application.
+  #
+  # @type [Array<String>]
+  #
+  ACTIVE_SEARCH_LIMITERS =
+    SEARCH_LIMITERS.map { |id, active| id if active }.compact.freeze
+
   # ===========================================================================
   # :section: EBSCO::EDS::Results overrides
   # ===========================================================================
@@ -90,8 +114,11 @@ module EBSCO::EDS::ResultsExt
     # Titleize facets?
     @titleize_facets = TITLEIZE_FACETS
     @titleize_facets_on =
-      %w(y yes true).include?(ENV['EDS_TITLEIZE_FACETS'].to_s.downcase) ||
+      if (env_value = ENV['EDS_TITLEIZE_FACETS']).present?
+        %w(y yes true).include?(env_value.to_s.downcase)
+      else
         eds_config[:titleize_facets]
+      end
 
     # Facet pagination properties.
     init_facet_pagination(@raw_options)
@@ -196,6 +223,23 @@ module EBSCO::EDS::ResultsExt
     res.merge!(research_starters:   research_starters)   if research_starters
     res.merge!(publication_matches: publication_matches) if publication_matches
     res.deep_stringify_keys!
+  end
+
+  # Translate limiters found in calls to Info endpoint into solr facet fields
+  # if they are turned on.
+  #
+  # This override only makes use of the ones enabled in self#SEARCH_LIMITERS.
+  #
+  # @return [Array<Hash>]
+  #
+  # This method overrides:
+  # @see EBSCO::EDS::Results#solr_search_limiters
+  #
+  def solr_search_limiters
+    return [] if stat_total_hits.zero? || @limiters.blank?
+    @limiters.flat_map { |item|
+      [item['Label'], ''] if ACTIVE_SEARCH_LIMITERS.include?(item['Id'])
+    }.compact
   end
 
   # Generate Solr facet values and counts, applying sort, prefix and offset.

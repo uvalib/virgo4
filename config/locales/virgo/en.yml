@@ -575,7 +575,7 @@ en:
       quick_view_images:                '[quick_view_images]'
       relevancy_score:                  '[relevancy_score]'
       result_id:                        '[result_id]'
-      search_limiters:                  'Search Limiter'
+      search_limiters:                  'Peer Review'
       series:                           'Series'
       source_title:                     'Journal'
       subject_topic:                    'Topic'
