@@ -27,15 +27,17 @@
 
   sf_label = t('blacklight.search.form.search_field.label')
   sf_value = h(params[:search_field])
-  sf_value = nil if sf_value && %w(advanced all_fields).include?(sf_value)
+  sf_value = nil if sf_value == 'advanced'
   sf_menu  = options_for_select(search_types, sf_value)
   sf_opt = {
     id:     'search_field',
     class:  'custom-select search_field',
-    prompt: 'Select type of search',
+    prompt: t('blacklight.search.form.search_field.prompt'),
     title:  t('blacklight.search.form.search_field.title',
               all_fields: t('blacklight.search_field.all_fields'))
   }
+
+  search_fields = active_search_fields.values
 
   q_label = t('blacklight.search.form.search.label')
   q_value = params[:q]
@@ -46,7 +48,8 @@
     placeholder: t('blacklight.search.form.search.placeholder'),
     data: {
       autocomplete_enabled: presenter.autocomplete_enabled?,
-      autocomplete_path:    suggest_index_path(lens)
+      autocomplete_path:    suggest_index_path(lens),
+      no_suggest:           search_fields.reject(&:autocomplete).map(&:key)
     }
   }
 

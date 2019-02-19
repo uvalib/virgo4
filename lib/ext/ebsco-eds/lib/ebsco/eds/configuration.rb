@@ -10,24 +10,11 @@ __loading_begin(__FILE__)
 #
 module EBSCO::EDS::ConfigurationExt
 
+  # Connection-related options maintained with the middleware.
+  require 'ext/faraday/eds_caching_middleware'
+  include Faraday::EdsCachingMiddlewareDefaults
+
   DEFAULT_CONFIG_FILE = 'eds.yml'
-
-  # Default expiration time.
-  DEFAULT_EXPIRATION = 30.minutes
-
-  # Lifetime of the auth token.
-  AUTH_TOKEN_EXPIRATION = 30.minutes
-
-  TMP_ROOT_DIR =
-    ENV['TMPDIR']&.sub(/^([^\/])/, "#{Rails.root}/\\1")&.freeze || Dir.tmpdir
-
-  # Temporary directory that will hold the Faraday cache directory for
-  # :file_store.
-  CACHE_ROOT_DIR =
-    ENV.fetch('CACHE_DIR', File.join(TMP_ROOT_DIR, 'cache')).freeze
-
-  # Faraday cache directory for :file_store.
-  FARADAY_CACHE_DIR = File.join(CACHE_ROOT_DIR, 'faraday', 'eds').freeze
 
   DEFAULT_CONFIG = {
     debug:                            false,
@@ -50,19 +37,20 @@ module EBSCO::EDS::ConfigurationExt
     citation_styles_formats:          'all',
     user_agent:                       'EBSCO EDS GEM v0.0.1',
     interface_id:                     'edsapi_ruby_gem',
-    log:                              'faraday.log',
+    log:                              DEFAULT_OPTIONS[:logger] || 'faraday.log',
     log_level:                        'INFO',
     max_attempts:                     3,
     max_results_per_page:             100,
     ebook_preferred_format:           'ebook-pdf',
     use_cache:                        true,
     eds_cache_dir:                    FARADAY_CACHE_DIR,
-    auth_cache_expires_in:            (AUTH_TOKEN_EXPIRATION - 5.minutes),
-    info_cache_expires_in:            1.day,
-    retrieve_cache_expires_in:        DEFAULT_EXPIRATION,
-    search_cache_expires_in:          DEFAULT_EXPIRATION,
-    export_format_cache_expires_in:   1.day,
-    citation_styles_cache_expires_in: 1.day,
+    cache_store:                      DEFAULT_OPTIONS[:store],
+    auth_cache_expires_in:            DEFAULT_OPTIONS[:auth_expire],
+    info_cache_expires_in:            DEFAULT_OPTIONS[:info_expire],
+    retrieve_cache_expires_in:        DEFAULT_OPTIONS[:retrieve_expire],
+    search_cache_expires_in:          DEFAULT_OPTIONS[:search_expire],
+    export_format_cache_expires_in:   DEFAULT_OPTIONS[:export_format_expire],
+    citation_styles_cache_expires_in: DEFAULT_OPTIONS[:citation_styles_expire],
     timeout:                          60,
     open_timeout:                     12,
     max_page_jumps:                   6,

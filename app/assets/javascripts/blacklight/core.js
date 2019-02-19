@@ -1,6 +1,7 @@
 // app/assets/javascripts/blacklight/core.js
 //
 // This code is essentially unchanged from the original Blacklight source.
+// @see https://github.com/projectblacklight/blacklight/blob/v7.0.1/app/javascript/blacklight/core.js
 
 Blacklight = function() {
     var buffer = new Array;

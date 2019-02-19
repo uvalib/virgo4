@@ -228,7 +228,15 @@ class Config::SolrFake < Config::Base
       # before falling-back on a generic keyword search.  It is indicated as
       # "default" only to ensure that other search types are properly labeled
       # in search constraints and history.
-      config.add_search_field 'all_fields', label: 'All Fields', default: true
+      config.add_search_field('all_fields') do |field|
+        field.default      = true
+        field.autocomplete = 'mySuggester'
+      end
+
+      # Initialize search field :autocomplete settings.
+      config.search_fields.each_pair do |key, field|
+        field.autocomplete = "#{key}Suggest" if field.autocomplete.nil?
+      end
 
       # =======================================================================
       # Sort fields
@@ -249,7 +257,8 @@ class Config::SolrFake < Config::Base
       # Search parameters
       # =======================================================================
 
-      # TODO: ???
+      search_builder_processors!(config)
+      autocomplete_suggesters!(config)
 
       # =======================================================================
       # Blacklight Advanced Search
@@ -281,6 +290,21 @@ class Config::SolrFake < Config::Base
     #
     def response_models!(config, added_values = nil)
       ::Config::Solr.response_models!(config, added_values)
+    end
+
+    # Settings for autocomplete suggesters.
+    #
+    # @param [Blacklight::Configuration] config
+    #
+    # @return [void]
+    #
+    # This method overrides:
+    # @see Config::Base::ClassMethods#autocomplete_suggesters!
+    #
+    def autocomplete_suggesters!(config)
+      config.autocomplete_path      = 'suggest'
+      config.autocomplete_suggester = 'suggest'
+      super(config, '%s_suggest')
     end
 
     # Set mappings of configuration key to repository field for both :index and

@@ -311,6 +311,7 @@ en:
         search_field:
           label:        'Search in'
           post_label:   'for'
+          prompt:       'Select type of search'
           title: >
             For best results, specify the type of search; use "%{all_fields}"
             to find all possible matches for your search terms.

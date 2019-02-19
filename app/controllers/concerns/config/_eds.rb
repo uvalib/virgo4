@@ -260,23 +260,40 @@ class Config::Eds < Config::Base
       # For supported keys in hash, see rdoc for Blacklight::SearchFields.
       #
       # @see Blacklight::Configuration::Files::ClassMethods#define_field_access
+      # @see EBSCO::EDS#SOLR_SEARCH_TO_EBSCO_FIELD_CODE
+      # @see EBSCO::EDS#OTHER_SOLR_SEARCH_TO_EBSCO_FIELD_CODE
       #
       # ==== Implementation Notes
       # "All Fields" is intentionally placed last.
+      #
+      # NOTE: Lack of a search field is not identical to 'all_fields'
+      #
+      # For EBSCO, a search without specifying a field code searches in:
+      # - author
+      # - subject
+      # - keywords (most documents in EBSCO databases do not have keywords)
+      # - title
+      # - source title (i.e., journal title)
+      # - abstract
+      # BUT NOT in full text, whereas a 'TX' search will search in all fields
+      # including full text.
+      #
+      # For now this is not presented as a search option.
 
-      config.add_search_field 'title'            # 'TI'
-      config.add_search_field 'author'           # 'AU'
-      config.add_search_field 'subject'          # 'SU'
-      config.add_search_field 'text'             # 'TX' # TODO: testing; remove?
-      config.add_search_field 'abstract'         # 'AB' # TODO: testing; remove?
-      config.add_search_field 'source'           # 'SO' # TODO: testing; remove?
-      config.add_search_field 'issn'             # 'IS' # TODO: testing; remove?
-      config.add_search_field 'isbn'             # 'IB' # TODO: testing; remove?
-      #config.add_search_field 'descriptor'      # 'DE' # TODO: testing; remove?
-      #config.add_search_field 'series'          # 'SE' # TODO: testing; remove?
-      #config.add_search_field 'subject_heading' # 'SH' # TODO: testing; remove?
-      #config.add_search_field 'keywords'        # 'KW' # TODO: testing; remove?
-      config.add_search_field 'all_fields', label: 'All Fields', default: true
+      config.add_search_field 'title'                           # 'TI'
+      config.add_search_field 'author'                          # 'AU'
+      config.add_search_field 'subject'                         # 'SU'
+      config.add_search_field 'abstract'                        # 'AB'
+      config.add_search_field 'source'                          # 'SO'
+      config.add_search_field 'issn',       autocomplete: false # 'IS'
+      config.add_search_field 'isbn',       autocomplete: false # 'IB'
+      # config.add_search_field 'basic',    autocomplete: ''
+      config.add_search_field 'all_fields', default:      true  # 'TX'
+
+      # Lookup search field labels and initialize :autocomplete.
+      config.search_fields.each_pair do |key, field|
+        field.autocomplete = key if field.autocomplete.nil?
+      end
 
       # =======================================================================
       # Sort fields
@@ -296,11 +313,8 @@ class Config::Eds < Config::Base
       # Force spell checking in all cases, no max results required.
       config.spell_max = 9999999999
 
-      # Configuration for suggester.
-      # TODO: Cope with different suggesters for different search fields...
-      config.autocomplete_enabled   = true
-      config.autocomplete_path      = 'suggest'
-      config.autocomplete_suggester = 'suggest' # TODO: TBD?
+      search_builder_processors!(config)
+      autocomplete_suggesters!(config)
 
       # =======================================================================
       # Blacklight Advanced Search
@@ -355,6 +369,21 @@ class Config::Eds < Config::Base
         )
       values = values.merge(added_values) if added_values.present?
       super(config, values)
+    end
+
+    # Settings for autocomplete suggesters.
+    #
+    # @param [Blacklight::Configuration] config
+    #
+    # @return [void]
+    #
+    # This method overrides:
+    # @see Config::Base::ClassMethods#autocomplete_suggesters!
+    #
+    def autocomplete_suggesters!(config)
+      config.autocomplete_path      = 'suggest'
+      config.autocomplete_suggester = 'suggest' # TODO: TBD?
+      super(config)
     end
 
     # Set mappings of configuration key to repository field for both :index and

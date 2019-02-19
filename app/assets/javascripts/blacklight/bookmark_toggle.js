@@ -1,6 +1,7 @@
 // app/assets/javascripts/blacklight/bookmark_toggle.js
 //
 // This code is essentially unchanged from the original Blacklight source.
+// @see https://github.com/projectblacklight/blacklight/blob/v7.0.1/app/javascript/blacklight/bookmark_toggle.js
 
 (function($) {
     // Change form submit toggle to checkbox.

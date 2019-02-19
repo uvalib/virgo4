@@ -3,6 +3,9 @@
 // This code has been modified from the original Blacklight source in order to
 // support switching the suggester based on the currently selected search type.
 //
+// Compare with:
+// @see https://github.com/projectblacklight/blacklight/blob/v7.0.1/app/javascript/blacklight/autocomplete.js
+//
 // Twitter Typeahead for autocomplete
 //= require twitter/typeahead
 //= require shared/assets
@@ -61,6 +64,7 @@ Blacklight.onLoad(function() {
 
         var $this         = $(this);
         var suggest_url   = $this.data().autocompletePath;
+        var no_suggest    = $this.data().noSuggest || [];
         var $search_field = $('#search_field');
         var previous_search_type;
 
@@ -70,7 +74,8 @@ Blacklight.onLoad(function() {
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             remote: {
-                url:     suggest_url,
+                url: suggest_url,
+
                 prepare: function(query, settings) {
 
                     // Settings contains {url: suggest_url, method: 'get',
@@ -78,31 +83,47 @@ Blacklight.onLoad(function() {
                     // with the given query.
                     var new_settings = $.extend({}, settings);
 
-                    // Add the query to the base URL.
-                    var url = settings.url;
-                    url += (url.indexOf('?') === -1) ? '?' : '&';
-                    url += 'q=' + query;
+                    // Get the search type that has been selected on the menu.
+                    var search_type = searchType();
 
-                    // Determine which search type has been selected on the
-                    // menu. If the type has changed, clear the cache so that
-                    // the appropriate set of information is searched rather
-                    // than accepting cached values that probably are not
-                    // appropriate.  NOTE: Is there a way to save and restore
-                    // the cache? If so, the cache could be saved when
-                    // switching to a new search type and then restored when
-                    // that search type is selected again.
-                    var search_type = $search_field.val();
-                    if (search_type !== previous_search_type) {
-                        terms.clear();
-                        previous_search_type = search_type;
-                    }
-                    if (search_type) {
-                        url += '&search_field=' + search_type;
-                    }
+                    if (noAutosuggest(search_type)) {
 
-                    // Return with the finalized search URL.
-                    new_settings.url = url;
+                        // If this is a search type that should not support
+                        // typeahead, pass a flag to the transport function.
+                        new_settings.cancelled = true;
+
+                    } else {
+
+                        // If the search type has changed, clear the cache so
+                        // that the appropriate set of information is searched
+                        // rather than accepting cached values that probably
+                        // are not appropriate.
+                        if (search_type !== previous_search_type) {
+                            terms.clear();
+                            previous_search_type = search_type;
+                        }
+
+                        // NOTE: Is there a way to save and restore the cache?
+                        // If so, the cache could be saved when switching to a
+                        // new search type and then restored when that search
+                        // type is selected again.
+
+                        // Add the query and search type to the base URL.
+                        var url = settings.url;
+                        url += (url.indexOf('?') === -1) ? '?' : '&';
+                        url += 'q=' + query;
+                        if (search_type) {
+                            url += '&search_field=' + search_type;
+                        }
+                        new_settings.url = url;
+                    }
                     return new_settings;
+                },
+
+                transport: function(opts, onSuccess, onError) {
+                    if (!opts.cancelled) {
+                        $.ajax(opts).done(onSuccess).fail(onError);
+                    }
                 }
             }
         });
@@ -115,141 +136,178 @@ Blacklight.onLoad(function() {
             limit:      SUGGESTION_COUNT,
             display:    function(response) { return displayTerm(response); },
             templates: {
-                suggestion: ttEntry, // function reference not function call
-                header:     ttHeader,       // TODO: comment out, probably
-                footer:     ttFooter(),     // TODO: comment out, probably
-                notFound:   ttNotFound(),   // TODO: comment out?
-                pending:    ttPending(),    // TODO: comment out?
+                suggestion: ttEntry,
+                header:     ttHeader,   // TODO: keep?
+                footer:     ttFooter,   // TODO: keep?
+                notFound:   ttNotFound,
+                pending:    ttPending
             }
         });
 
-    });
+        // ====================================================================
+        // Function definitions
+        // ====================================================================
 
-    // ========================================================================
-    // Function definitions
-    // ========================================================================
+        /**
+         * The currently selected search type.
+         *
+         * @return {string}
+         */
+        function searchType() {
+            return $search_field.val();
+        }
 
-    /**
-     * Process a suggestion entry to remove highlighting that Solr may add.
-     *
-     * This is necessary to eliminate the <b></b> tags from the string used to
-     * load into the search input element is updated from the selected
-     * suggestion.
-     *
-     * @param {object} data
-     *
-     * @return {string}
-     */
-    function displayTerm(data) {
-        data = data || {};
-        return data.term.toString().replace(/<\/?b>/g, '');
-    }
+        /**
+         * Indicate whether autosuggest should happen for the currently
+         * selected search type.
+         *
+         * @param {string} [search_type]    Default: value of $search_field.
+         *
+         * @return {boolean}
+         */
+        function noAutosuggest(search_type) {
+            var type = search_type || searchType();
+            return (no_suggest.indexOf(type) >= 0);
+        }
 
-    /**
-     * Render a suggestions menu entry.
-     *
-     * Note that for Solr results, this does not remove the <b></b> tags, so
-     * suggestion menu entries will have hit highlighting of the form
-     *
-     *  <b><strong class="tt-highlight">INPUT_WORD</strong></b>
-     *
-     * where INPUT_WORD is the portion of the (single) search term that the
-     * user has entered (so far).  To avoid "over-bolding" use CSS styling:
-     *
-     *  .tt-suggestion b strong { font-weight: bold }
-     *
-     * since both <b> and <strong> have "font-weight: bolder;" normally.
-     *
-     * @param {object} data
-     *
-     * @return {string}
-     */
-    function ttEntry(data) {
-        return '<div>' + data.term + '</div>';
-    }
+        /**
+         * Process a suggestion entry to remove highlighting that Solr may add.
+         *
+         * This is necessary to sanitize the string (including eliminating the
+         * <b></b> inserted by Solr) which is used to update the search input
+         * element with the selected suggestion.
+         *
+         * @param {object} data
+         *
+         * @return {string}
+         */
+        function displayTerm(data) {
+            var terms = ttEntry(data);
+            return $($.parseHTML(terms)).text();
+        }
 
-    /**
-     * Display an informational element at the top of the suggestions menu.
-     *
-     * @param {string} [content]
-     *
-     * @return {string}
-     */
-    function ttHeader(content) {
-        if (typeof content !== 'string') {
-            var search_type = $('#search_field').val();
-            if (search_type) {
+        /**
+         * Render a suggestions menu entry.
+         *
+         * Note that for Solr results, this does not remove the <b></b> tags,
+         * so suggestion menu entries will have hit highlighting of the form
+         *
+         *  <b><strong class="tt-highlight">INPUT_WORD</strong></b>
+         *
+         * where INPUT_WORD is the portion of the (single) search term that the
+         * user has entered (so far).  To avoid "over-bolding" use CSS styling:
+         *
+         *  .tt-suggestion b strong { font-weight: bold }
+         *
+         * since both <b> and <strong> have "font-weight: bolder;" normally.
+         *
+         * @param {object} data
+         *
+         * @return {string}
+         */
+        function ttEntry(data) {
+            return '<div>' + (data || {}).term + '</div>';
+        }
+
+        /**
+         * Display an informational element at the top of the suggestions menu.
+         *
+         * @param {object|string} [query]
+         *
+         * @return {string}
+         */
+        function ttHeader(query) {
+            var search_type;
+            var content;
+            if (typeof query === 'string') {
+                content = query;
+            } else if (search_type = searchType()) {
                 content = 'Suggested ' + search_type + ' searches';
             } else {
                 content = 'Suggested search terms';
             }
+            content = '&mdash;' + content + '&mdash;';
+            return ttInfo(content, 'tt-header');
         }
-        content = '&mdash;' + content + '&mdash;';
-        return ttInfo(content, 'tt-header');
-    }
 
-    /**
-     * Display an informational element at the bottom of the suggestions menu.
-     *
-     * @param {string} [content]
-     *
-     * @return {string}
-     */
-    function ttFooter(content) {
-        if (typeof content !== 'string') {
-            content = 'END';
+        /**
+         * Display an informational element at the bottom of the suggestions
+         * menu.
+         *
+         * @param {object|string} [query]
+         *
+         * @return {string}
+         */
+        function ttFooter(query) {
+            var content;
+            if (typeof query === 'string') {
+                content = query;
+            } else {
+                content = 'END';
+            }
+            content = '&mdash;' + content + '&mdash;';
+            return ttInfo(content, 'tt-footer');
         }
-        content = '&mdash;' + content + '&mdash;';
-        return ttInfo(content, 'tt-footer');
-    }
 
-    /**
-     * Display an informational element within the suggestions menu if no
-     * suggestions were retrieved from the source.
-     *
-     * @param {string} [content]
-     *
-     * @return {string}
-     */
-    function ttNotFound(content) {
-        if (typeof content !== 'string') {
-            content = 'No suggestions';
+        /**
+         * Display an informational element within the suggestions menu if no
+         * suggestions were retrieved from the source.
+         *
+         * @param {object|string} [query]
+         *
+         * @return {string}
+         */
+        function ttNotFound(query) {
+            var content;
+            if (typeof query === 'string') {
+                content = query;
+            } else {
+                content = 'No suggestions';
+            }
+            return ttInfo(content, 'tt-notFound', true);
         }
-        return ttInfo(content, 'tt-notFound', true);
-    }
 
-    /**
-     * Display an informational element within the suggestions menu while
-     * the source is being queried for suggestions.
-     *
-     * @param {string|object} [content]
-     *
-     * @return {string}
-     */
-    function ttPending(content) {
-        if (typeof content !== 'string') {
-            var src = LOADING_IMAGE;
-            var alt = 'Looking...';
-            content = '<img src="' + src + '" alt="' + alt + '">';
+        /**
+         * Display an informational element within the suggestions menu while
+         * the source is being queried for suggestions.
+         *
+         * @param {object|string} [query]
+         *
+         * @return {string}
+         */
+        function ttPending(query) {
+            var content;
+            if (noAutosuggest()) {
+                content = '';
+            } else if (typeof query === 'string') {
+                content = query;
+            } else {
+                var src = LOADING_IMAGE;
+                var alt = 'Looking...';
+                content = '<img src="' + src + '" alt="' + alt + '">';
+                content = ttInfo(content, 'tt-pending', true);
+            }
+            return content;
         }
-        return ttInfo(content, 'tt-pending', true);
-    }
 
-    /**
-     * Display an informational element within the suggestions menu.
-     *
-     * @param {string}  [content]
-     * @param {string}  [css_class]
-     * @param {boolean} [always_show]   If *true*, make visible even if
-     *                                      INFO_SR_ONLY is *true*.
-     *
-     * @return {string}
-     */
-    function ttInfo(content, css_class, always_show) {
-        var classes = ['tt-info'];
-        if (css_class)                    { classes.push(css_class); }
-        if (INFO_SR_ONLY && !always_show) { classes.push('sr-only'); }
-        return '<div class="' + classes.join(' ') + '">' + content + '</div>';
-    }
+        /**
+         * Display an informational element within the suggestions menu.
+         *
+         * @param {string}  [content]
+         * @param {string}  [css_class]
+         * @param {boolean} [always_show]   If *true*, make visible even if
+         *                                      INFO_SR_ONLY is *true*.
+         *
+         * @return {string}
+         */
+        function ttInfo(content, css_class, always_show) {
+            var classes = ['tt-info'];
+            if (css_class)                    { classes.push(css_class); }
+            if (INFO_SR_ONLY && !always_show) { classes.push('sr-only'); }
+            var css = classes.join(' ');
+            return '<div class="' + css + '">' + content + '</div>';
+        }
+
+    });
 
 });

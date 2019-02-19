@@ -1,6 +1,7 @@
 // app/assets/javascripts/blacklight/facet_load.js
 //
 // This code is essentially unchanged from the original Blacklight source.
+// @see https://github.com/projectblacklight/blacklight/blob/v7.0.1/app/javascript/blacklight/facet_load.js
 
 /*global Blacklight */
 

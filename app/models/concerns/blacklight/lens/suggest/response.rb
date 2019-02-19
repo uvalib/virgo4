@@ -17,7 +17,33 @@ module Blacklight::Lens
     #
     class Response < Blacklight::Suggest::Response
 
-      # TODO: ???
+      # =======================================================================
+      # :section: Blacklight::Suggest::Response overrides
+      # =======================================================================
+
+      public
+
+      # Create a suggest response.
+      #
+      # @param [RSolr::HashWithResponse, nil] response
+      # @param [Hash, nil]                    request_params
+      # @param [String, nil]                  suggest_path
+      # @param [String, nil]                  suggester_name
+      #
+      # This method overrides:
+      # @see Blacklight::Suggest::Response#initialize
+      #
+      def initialize(
+        response       = {},
+        request_params = {},
+        suggest_path   = '',
+        suggester_name = ''
+      )
+        @response       = response
+        @request_params = request_params
+        @suggest_path   = suggest_path
+        @suggester_name = suggester_name
+      end
 
     end
 

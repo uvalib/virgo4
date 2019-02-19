@@ -9,6 +9,27 @@ require 'faraday'
 
 module Faraday
 
+  # Default values for Solr middleware.
+  #
+  module SolrCachingMiddlewareDefaults
+
+    include CachingMiddlewareDefaults
+
+    # Default options.
+    #
+    DEFAULT_OPTIONS =
+      CachingMiddlewareDefaults::DEFAULT_OPTIONS.merge(
+        namespace:       'solr',
+        expires_in:      DEFAULT_EXPIRATION,
+        cacheable_paths: %w(
+          /get?
+          /select?
+          /suggest?
+        )
+      ).deep_freeze
+
+  end
+
   # Caching for items and search results from Solr.
   #
   # == Implementation Notes
@@ -20,21 +41,7 @@ module Faraday
   class SolrCachingMiddleware < Faraday::Middleware
 
     include CachingMiddlewareConcern
-
-    # Default expiration time.
-    DEFAULT_EXPIRATION = 1.hour
-
-    # Default options.
-    #
-    DEFAULT_OPTIONS = {
-      namespace:       'solr',
-      expires_in:      DEFAULT_EXPIRATION,
-      cacheable_paths: %w(
-        /get?
-        /select?
-        /suggest?
-      )
-    }.freeze
+    include SolrCachingMiddlewareDefaults
 
     # =========================================================================
     # :section:

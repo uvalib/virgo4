@@ -10,16 +10,9 @@ require 'faraday'
 
 module Faraday
 
-  # A common implementation for locally-defined caching middleware.
+  # Common middleware default values.
   #
-  # == Implementation Notes
-  # This is patterned after the EdsCachingMiddleware class provided by the
-  # ebsco-eds gem, but with 'cache_response'/'cached_response' replaced with
-  # 'write_cache'/'read_cache'.
-  #
-  module CachingMiddlewareConcern
-
-    extend ActiveSupport::Concern
+  module CachingMiddlewareDefaults
 
     # Base temporary directory.
     TMP_ROOT_DIR =
@@ -43,6 +36,21 @@ module Faraday
       store:  :redis_cache_store,
       logger: Rails.logger,
     }.freeze
+
+  end
+
+  # A common implementation for locally-defined caching middleware.
+  #
+  # == Implementation Notes
+  # This is patterned after the EdsCachingMiddleware class provided by the
+  # ebsco-eds gem, but with 'cache_response'/'cached_response' replaced with
+  # 'write_cache'/'read_cache'.
+  #
+  module CachingMiddlewareConcern
+
+    extend ActiveSupport::Concern
+
+    include CachingMiddlewareDefaults
 
     # =========================================================================
     # :section:
@@ -91,6 +99,7 @@ module Faraday
       @store           = opt[:store]
       @store_options   = opt[:store_options]
       @cacheable_paths = Array.wrap(opt[:cacheable_paths]).presence
+      initialize_logger
       initialize_store
     end
 
@@ -307,9 +316,33 @@ module Faraday
       log("cache #{status} #{cache_key}#{note}")
     end
 
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    private
+
+    # Run from #initialize to set up the logger.
+    #
+    # @return [void]
+    #
+    def initialize_logger
+      return if @logger.blank?
+      log = @logger
+      log = log.to_s if log.is_a?(Pathname)
+      if log.is_a?(String)
+        log = File.join(TMP_ROOT_DIR, log) unless log.start_with?('/')
+        @logger =
+          Logger.new(log).tap { |l| l.level = Logger.const_get(@log_level) }
+      end
+      unless @logger.is_a?(Logger)
+        raise "expected String, got #{log.class} #{log.inspect}"
+      end
+    end
+
     # Run from #initialize to set up the cache store.
     #
-    # @return [ActiveSupport::Cache::Store]
+    # @return [void]
     #
     # This method replaces:
     # Faraday::EdsCachingMiddleware#initialize_store

@@ -569,7 +569,8 @@ class Config::Solr < Config::Base
         }
       end
 
-=begin # TODO: No "journal_title_qf/journal_title_pf" in select_edismax.xml
+=begin
+      # NOTE: No "journal_title_qf/journal_title_pf" in select_edismax.xml
       config.add_search_field('journal') do |field|
         field.solr_parameters = {
           'spellcheck.dictionary': 'journal',
@@ -577,69 +578,66 @@ class Config::Solr < Config::Base
           pf: '${journal_title_pf}'
         }
       end
-=end
 
-=begin # TODO: No "keyword_qf/keyword_pf" in select_edismax.xml
-      config.add_search_field('keyword') do |field| # TODO: testing - remove?
+      # NOTE: No "keyword_qf/keyword_pf" in select_edismax.xml
+      config.add_search_field('keyword') do |field|
         field.solr_parameters = {
-          #'spellcheck.dictionary': 'keyword', # TODO: ?
+          # 'spellcheck.dictionary': 'keyword',
           qf: '${keyword_qf}',
           pf: '${keyword_pf}',
         }
       end
-=end
 
-=begin # TODO: No "call_number_qf/call_number_pf" in select_edismax.xml
+      # NOTE: No "call_number_qf/call_number_pf" in select_edismax.xml
       config.add_search_field('call_number') do |field|
         field.solr_parameters = {
           qf: '${call_number_qf}',
           pf: '${call_number_pf}'
         }
       end
-=end
 
-=begin # TODO: No "published_qf/published_pf" in select_edismax.xml
+      # NOTE: No "published_qf/published_pf" in select_edismax.xml
       config.add_search_field('published') do |field|
         field.solr_parameters = {
-          #'spellcheck.dictionary': 'published', # TODO: ?
+          # 'spellcheck.dictionary': 'published',
           qf: '${published_qf}',
           pf: '${published_pf}'
         }
       end
-=end
 
-=begin # TODO: ???
+      # NOTE: ???
       config.add_search_field('publication_date') do |field|
-        field.range      = 'true'
-        field.solr_field = 'year_multisort_i'
+        field.range        = 'true'
+        field.solr_field   = 'year_multisort_i'
+        field.autocomplete = false
       end
-=end
 
-=begin # TODO: No "issn_qf/issn_pf" in select_edismax.xml
+      # NOTE: No "issn_qf/issn_pf" in select_edismax.xml
       config.add_search_field('issn') do |field|
         field.solr_parameters = {
           qf: '${issn_qf}',
           pf: '${issn_pf}'
         }
+        field.autocomplete = false
       end
-=end
 
-=begin # TODO: No "isbn_qf/isbn_pf" in select_edismax.xml
+      # NOTE: No "isbn_qf/isbn_pf" in select_edismax.xml
       config.add_search_field('isbn') do |field|
         field.solr_parameters = {
           qf: '${isbn_qf}',
           pf: '${isbn_pf}'
         }
+        field.autocomplete = false
       end
 =end
 
-      # TODO: No "isbn_issn_pf" in select_edismax.xml (does that matter?)
+      # NOTE: No "isbn_issn_pf" in select_edismax.xml (does that matter?)
       config.add_search_field('isbn_issn') do |field|
-        field.label = 'ISBN/ISSN'
         field.solr_parameters = {
           qf: '${isbn_issn_qf}',
           pf: '${isbn_issn_pf}'
         }
+        field.autocomplete = false
       end
 
       # "All Fields" search selection is intentionally placed last so that the
@@ -647,7 +645,15 @@ class Config::Solr < Config::Base
       # before falling-back on a generic keyword search.  It is indicated as
       # "default" only to ensure that other search types are properly labeled
       # in search constraints and history.
-      config.add_search_field 'all_fields', label: 'All Fields', default: true
+      config.add_search_field('all_fields') do |field|
+        field.default      = true
+        field.autocomplete = 'defaultSuggest'
+      end
+
+      # Initialize search field :autocomplete settings.
+      config.search_fields.each_pair do |key, field|
+        field.autocomplete = "#{key}Suggest" if field.autocomplete.nil?
+      end
 
       # =======================================================================
       # Sort fields
@@ -672,14 +678,7 @@ class Config::Solr < Config::Base
       # =======================================================================
 
       search_builder_processors!(config)
-
-      # Configuration for suggester.
-      # TODO: Cope with different suggesters for different search fields...
-      config.autocomplete_enabled   = true
-      config.autocomplete_path      = 'suggest'
-      config.autocomplete_suggester = 'titleSuggest'
-      #config.autocomplete_suggester = 'authorSuggester'
-      #config.autocomplete_suggester = 'subjectSuggester'
+      autocomplete_suggesters!(config)
 
       # =======================================================================
       # Blacklight Advanced Search
@@ -735,6 +734,21 @@ class Config::Solr < Config::Base
     def search_builder_processors!(config, *values)
       values += %i(public_only discoverable_only)
       super(config, values)
+    end
+
+    # Settings for autocomplete suggesters.
+    #
+    # @param [Blacklight::Configuration] config
+    #
+    # @return [void]
+    #
+    # This method overrides:
+    # @see Config::Base::ClassMethods#autocomplete_suggesters!
+    #
+    def autocomplete_suggesters!(config)
+      config.autocomplete_path      = 'suggest'
+      config.autocomplete_suggester = 'defaultSuggest'
+      super(config, '%sSuggest')
     end
 
     # Set mappings of configuration key to repository field for both :index and

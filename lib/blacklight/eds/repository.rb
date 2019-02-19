@@ -22,25 +22,6 @@ module Blacklight::Eds
     #
     SUGGEST_PARAMS = %i(q guest search_field session_token eds_session_token)
 
-    # EDS fields to use for suggestions based on the :search_field request
-    # parameter.
-    #
-    # @type [Hash{String=>Array<String>}]
-    #
-    # @see self#suggestions
-    # @see Blacklight::Eds::Suggest::Response#SUGGEST_FIELDS
-    #
-    SUGGEST_FIELDS = Blacklight::Eds::Suggest::Response::SUGGEST_FIELDS
-
-    # EDS fields to use for suggestions.
-    #
-    # @type [Array<String>]
-    #
-    # @see self#suggestions
-    # @see Blacklight::Eds::Suggest::Response#SUGGEST_PARAMETERS
-    #
-    SUGGEST_PARAMETERS = Blacklight::Eds::Suggest::Response::SUGGEST_PARAMETERS
-
     # The number of suggestions to request for autosuggest.
     #
     # @type [Numeric]
@@ -49,6 +30,18 @@ module Blacklight::Eds
     # @see Blacklight::Eds::Suggest::Response#SUGGESTION_COUNT
     #
     SUGGESTION_COUNT = Blacklight::Eds::Suggest::Response::SUGGESTION_COUNT
+
+    # The fallback value for `blacklight_config.autocomplete_path`.
+    #
+    # @type [String]
+    #
+    DEF_AUTOCOMPLETE_PATH = 'suggest'
+
+    # The fallback value for `blacklight_config.autocomplete_suggester`.
+    #
+    # @type [String]
+    #
+    DEF_AUTOCOMPLETE_SUGGESTER = 'suggest'
 
     # =========================================================================
     # :section: Blacklight::AbstractRepository overrides
@@ -126,29 +119,24 @@ module Blacklight::Eds
     #
     # @param [Hash] req_params
     #
-    # @return [Blacklight::Suggest::Response]
+    # @return [Blacklight::Eds::Suggest::Response]
     #
     # Compare with:
     # @see Blacklight::Solr::Repository#suggestions
     #
     def suggestions(req_params)
-      url_params  = req_params.slice(*SUGGEST_PARAMS)
-      suggester   = suggester_name(url_params)
-      search_type = url_params.delete(:search_field).to_s
-      if search_type.present? && !%w(advanced all_fields).include?(search_type)
-        fields = SUGGEST_FIELDS[search_type].presence || SUGGEST_PARAMETERS.dup
-        url_params[:fl] = Array.wrap(fields).unshift('score').join(',')
-      end
-      token = url_params.delete(:eds_session_token)
+      url_params = req_params.slice(*SUGGEST_PARAMS)
+      suggester  = suggester_name(url_params)
+      token      = url_params.delete(:eds_session_token)
       url_params[:session_token] = token if token.present?
-      url_params[:facet] = 'false'
-      url_params[:rows]  = SUGGESTION_COUNT
+      url_params[:facet]         = 'false'
+      url_params[:rows]          = SUGGESTION_COUNT
 
       result = search(url_params, debug: false)
 
       Blacklight::Eds::Suggest::Response.new(
         result,
-        url_params.merge(search_field: suggester),
+        url_params,
         suggest_handler_path,
         suggester
       )
@@ -214,18 +202,30 @@ module Blacklight::Eds
 
     private
 
-    # suggester_name
+    # The EBSCO EDS URL path for autosuggest results.
+    #
+    # @return [String]
+    #
+    # This method overrides:
+    # @see Blacklight::Lens::Repository#suggest_handler_path
+    #
+    def suggest_handler_path
+      blacklight_config.autocomplete_path || DEF_AUTOCOMPLETE_PATH
+    end
+
+    # The EBSCO EDS autosuggest handler modified by the presence of
+    # :search_field in the supplied parameters.
     #
     # @param [SearchBuilder, Hash, nil] url_params
     #
     # @return [String]
     #
-    # Compare with:
-    # @see Blacklight::Solr::Repository#suggester_name
+    # This method overrides:
+    # @see Blacklight::Lens::Repository#suggester_name
     #
     def suggester_name(url_params = nil)
-      url_params ||= {}
-      url_params[:search_field].presence || super
+      blacklight_config.autocomplete_suggester ||= DEF_AUTOCOMPLETE_SUGGESTER
+      super
     end
 
     # =========================================================================
@@ -247,33 +247,6 @@ module Blacklight::Eds
     def fulltext_url(id, type, _req_params = nil, eds_params = nil)
       record = eds_get_record(id, eds_params)
       record.fulltext_link(type)[:url]
-    end
-
-    # make_eds_response
-    #
-    # @param [Hash] data
-    # @param [Hash] params
-    #
-    # @return [Blacklight::Eds::Response]
-    #
-    def make_eds_response(data, params = nil)
-      docs = eds_documents(data)
-      params ||= {}
-      options = { documents: docs, blacklight_config: blacklight_config }
-      blacklight_config.response_model.new(data, params, options)
-    end
-
-    # Get a records from EDS.
-    #
-    # @param [String] id
-    # @param [Hash]   eds_params
-    #
-    # @return [EBSCO::EDS::Record]
-    #
-    def eds_get_record(id, eds_params = nil)
-      dbid, an = extract_dbid_an(id)
-      eds = eds_session('bl-repo-find', eds_params)
-      eds.retrieve(dbid: dbid, an: an)
     end
 
     # Construct EDS Session.
@@ -320,12 +293,6 @@ module Blacklight::Eds
       EBSCO::EDS::Session.new(eds_params)
     end
 
-    # =========================================================================
-    # :section:
-    # =========================================================================
-
-    protected
-
     # Analyze an identifier into database ID and accession number to be used
     # to query EBSCO EDS.
     #
@@ -336,6 +303,42 @@ module Blacklight::Eds
     def extract_dbid_an(id)
       dbid, an = id.split('__')
       [dbid, an.to_s.tr('_', '.')]
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    protected
+
+    # Get a record from EBSCO EDS.
+    #
+    # @param [String] id
+    # @param [Hash]   eds_params
+    #
+    # @return [EBSCO::EDS::Record]
+    #
+    def eds_get_record(id, eds_params = nil)
+      dbid, an = extract_dbid_an(id)
+      eds = eds_session('bl-repo-find', eds_params)
+      eds.retrieve(dbid: dbid, an: an)
+    end
+
+    # Create an EBSCO EDS response object.
+    #
+    # @param [Hash] data
+    # @param [Hash] params
+    #
+    # @return [Blacklight::Eds::Response]
+    #
+    # Compare with:
+    # @see Blacklight::Solr::RepositoryExt#make_solr_response
+    #
+    def make_eds_response(data, params = nil)
+      docs = eds_documents(data)
+      params ||= {}
+      options = { documents: docs, blacklight_config: blacklight_config }
+      blacklight_config.response_model.new(data, params, options)
     end
 
     # Extract the list of documents from EDS response data.

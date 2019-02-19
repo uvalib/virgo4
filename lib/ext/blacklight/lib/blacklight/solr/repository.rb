@@ -67,8 +67,17 @@ module Blacklight::Solr::RepositoryExt
   #
   SUGGESTION_COUNT = 7
 
-  DEF_AUTOCOMPLETE_PATH      = 'suggest'
-  DEF_AUTOCOMPLETE_SUGGESTER = 'titleSuggester' # TODO: 'all_fieldsSuggester'?
+  # The fallback value for `blacklight_config.autocomplete_path`.
+  #
+  # @type [String]
+  #
+  DEF_AUTOCOMPLETE_PATH = 'suggest'
+
+  # The fallback value for `blacklight_config.autocomplete_suggester`.
+  #
+  # @type [String]
+  #
+  DEF_AUTOCOMPLETE_SUGGESTER = 'defaultSuggest'
 
   # ===========================================================================
   # :section: Blacklight::Solr::Repository overrides
@@ -126,23 +135,27 @@ module Blacklight::Solr::RepositoryExt
 
   # Query Solr for suggested matches for the given search terms.
   #
+  # If there is no valid suggester then an empty response is returned.
+  #
   # @param [SearchBuilder, Hash, nil] url_params
   #
-  # @return [Blacklight::Suggest::Response]
+  # @return [Blacklight::Solr::Suggest::Response]
   #
   # This method overrides:
   # @see Blacklight::Solr::Repository#suggestions
   #
   def suggestions(url_params)
-    suggester = suggester_name(url_params)
-    solr_params =
-      Blacklight::Solr::Request.new(
-        suggest:              true,
-        'suggest.q':          url_params[:q],
-        'suggest.count':      SUGGESTION_COUNT,
-        'suggest.dictionary': suggester
-      )
-    send_and_receive(suggest_handler_path, solr_params, suggester)
+    if (suggester = suggester_name(url_params)).present?
+      solr_params =
+        Blacklight::Solr::Request.new(
+          'suggest.q':          url_params[:q],
+          'suggest.count':      SUGGESTION_COUNT,
+          'suggest.dictionary': suggester
+        )
+      send_and_receive(suggest_handler_path, solr_params, suggester: suggester)
+    else
+      Blacklight::Solr::Suggest::Response.new
+    end
   end
 
   # Execute a Solr query.
@@ -151,7 +164,7 @@ module Blacklight::Solr::RepositoryExt
   #   Execute a solr query at the given path with the parameters
   #   @param [String] path          Default: `blacklight_config.solr_path`.
   #   @param [Blacklight::Solr::Request, Hash]   solr_params
-  #   @param [String, nil]                       suggester
+  #   @param [Hash, nil]                         other_params
   #
   # @overload send_and_receive(solr_params)
   #   @param [Blacklight::Solr::Request, Hash]   solr_params
@@ -163,36 +176,14 @@ module Blacklight::Solr::RepositoryExt
   # This method overrides:
   # @see Blacklight::Solr::Repository#send_and_receive
   #
-  def send_and_receive(path, solr_params = nil, suggester = nil)
-    benchmark('Solr fetch', level: :debug) do
-
-      # Send to Solr.
-      cfg  = blacklight_config
-      http = cfg.http_method
-      solr_params ||= Blacklight::Solr::Request.new
-      rsolr_response = solr_send_and_receive(http, path, solr_params)
-
-      # Create a response object.
-      if suggester
-        Blacklight::Solr::Suggest::Response.new(
-          rsolr_response,
-          solr_params,
-          path,
-          suggester
-        )
-      else
-        cfg.response_model.new(
-          rsolr_response,
-          solr_params,
-          document_model:    cfg.document_model,
-          blacklight_config: cfg
-        )
-      end
-        .tap do |result|
-          Log.debug { "Solr response: #{result.inspect}" } if VERBOSE_LOGGING
-        end
-
-    end
+  def send_and_receive(path, solr_params = nil, other_params = nil)
+    other_params = { path: path }.merge(other_params || {})
+    benchmark('Solr fetch', level: :debug) {
+      rsolr_response = solr_send_and_receive(path, solr_params)
+      make_solr_response(rsolr_response, solr_params, other_params)
+    }.tap { |result|
+      Log.debug { "Solr response: #{result.inspect}" } if VERBOSE_LOGGING
+    }
 
   rescue Errno::ECONNREFUSED => e
     msg = +'Unable to connect to Solr instance using ' << connection.inspect
@@ -210,7 +201,7 @@ module Blacklight::Solr::RepositoryExt
 
   private
 
-  # suggest_handler_path
+  # The Solr URL path for autosuggest results.
   #
   # @return [String]
   #
@@ -221,24 +212,55 @@ module Blacklight::Solr::RepositoryExt
     blacklight_config.autocomplete_path || DEF_AUTOCOMPLETE_PATH
   end
 
-  # suggester_name
+  # The Solr autosuggest handler modified by the presence of :search_field in
+  # the supplied parameters.
   #
   # @param [SearchBuilder, Hash, nil] url_params
   #
   # @return [String]
+  # @return [nil]                     If autosuggest should not be performed.
   #
   # This method overrides:
   # @see Blacklight::Solr::Repository#suggester_name
   #
   def suggester_name(url_params = nil)
-    url_params ||= {}
-    search_type = url_params[:search_field]
+    cfg = blacklight_config
+    default      = cfg.autocomplete_suggester  || DEF_AUTOCOMPLETE_SUGGESTER
+    suggester    = cfg.autocomplete_suggest    || {}
+    no_suggester = cfg.autocomplete_no_suggest || {}
+    search_type  = (url_params && url_params[:search_field]).to_s
     result =
-      ("#{search_type}Suggester" if search_type.present?) ||
-        blacklight_config.autocomplete_suggester ||
-        DEF_AUTOCOMPLETE_SUGGESTER
-    result = 'titleSuggest' if result == 'titleSuggester' # TODO: fix in solrconfig.xml
-    result
+      case search_type
+        when '', 'all_fields' then default
+        else                       make_suggester_name(search_type)
+      end
+    if no_suggester.include?(result)
+      nil
+    elsif !suggester.include?(result)
+      logger.warn("invalid suggester #{result.inspect}")
+      default
+    else
+      result
+    end
+  end
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  private
+
+  # Map a search type to its Solr suggester.
+  #
+  # @param [String] search_type
+  #
+  # @return [String]
+  #
+  # Compare with:
+  # @see Blacklight::Lens::Repository#make_suggester_name
+  #
+  def make_suggester_name(search_type)
+    "#{search_type}Suggest"
   end
 
   # ===========================================================================
@@ -249,13 +271,15 @@ module Blacklight::Solr::RepositoryExt
 
   # Encapsulates the point of contact with RSolr to facilitate debugging.
   #
-  # @param [Symbol]                    http   Either :post or :get (default).
   # @param [String]                    path
   # @param [Blacklight::Solr::Request] solr_params
+  # @param [Symbol]                    http   Either :post or :get (default).
   #
   # @return [RSolr::HashWithResponse, nil]
   #
-  def solr_send_and_receive(http, path, solr_params)
+  def solr_send_and_receive(path, solr_params = nil, http = nil)
+    solr_params ||= Blacklight::Solr::Request.new
+    http        ||= blacklight_config.http_method
     Log.debug { "Solr query: #{http} #{path} #{solr_params.inspect}" }
     key = (http == :post) ? :data : :params
     connection.send_and_receive(path, method: http, key => solr_params)
@@ -307,6 +331,36 @@ module Blacklight::Solr::RepositoryExt
     solr_params[:qt] = qt || solr_params[:qt].presence || 'search'
     sb_filters ||= {} # NOTE: a placeholder for now (no filters are skipped)
     merge_url_params!(solr_params, url_params, sb_filters)
+  end
+
+  # Create a Solr response object.
+  #
+  # @param [RSolr::HashWithResponse]         rsolr_resp
+  # @param [Blacklight::Solr::Request, Hash] solr_params
+  # @param [Hash, nil]                       other_params
+  #
+  # @overload Search
+  #   @option other_params [Blacklight::Configuration] :blacklight_config
+  #   @option other_params [Class]                     :document_model
+  #
+  # @overload Suggester
+  #   @option other_params [String] :path
+  #   @option other_params [String] :suggester
+  #
+  # @return [Blacklight::Solr::Response]
+  # @return [Blacklight::Solr::Suggest::Response]
+  #
+  def make_solr_response(rsolr_resp, solr_params, other_params = nil)
+    other_params ||= {}
+    if other_params[:suggester]
+      args = other_params.slice(:path, :suggester).values
+      Blacklight::Solr::Suggest::Response.new(rsolr_resp, solr_params, *args)
+    else
+      other_params = other_params.except(:path, :suggester)
+      cfg = other_params[:blacklight_config] ||= blacklight_config
+      other_params[:document_model] ||= cfg.document_model
+      cfg.response_model.new(rsolr_resp, solr_params, other_params)
+    end
   end
 
   # ===========================================================================

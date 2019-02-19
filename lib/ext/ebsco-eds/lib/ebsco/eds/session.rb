@@ -138,33 +138,8 @@ module EBSCO::EDS::SessionExt
       end
 
     # Setup logging.
-    @logger =
-      case (log = options[:log] || (@config[:log] if @debug)).presence
-        when Logger
-          log
-        when String, Pathname
-          unless log.to_s.start_with?('/')
-            tmp_root = ENV.fetch('TMPDIR', '/tmp')
-            log = File.join(tmp_root, log)
-          end
-          Logger.new(log).tap { |l| l.level = Logger.const_get(@log_level) }
-      end
-
-    # Setup caching options that will be used in #connection.
-    @cache_store = @cache_opt = nil
-    if @use_cache
-      @cache_store = ActiveSupport::Cache::FileStore.new(@cache_dir)
-      @cache_opt = {
-        store:                  @cache_store,
-        logger:                 @logger,
-        auth_expire:            @auth_expire,
-        info_expire:            @info_expire,
-        search_expire:          @search_expire,
-        retrieve_expire:        @retrieve_expire,
-        export_format_expire:   @export_format_expire,
-        citation_styles_expire: @citation_styles_expire
-      }
-    end
+    @logger = options[:log]
+    @logger ||= @config[:log] if @debug
 
     # Other values that need to be initialized.
     @conn_adapter   = @config[:adapter]
@@ -394,7 +369,7 @@ module EBSCO::EDS::SessionExt
     Faraday.new(@conn_opt) do |conn|
       conn.headers['x-sessionToken']        = token
       conn.headers['x-authenticationToken'] = @auth_token
-      conn.use :eds_caching_middleware, @cache_opt if use_cache
+      conn.use :eds_caching_middleware, logger: @logger if use_cache
       conn.use :eds_exception_middleware
       conn.request  :url_encoded
       conn.response :json, content_type: /\bjson$/

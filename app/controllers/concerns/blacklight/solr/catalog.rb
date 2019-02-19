@@ -31,7 +31,7 @@ module Blacklight::Solr::Catalog
 
   # suggestions_service
   #
-  # @return [Blacklight::Suggest::Response]
+  # @return [Blacklight::Solr::Suggest::Response]
   #
   # This method overrides:
   # @see Blacklight::Catalog#suggestions_service

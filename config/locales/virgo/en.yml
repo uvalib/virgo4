@@ -622,10 +622,11 @@ en:
     search_field:             &SEARCH_FIELD_LABELS
       <<:                     *METADATA_FIELD_LABELS
       all_fields:             'All Fields'
+      isbn_issn:              'ISBN/ISSN'
       journal:                'Journal Title'
       keyword:                'Keywords'
-      published:              'Publisher Name/Place'
       publication_date:       'Year Published'
+      published:              'Publisher Name/Place'
 
     # -------------------------------------------------------------------------
     # Sort field display labels
@@ -774,11 +775,28 @@ en:
 
       search_field:
         <<:                   *SEARCH_FIELD_LABELS
-        text:                 'Text'
+        abstract_supplied:    'Has Abstract'
+        accession_number:     'Accession Number'
+        affiliation:          'Author Affiliation'
+        affiliation_exact:    'Author Affiliation'
+        all_subjects:         'Subjects'
+        basic:                'Primary Fields'
+        country:              'Country Code'
         descriptor:           'Descriptor'
-        series:               'Series'
+        full_text:            'Has FullText'
+        geographic_terms:     'Geographic Terms'
+        illustrations:        'Has Illustrations'
+        images:               'Has Images'
+        journal_name:         'Journal'
+        keyword_language:     'Language of Keywords'
+        pages:                'Page Count'
+        peer_reviewed:        'Peer Reviewed'
+        publication_type:     'Publication Type'
+        reviews:              'Has Reviews'
+        source:               'Journal'
+        start_page:           'Start Page'
         subject_heading:      'Subject Heading'
-        keywords:             'Keywords'
+        unique_identifier:    'Accession Number'
 
       sort_field:
         <<:                   *SORT_FIELD_LABELS
@@ -818,8 +836,8 @@ en:
 
       search_field:
         <<:                   *SEARCH_FIELD_LABELS
-        published:            'Distributor Name/Place'
         publication_date:     'Year Released'
+        published:            'Distributor Name/Place'
 
       sort_field:
         <<:                   *SORT_FIELD_LABELS
@@ -859,8 +877,8 @@ en:
 
       search_field:
         <<:                   *SEARCH_FIELD_LABELS
-        published:            'Distributor Name/Place'
         publication_date:     'Year Released'
+        published:            'Distributor Name/Place'
 
       sort_field:
         <<:                   *SORT_FIELD_LABELS

@@ -232,9 +232,7 @@ module Blacklight::Lens::Catalog
       format.refworks_marc_txt { render layout: false }
     end
   end
-=end
 
-=begin # TODO: remove?
   # == GET /:lens/endnote?id=:id
   #
   # This method overrides:
@@ -246,9 +244,7 @@ module Blacklight::Lens::Catalog
       format.endnote { render layout: false }
     end
   end
-=end
 
-=begin # TODO: remove?
   # == GET /:lens/zotero?id=:id
   #
   def zotero
@@ -273,7 +269,7 @@ module Blacklight::Lens::Catalog
 
   # suggestions_service
   #
-  # @return [Blacklight::Suggest::Response]
+  # @return [Blacklight::Lens::Suggest::Response]
   #
   # This method overrides:
   # @see Blacklight::Catalog#suggestions_service

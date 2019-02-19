@@ -124,9 +124,12 @@ def overrides(mapping)
 end
 
 # =============================================================================
-# Require all modules from the "lib/ext" directory
+# Require all modules from the "lib/ext" directory, starting with the Faraday
+# middleware classes so that their definitions can be used by other overrides.
 # =============================================================================
 
+require 'ext/active_support/ext'
+require 'ext/faraday/ext'
 require_files(__FILE__, 'ext/*/ext.rb')
 
 __loading_end(__FILE__)

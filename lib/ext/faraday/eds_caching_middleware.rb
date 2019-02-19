@@ -9,11 +9,11 @@ require 'faraday/eds_caching_middleware'
 
 module Faraday
 
-  # Caching for items and search results from EBSCO EDS.
+  # Default values for EBSCO EDS middleware.
   #
-  module EdsCachingMiddlewareExt
+  module EdsCachingMiddlewareDefaults
 
-    include CachingMiddlewareConcern
+    include CachingMiddlewareDefaults
 
     # Default expiration time.
     DEFAULT_EXPIRATION = 30.minutes
@@ -26,28 +26,38 @@ module Faraday
     # NOTE: These supersede the settings defined in:
     # @see EBSCO::EDS::ConfigurationExt#DEFAULT_CONFIG
     #
-    DEFAULT_OPTIONS = {
-      namespace:              'eds',
-      auth_expire:            (AUTH_TOKEN_EXPIRATION - 5.minutes),
-      info_expire:            1.day,
-      retrieve_expire:        DEFAULT_EXPIRATION,
-      search_expire:          DEFAULT_EXPIRATION,
-      export_format_expire:   1.day,
-      citation_styles_expire: 1.day,
-      cacheable_paths:        %w(
-        /authservice/rest/uidauth
-        /edsapi/rest/ExportFormat
-        /edsapi/rest/CitationStyles
-        /edsapi/rest/Info
-        /edsapi/rest/Retrieve?
-        /edsapi/rest/Search?
-      )
-    }.deep_freeze
+    DEFAULT_OPTIONS =
+      CachingMiddlewareDefaults::DEFAULT_OPTIONS.merge(
+        namespace:              'eds',
+        auth_expire:            (AUTH_TOKEN_EXPIRATION - 5.minutes),
+        info_expire:            1.day,
+        retrieve_expire:        DEFAULT_EXPIRATION,
+        search_expire:          DEFAULT_EXPIRATION,
+        export_format_expire:   1.day,
+        citation_styles_expire: 1.day,
+        cacheable_paths:        %w(
+          /authservice/rest/uidauth
+          /edsapi/rest/ExportFormat
+          /edsapi/rest/CitationStyles
+          /edsapi/rest/Info
+          /edsapi/rest/Retrieve?
+          /edsapi/rest/Search?
+        )
+      ).deep_freeze
 
     # Sanity check.
     unless DEFAULT_OPTIONS[:auth_expire] < AUTH_TOKEN_EXPIRATION
       raise 'auth_expire must be less than the auth token expiration'
     end
+
+  end
+
+  # Caching for items and search results from EBSCO EDS.
+  #
+  module EdsCachingMiddlewareExt
+
+    include CachingMiddlewareConcern
+    include EdsCachingMiddlewareDefaults
 
     # =========================================================================
     # :section:

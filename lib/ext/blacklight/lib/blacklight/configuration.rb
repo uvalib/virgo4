@@ -263,9 +263,8 @@ module Blacklight::ConfigurationExt
     #
     # @return [Blacklight::Configuration::FacetField]
     #
-    # @see #define_field_access
-    # @see #add_blacklight_field
     # @see #facet_fields
+    # @see Blacklight::Configuration::FieldsExt#add_blacklight_field
     #
     def add_facet_field(*) super end
 
@@ -278,9 +277,8 @@ module Blacklight::ConfigurationExt
     #
     # @return [Blacklight::Configuration::IndexField]
     #
-    # @see #define_field_access
-    # @see #add_blacklight_field
     # @see #index_fields
+    # @see Blacklight::Configuration::FieldsExt#add_blacklight_field
     #
     def add_index_field(*) super end
 
@@ -293,9 +291,8 @@ module Blacklight::ConfigurationExt
     #
     # @return [Blacklight::Configuration::ShowField]
     #
-    # @see #define_field_access
-    # @see #add_blacklight_field
     # @see #show_fields
+    # @see Blacklight::Configuration::FieldsExt#add_blacklight_field
     #
     def add_show_field(*) super end
 
@@ -310,9 +307,8 @@ module Blacklight::ConfigurationExt
     #
     # @return [Blacklight::Configuration::SearchField]
     #
-    # @see #define_field_access
-    # @see #add_blacklight_field
     # @see #search_fields
+    # @see Blacklight::Configuration::FieldsExt#add_blacklight_field
     #
     def add_search_field(*) super end
 
@@ -327,9 +323,8 @@ module Blacklight::ConfigurationExt
     #
     # @return [Blacklight::Configuration::SortField]
     #
-    # @see #define_field_access
-    # @see #add_blacklight_field
     # @see #sort_fields
+    # @see Blacklight::Configuration::FieldsExt#add_blacklight_field
     #
     def add_sort_field(*) super end
 

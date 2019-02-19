@@ -1,6 +1,7 @@
 // app/assets/javascripts/blacklight/collapsable.js
 //
 // This code is essentially unchanged from the original Blacklight source.
+// @see https://github.com/projectblacklight/blacklight/blob/v7.0.1/app/javascript/blacklight/collapsable.js
 
 (function($) {
     Blacklight.onLoad(function() {

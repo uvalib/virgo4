@@ -1,20 +1,21 @@
 // app/assets/javascripts/blacklight/modal.js
 //
 // This code is essentially unchanged from the original Blacklight source.
+// @see https://github.com/projectblacklight/blacklight/blob/v7.0.1/app/javascript/blacklight/modal.js
 
 /*
   The blacklight modal plugin can display some interactions inside a Bootstrap
   modal window, including some multi-page interactions.
 
-  It supports unobtrusive Javascript, where a link or form that would have caused
-  a new page load is changed to display it's results inside a modal dialog,
-  by this plugin.  The plugin assumes there is a Bootstrap modal div
-  on the page with id #blacklight-modal to use as the modal -- the standard Blacklight
-  layout provides this.
+  It supports unobtrusive Javascript, where a link or form that would have
+  caused a new page load is changed to display it's results inside a modal
+  dialog, by this plugin.  The plugin assumes there is a Bootstrap modal div
+  on the page with id #blacklight-modal to use as the modal -- the standard
+  Blacklight layout provides this.
 
   To make a link or form have their results display inside a modal, add
-  `data-blacklight-modal="trigger"` to the link or form. (Note, form itself not submit input)
-  With Rails link_to helper, you'd do that like:
+  `data-blacklight-modal="trigger"` to the link or form. (Note, form itself not
+  submit input.)  With Rails link_to helper, you'd do that like:
 
       link_to something, link, data: { blacklight_modal: "trigger" }
 
@@ -38,41 +39,48 @@
   to stay within the modal, just add `data-blacklight-modal="preserve"`
   to the link or form.
 
-  Here's an example of what might be returned, demonstrating most of the devices available:
+  Here's an example of what might be returned, demonstrating most of the
+  devices available:
 
     <div data-blacklight-modal="container">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <button type="button" class="close" data-dismiss="modal"
+            aria-hidden="true">×</button>
         <h3 class="modal-title">Request Placed</h3>
       </div>
 
       <div class="modal-body">
         <p>Some message</p>
-        <%= link_to "This result will still be within modal", some_link, data: { blacklight: "preserve" } %>
+        <%= link_to 'This result will still be within modal', some_link,
+            data: { blacklight: 'preserve' } %>
       </div>
 
 
       <div class="modal-footer">
-        <%= link_to "Close the modal", request_done_path, class: "submit button dialog-close", data: { dismiss: "modal" } %>
+        <%= link_to 'Close the modal', request_done_path,
+            class: 'submit button dialog-close', data: { dismiss: 'modal' } %>
       </div>
     </div>
 
 
   One additional feature. If the content returned from the AJAX modal load
-  has an element with `data-blacklight-modal=close`, that will trigger the modal
-  to be closed. And if this element includes a node with class "flash_messages",
-  the flash-messages node will be added to the main page inside #main-flahses.
+  has an element with `data-blacklight-modal=close`, that will trigger the
+  modal to be closed. And if this element includes a node with class
+  "flash_messages", the flash-messages node will be added to the main page
+  inside #main-flashes.
 
   == Events
 
-  We'll send out an event 'loaded.blacklight.blacklight-modal' with the #blacklight-modal
-  dialog as the target, right after content is loaded into the modal but before
-  it is shown (if not already a shown modal).  In an event handler, you can
-  inspect loaded content by looking inside $(this).  If you call event.preventDefault(),
-  we won't 'show' the dialog (although it may already have been shown, you may want to
-  $(this).modal("hide") if you want to ensure hidden/closed.
+  We'll send out an event 'loaded.blacklight.blacklight-modal' with the
+  #blacklight-modal dialog as the target, right after content is loaded into
+  the modal but before it is shown (if not already a shown modal).  In an event
+  handler, you can inspect loaded content by looking inside $(this).  If you
+  call event.preventDefault(), we won't 'show' the dialog (although it may
+  already have been shown, you may want to $(this).modal("hide") if you want to
+  ensure hidden/closed.
 
-  The data-blacklight-modal=close behavior is implemented with this event, see for example.
+  The data-blacklight-modal=close behavior is implemented with this event, see
+  for example.
 */
 
 // We keep all our data in Blacklight.modal object.
@@ -120,7 +128,7 @@ Blacklight.modal.receiveAjax = function(contents) {
     // Does it have a data- selector for container?
     // Important we don't execute script tags, we shouldn't.
     // Code modelled off of JQuery ajax.load.
-    // https://github.com/jquery/jquery/blob/master/src/ajax/load.js?source=c#L62
+    // @see https://github.com/jquery/jquery/blob/master/src/ajax/load.js?source=c#L62
     var container =
         $('<div>')
             .append(jQuery.parseHTML(contents))

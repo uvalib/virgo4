@@ -1,6 +1,7 @@
 // app/assets/javascripts/blacklight/checkbox_submit.js
 //
 // This code is essentially unchanged from the original Blacklight source.
+// @see https://github.com/projectblacklight/blacklight/blob/v7.0.1/app/javascript/blacklight/checkbox_submit.js
 
 /* A JQuery plugin (should this be implemented as a widget instead? not sure)
    that will convert a "toggle" form, with single submit button to add/remove
@@ -41,7 +42,7 @@
             var form = $(this);
             form.children().hide();
             // We're going to use the existing form to actually send our
-            // add/removes.  This works conveneintly because the exact same
+            // add/removes.  This works conveniently because the exact same
             // action href is used for both bookmarks/$doc_id.  But let's take
             // out the irrelevant parts of the form to avoid any future
             // confusion.

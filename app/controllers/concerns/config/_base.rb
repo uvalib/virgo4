@@ -340,10 +340,8 @@ class Config::Base
       # This the number of items per page in the facet modal dialog.
       config.default_more_limit = 15 # config.default_facet_limit # NOTE: was 20
 
-      # Configuration for suggester.
-      config.autocomplete_enabled   = true
-      config.autocomplete_path      = 'suggest'
-      config.autocomplete_suggester = 'mySuggester'
+      # NOTE: The derived class must call search_builder_processors!().
+      # NOTE: The derived class must call autocomplete_suggesters!().
 
       # =======================================================================
       # Blacklight Advanced Search
@@ -380,6 +378,15 @@ class Config::Base
         }
       )
 =end
+
+      # =======================================================================
+      # Finalize and return the modified configuration
+      # =======================================================================
+
+      # NOTE: The derived class must call add_tools!().
+      # NOTE: The derived class must call semantic_fields!().
+      # NOTE: The derived class must call blacklight_gallery!().
+      # NOTE: The derived class must call finalize_configuration!().
 
       config
     end
@@ -485,6 +492,55 @@ class Config::Base
     def search_builder_processors!(config, *values)
       config.search_builder_processors ||= []
       config.search_builder_processors += values.flatten.compact.uniq
+    end
+
+    # Settings for autocomplete suggesters.
+    #
+    # The suggesters defined by the search repository should be included in the
+    # `autocomplete_suggest` array.
+    #
+    # Suggester names generated from :search_field values which should *not*
+    # result in an attempt to autocomplete should be included in the
+    # `autocomplete_no_suggest` array.  Unknown suggesters that are not given
+    # here will result in an attempt to autocomplete using the default
+    # suggester (`autocomplete_suggester`).
+    #
+    # @param [Blacklight::Configuration] config
+    # @param [String, nil]               name_template
+    #
+    # @return [void]
+    #
+    def autocomplete_suggesters!(config, name_template = nil)
+
+      config.autocomplete_enabled = true
+
+      # Get the search field definitions that specify suggesters.
+      fields = config.search_fields.select { |_, field| field.autocomplete }
+
+      # Determine the default suggester if not already set, using the
+      # :autocomplete field of the default search field if possible. Otherwise
+      # the default suggester is the first non-blank :autocomplete field in the
+      # search fields.
+      default =
+        config.autocomplete_suggester ||=
+          fields.find { |_, f| break f.autocomplete if f.default } ||
+          fields.values.first&.autocomplete
+
+      # Construct suggester list from the :autocomplete field of each search
+      # field definition.
+      config.autocomplete_suggest =
+        fields.map { |_, field|
+          field.autocomplete unless field.autocomplete == default
+        }.unshift(default).compact
+
+      # Construct list of suggesters that will not trigger autocomplete.
+      # Because the suggester name is not part of the search field definition
+      # it must be constructed via :make_suggester_name.
+      name_template ||= '%s'
+      config.autocomplete_no_suggest =
+        config.search_fields.map { |name, field|
+          name_template % name unless field.autocomplete
+        }.compact
     end
 
     # Set mappings of configuration key to repository field for both :index and
