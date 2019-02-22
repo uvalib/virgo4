@@ -1,0 +1,31 @@
+<%# app/views/kaminari/blacklight/_paginator.html.erb -%>
+<%-
+  # The container tag.
+  # Paginator now using the Bootstrap paginator class.
+
+  # Available local variables:
+  # url:           url to the first page
+  # current_page:  a page object for the currently displayed page
+  # num_pages:     total number of pages
+  # per_page:      number of items to fetch per page
+  # remote:        data-remote
+
+  # Don't show links for the "last" result pages for articles because it will
+  # take too long to acquire them.  (@see EBSCO::EDS::Session#do_jump_request)
+  in_articles = (current_lens_key == :articles)
+-%>
+<%= paginator.render do -%>
+  <ul class="pagination">
+    <%= prev_page_tag %>
+    <%= next_page_tag %>
+    <%- each_relevant_page do |page| -%>
+      <%- if page.left_outer? || page.inside_window? -%>
+        <%= page_tag page %>
+      <%- elsif !in_articles && page.right_outer? -%>
+        <%= page_tag page %>
+      <%- elsif !page.was_truncated? -%>
+        <%= gap_tag %>
+      <%- end -%>
+    <%- end -%>
+  </ul>
+<%- end -%>
