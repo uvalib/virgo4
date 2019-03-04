@@ -89,7 +89,7 @@ end
 # Blacklight and supporting gems.
 gem 'blacklight', '~> 7.0'
 gem 'rsolr', '>= 1.0', '< 3'
-gem 'bootstrap', '~> 4.0'
+gem 'bootstrap', '~> 4.3'
 gem 'jquery-rails'
 gem 'popper_js'
 gem 'twitter-typeahead-rails', '0.11.1.pre.corejavascript'
