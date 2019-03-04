@@ -89,6 +89,10 @@
                 z-index: $zindex-typeahead + 1;
             }
         }
+
+        .search-btn.disabled {
+            cursor: default;
+        }
     }
 
     .navbar-form {

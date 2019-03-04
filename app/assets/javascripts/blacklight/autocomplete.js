@@ -56,118 +56,191 @@ Blacklight.onLoad(function() {
      */
     var INFO_SR_ONLY = false;
 
+    /**
+     * Indicate whether a search type must be specified.
+     *
+     * @const
+     * @type {boolean}
+     */
+    var SEARCH_TYPE_REQUIRED = true;
+
+    /**
+     * Default placeholder to display in the search input box.
+     *
+     * @const
+     * @type {string}
+     */
+    var DEFAULT_PLACEHOLDER = 'Search...';
+
+    /**
+     * Placeholder to display when no search type has been selected.
+     *
+     * @const
+     * @type {string}
+     */
+    var NO_TYPE_PLACEHOLDER = '← Please select a search type';
+
+    /**
+     * Search-type-specific placeholders.
+     *
+     * @const
+     * @type {{string:string}}
+     */
+    var PLACEHOLDER_TABLE = {
+        'title':      'Enter a title...',
+        'author':     'Enter an author name...',
+        'subject':    'Enter subject term(s)...',
+        'isbn_issn':  'Enter a standard identifier number...',
+        'all_fields': 'Look for terms anywhere within records...'
+    };
+    if (SEARCH_TYPE_REQUIRED) { PLACEHOLDER_TABLE[''] = NO_TYPE_PLACEHOLDER; }
+
+    /**
+     * Default tooltip for the search commit button.
+     *
+     * @const
+     * @type {string}
+     */
+    var DEFAULT_TOOLTIP = '';
+
+    /**
+     * Tooltip to display when no search type has been selected.
+     *
+     * @const
+     * @type {string}
+     */
+    var NO_TYPE_TOOLTIP = 'Please select a search type';
+
+    /**
+     * Search-type-specific tooltips.
+     *
+     * @const
+     * @type {{string:string}}
+     */
+    var TOOLTIP_TABLE = {};
+    if (SEARCH_TYPE_REQUIRED) { TOOLTIP_TABLE[''] = NO_TYPE_TOOLTIP; }
+
     // ========================================================================
     // Actions
     // ========================================================================
 
+    // Set up the search field for autocomplete.
+    //
+    // While it's likely that there will only be a single search field on the
+    // page that would get typeahead, this is arranged to support an arbitrary
+    // number (although that is untested and would probably require additional
+    // effort to work properly).
+    //
     $('[data-autocomplete-enabled="true"]').not('.tt-hint').each(function() {
 
-        var $this         = $(this);
-        var suggest_url   = $this.data().autocompletePath;
-        var no_suggest    = $this.data().noSuggest || [];
-        var $search_field = $('#search_field');
+        var $search_input  = $(this);
+        var suggest_url    = $search_input.data().autocompletePath;
+        var no_suggest     = $search_input.data().noSuggest || [];
+        var $container     = $search_input.parents('.input-group');
+        var $search_field  = $container.find('.search_field');
+        var $search_button = $container.find('.search-btn');
+
         var previous_search_type;
+        var terms;
 
-        // Set up the suggestion engine to modify the final path based on the
-        // currently-selected search type.
-        var terms = new Bloodhound({
-            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
-            queryTokenizer: Bloodhound.tokenizers.whitespace,
-            remote: {
-                url: suggest_url,
+        // ====================================================================
+        // Actions
+        // ====================================================================
 
-                prepare: function(query, settings) {
+        initializeTypeahead();
+        setSearchLabels();
 
-                    // Settings contains {url: suggest_url, method: 'get',
-                    // format: 'json'} Need to return with the URL modified
-                    // with the given query.
-                    var new_settings = $.extend({}, settings);
+        // ====================================================================
+        // Event Handlers
+        // ====================================================================
 
-                    // Get the search type that has been selected on the menu.
-                    var search_type = searchType();
-
-                    if (noAutosuggest(search_type)) {
-
-                        // If this is a search type that should not support
-                        // typeahead, pass a flag to the transport function.
-                        new_settings.cancelled = true;
-
-                    } else {
-
-                        // If the search type has changed, clear the cache so
-                        // that the appropriate set of information is searched
-                        // rather than accepting cached values that probably
-                        // are not appropriate.
-                        if (search_type !== previous_search_type) {
-                            terms.clear();
-                            previous_search_type = search_type;
-                        }
-
-                        // NOTE: Is there a way to save and restore the cache?
-                        // If so, the cache could be saved when switching to a
-                        // new search type and then restored when that search
-                        // type is selected again.
-
-                        // Add the query and search type to the base URL.
-                        var url = settings.url;
-                        url += (url.indexOf('?') === -1) ? '?' : '&';
-                        url += 'q=' + query;
-                        if (search_type) {
-                            url += '&search_field=' + search_type;
-                        }
-                        new_settings.url = url;
-                    }
-                    return new_settings;
-                },
-
-                transport: function(opts, onSuccess, onError) {
-                    if (!opts.cancelled) {
-                        $.ajax(opts).done(onSuccess).fail(onError);
-                    }
-                }
+        // When the search type is changed by the user, reinitialize typeahead
+        // and display elements for the new search type.
+        $search_field.change(function() {
+            var search_type = searchType();
+            if (search_type !== previous_search_type) {
+                initializeTypeahead();
+                setSearchLabels();
+                previous_search_type = search_type;
             }
-        });
-
-        terms.initialize();
-
-        $this.typeahead(DEFAULT_OPTIONS, {
-            name:       'terms',
-            source:     terms.ttAdapter(),
-            limit:      SUGGESTION_COUNT,
-            display:    function(response) { return displayTerm(response); },
-            templates: {
-                suggestion: ttEntry,
-                header:     ttHeader,   // TODO: keep?
-                footer:     ttFooter,   // TODO: keep?
-                notFound:   ttNotFound,
-                pending:    ttPending
-            }
+            return false;
         });
 
         // ====================================================================
-        // Function definitions
+        // Function definitions - Typeahead
         // ====================================================================
 
         /**
-         * The currently selected search type.
-         *
-         * @return {string}
+         * Initialize (or re-initialize) the suggestion engine and typeahead.
          */
-        function searchType() {
-            return $search_field.val();
+        function initializeTypeahead() {
+            var reinitialize = !!terms;
+            if (reinitialize) {
+                $search_input.typeahead('destroy');
+            } else {
+                terms = buildSuggestionEngine();
+            }
+            terms.initialize(reinitialize);
+
+            $search_input.typeahead(DEFAULT_OPTIONS, {
+                name:    'terms',
+                source:  terms.ttAdapter(),
+                limit:   SUGGESTION_COUNT,
+                display: function(response) { return displayTerm(response); },
+                templates: {
+                    suggestion: ttEntry,
+                    header:     ttHeader,   // TODO: keep?
+                    footer:     ttFooter,   // TODO: keep?
+                    notFound:   ttNotFound,
+                    pending:    ttPending
+                }
+            });
         }
 
         /**
-         * Indicate whether autosuggest should happen for the currently
-         * selected search type.
+         * Set up an instance of the suggestion engine which will modify the
+         * final search path based on the currently-selected search type.
          *
-         * @param {string} [search_type]    Default: value of $search_field.
-         *
-         * @return {boolean}
+         * @returns {Bloodhound}
          */
-        function noAutosuggest(search_type) {
-            var type = search_type || searchType();
-            return (no_suggest.indexOf(type) >= 0);
+        function buildSuggestionEngine() {
+            return new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: suggest_url,
+
+                    prepare: function(query, settings) {
+
+                        // Settings contains {url: suggest_url, method: 'get',
+                        // format: 'json'} Need to return with the URL modified
+                        // with the given query.
+                        var new_settings = $.extend({}, settings);
+
+                        // Get the search type selected on the menu.
+                        var search_type = searchType();
+
+                        // Add the query and search type to the base URL.
+                        if (allowAutosuggest(search_type)) {
+                            var url = settings.url;
+                            url += (url.indexOf('?') === -1) ? '?' : '&';
+                            url += 'q=' + query;
+                            if (search_type) {
+                                url += '&search_field=' + search_type;
+                            }
+                            new_settings.url = url;
+                        } else {
+                            new_settings.cancelled = true;
+                        }
+                        return new_settings;
+                    },
+
+                    transport: function(opts, onSuccess, onError) {
+                        return allowAutosuggest() &&
+                            $.ajax(opts).done(onSuccess).fail(onError);
+                    }
+                }
+            });
         }
 
         /**
@@ -183,7 +256,7 @@ Blacklight.onLoad(function() {
          */
         function displayTerm(data) {
             var terms = ttEntry(data);
-            return $($.parseHTML(terms)).text();
+            return terms && $($.parseHTML(terms)).text();
         }
 
         /**
@@ -206,21 +279,25 @@ Blacklight.onLoad(function() {
          * @return {string}
          */
         function ttEntry(data) {
-            return '<div>' + (data || {}).term + '</div>';
+            var result = '';
+            if (allowAutosuggest()) {
+                result += '<div>' + (data || {}).term + '</div>';
+            }
+            return result;
         }
 
         /**
          * Display an informational element at the top of the suggestions menu.
          *
-         * @param {object|string} [query]
+         * @param {object|string} [label]
          *
          * @return {string}
          */
-        function ttHeader(query) {
+        function ttHeader(label) {
             var search_type;
             var content;
-            if (typeof query === 'string') {
-                content = query;
+            if (typeof label === 'string') {
+                content = label;
             } else if (search_type = searchType()) {
                 content = 'Suggested ' + search_type + ' searches';
             } else {
@@ -234,14 +311,14 @@ Blacklight.onLoad(function() {
          * Display an informational element at the bottom of the suggestions
          * menu.
          *
-         * @param {object|string} [query]
+         * @param {object|string} [label]
          *
          * @return {string}
          */
-        function ttFooter(query) {
+        function ttFooter(label) {
             var content;
-            if (typeof query === 'string') {
-                content = query;
+            if (typeof label === 'string') {
+                content = label;
             } else {
                 content = 'END';
             }
@@ -253,14 +330,14 @@ Blacklight.onLoad(function() {
          * Display an informational element within the suggestions menu if no
          * suggestions were retrieved from the source.
          *
-         * @param {object|string} [query]
+         * @param {object|string} [label]
          *
          * @return {string}
          */
-        function ttNotFound(query) {
+        function ttNotFound(label) {
             var content;
-            if (typeof query === 'string') {
-                content = query;
+            if (typeof label === 'string') {
+                content = label;
             } else {
                 content = 'No suggestions';
             }
@@ -271,16 +348,16 @@ Blacklight.onLoad(function() {
          * Display an informational element within the suggestions menu while
          * the source is being queried for suggestions.
          *
-         * @param {object|string} [query]
+         * @param {object|string} [label]
          *
          * @return {string}
          */
-        function ttPending(query) {
+        function ttPending(label) {
             var content;
-            if (noAutosuggest()) {
+            if (!allowAutosuggest()) {
                 content = '';
-            } else if (typeof query === 'string') {
-                content = query;
+            } else if (typeof label === 'string') {
+                content = label;
             } else {
                 var src = LOADING_IMAGE;
                 var alt = 'Looking...';
@@ -301,11 +378,94 @@ Blacklight.onLoad(function() {
          * @return {string}
          */
         function ttInfo(content, css_class, always_show) {
-            var classes = ['tt-info'];
-            if (css_class)                    { classes.push(css_class); }
-            if (INFO_SR_ONLY && !always_show) { classes.push('sr-only'); }
-            var css = classes.join(' ');
-            return '<div class="' + css + '">' + content + '</div>';
+            var element;
+            if (allowAutosuggest()) {
+                var classes = ['tt-info'];
+                if (css_class)                    { classes.push(css_class); }
+                if (INFO_SR_ONLY && !always_show) { classes.push('sr-only'); }
+                var css = classes.join(' ');
+                element = '<div class="' + css + '">' + content + '</div>';
+            }
+            return element || '';
+        }
+
+        // ====================================================================
+        // Function definitions - Display
+        // ====================================================================
+
+        /**
+         * Update the search input box and search button.
+         */
+        function setSearchLabels() {
+            var search_type = searchType();
+            updateInputField(search_type);
+            updateSearchButton(search_type);
+            if (SEARCH_TYPE_REQUIRED) {
+                if (isEmpty(search_type)) {
+                    $search_button.addClass('disabled');
+                } else {
+                    $search_button.removeClass('disabled');
+                }
+            }
+        }
+
+        /**
+         * Update appearance of the input field based on the search type.
+         *
+         * @param {string} [search_type]    Default: {@link searchType}().
+         */
+        function updateInputField(search_type) {
+            var label = PLACEHOLDER_TABLE[search_type] || DEFAULT_PLACEHOLDER;
+            $search_input.attr('placeholder', label);
+        }
+
+        /**
+         * Update appearance of the search button based on the search type.
+         *
+         * @param {string} [search_type]    Default: {@link searchType}().
+         */
+        function updateSearchButton(search_type) {
+            var tooltip = TOOLTIP_TABLE[search_type] || DEFAULT_TOOLTIP;
+            $search_button.attr('title', tooltip);
+        }
+
+        // ====================================================================
+        // Function definitions - General
+        // ====================================================================
+
+        /**
+         * Indicate whether autosuggest should happen for the currently
+         * selected search type.
+         *
+         * @param {string} [search_type]    Default: {@link searchType}().
+         *
+         * @return {boolean}
+         */
+        function allowAutosuggest(search_type) {
+            var t = search_type || searchType();
+            var off = noSearchTypeSelected(t) || (no_suggest.indexOf(t) >= 0);
+            return !off;
+        }
+
+        /**
+         * If SEARCH_TYPE_REQUIRED is *true*, indicate whether no search type
+         * has been selected.
+         *
+         * @param {string} [search_type]  Default: {@link searchType}()
+         *
+         * @return {boolean}
+         */
+        function noSearchTypeSelected(search_type) {
+            return SEARCH_TYPE_REQUIRED && isEmpty(search_type || searchType());
+        }
+
+        /**
+         * The currently selected search type.
+         *
+         * @return {string}
+         */
+        function searchType() {
+            return $search_field.val();
         }
 
     });

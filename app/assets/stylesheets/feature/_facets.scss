@@ -126,7 +126,7 @@
 
             .facet-checkbox {
                 display:        flex;
-                margin:         auto 0.5rem auto 0;
+                margin:         0.4rem 0.5rem auto 0;
                 padding-bottom: 0.25rem;
                 flex:           0 0 auto;
             }
@@ -141,12 +141,12 @@
 
                     display:       flex;
                     margin-bottom: 0;
-                    flex:          1 0 auto;
+                    flex:          1 1 auto;
 
                     .facet-label {
                         display:       flex;
                         padding-right: 0;
-                        flex:          1 0 auto;
+                        flex:          1 1 auto;
                     }
 
                     .facet-count {

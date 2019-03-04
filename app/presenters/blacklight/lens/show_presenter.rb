@@ -38,14 +38,14 @@ module Blacklight::Lens
     #
     def html_title(options = nil)
       fields = Array.wrap(view_config.html_title)
-      if fields.present?
-        field = fields.find { |field| document.has?(field) }
-        field ||= configuration.default_title_field
-        field_value(field)
-      else
+      if fields.blank?
         opt = { line_separator: '<br/>'.html_safe }
         opt.merge!(options) if options.is_a?(Hash)
         heading(opt)
+      elsif (field = fields.find { |f| document.has?(f) }).present?
+        field_value(field)
+      else
+        title_missing.html_safe
       end
     end
 

@@ -1,0 +1,32 @@
+<%# app/views/catalog/_facet_layout.html.erb -%>
+<%-
+  facet_key = facet_field.key
+  facet_id  = facet_field_id(facet_field)
+  collapsed = should_collapse_facet?(facet_field)
+
+  card_classes =
+    css_classes('card facet-limit') { |classes|
+      classes << "blacklight-#{facet_key.parameterize}"
+      classes << 'facet-limit-active' if facet_field_in_params?(facet_key)
+    }
+
+  header_classes =
+    css_classes('card-header') { |classes|
+      classes << 'collapsed' if collapsed
+      classes << 'collapse-toggle facet-field-heading'
+    }
+
+  list_classes =
+    css_classes('card-body panel-collapse facet-content') { |classes|
+      classes << (collapsed ? 'collapse' : 'show')
+    }
+-%>
+<div class="<%= card_classes -%>">
+  <h3 class="<%= header_classes -%>" data-target="#<%= facet_id -%>"
+      data-toggle="collapse" aria-expanded="false">
+    <%= link_to(facet_field_label(facet_key), '', 'data-turbolinks': false) %>
+  </h3>
+  <div id="<%= facet_id %>" class="<%= list_classes -%>">
+    <%= yield %>
+  </div>
+</div>

@@ -118,6 +118,14 @@
                 }
             }
         }
+
+        dd.blacklight-url_a {
+            a {
+                display:    block;
+                word-break: keep-all;
+                word-wrap:  break-word;
+            }
+        }
     }
 }
 

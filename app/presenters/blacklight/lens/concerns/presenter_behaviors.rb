@@ -169,8 +169,7 @@ module Blacklight::Lens
       author       = opt[:show_author].presence
       alt_author   = opt[:show_linked_author].presence
 
-      def_field   = configuration.default_title_field
-      title     &&= value_for(view_config.title_field, def_field).presence
+      title     &&= value_for(view_config.title_field).presence
       subtitle  &&= title && value_for(view_config.subtitle_field).presence
       alt_title &&= value_for(view_config.alt_title_field).presence
 
@@ -178,6 +177,7 @@ module Blacklight::Lens
       title_lines << alt_title
       title_lines << [title, subtitle].reject(&:blank?).join(title_sep)
       title_lines.delete_if(&:blank?).uniq!
+      title_lines << title_missing if title_lines.blank?
 
       # Eliminate the configured line-oriented separator options for #value_for
       # if author_sep is not an HTML element.
@@ -216,6 +216,14 @@ module Blacklight::Lens
         (title_lines + author_lines).join(line_break)
       end
 
+    end
+
+    # Title to show when the data does not include a title of any kind.
+    #
+    # @return [String]
+    #
+    def title_missing
+      "(no title) - #{document.id}"
     end
 
     # =========================================================================
