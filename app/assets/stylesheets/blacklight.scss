@@ -1,9 +1,29 @@
 // app/assets/stylesheets/blacklight.scss
 
 @import 'blacklight/blacklight';
+
+// Blacklight::Marc
 @import 'blacklight_marc';
-@import 'blacklight_advanced_search';
+
+// BlacklightAdvancedSearch
+//
+// NOTE: Avoid "@import 'blacklight_advanced_search'"
+//
+// This seems to cause the resulting 'application.css' to have duplicate
+// content (maybe because of the mixing of Sprockets and SASS).  Importing
+// blacklight_advanced_search/* directly seems to avoid that problem.
+//
+@import 'blacklight_advanced_search/advanced_results';
+@import 'blacklight_advanced_search/blacklight_advanced_search_styles';
 
 // Blacklight::Gallery
-@import 'blacklight_gallery/default';
+//
+// NOTE: Avoid "@import 'blacklight_gallery/default'"
+//
+// Importing the partials directly avoids a second @import of Bootstrap.
+//
+@import "blacklight_gallery/gallery";
+@import "blacklight_gallery/masonry";
+@import "blacklight_gallery/slideshow";
+@import "blacklight_gallery/osd_viewer";
 @import 'openseadragon/openseadragon';

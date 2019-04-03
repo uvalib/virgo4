@@ -17,6 +17,7 @@ require_subdir(__FILE__)
 
 Faraday::Middleware.register_middleware(
   eds_caching_middleware:    Faraday::EdsCachingMiddleware,
+  ils_caching_middleware:    Faraday::IlsCachingMiddleware,
   solr_caching_middleware:   Faraday::SolrCachingMiddleware,
   solr_exception_middleware: Faraday::SolrExceptionMiddleware
 )

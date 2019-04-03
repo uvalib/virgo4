@@ -1,0 +1,29 @@
+<%# app/views/catalog/_availability_table.html.erb -%>
+<%-
+  doc = document ||= @document
+  return unless doc
+
+=begin
+  request_popup ||= true
+  simulate_pda  ||= params[:simulate]
+
+  sc_items =
+    if special_collections_lens? && (av = doc.availability)
+      av.special_collections_copies
+    end
+  sc_items ||= 0
+=end
+
+  template_opts = { document: doc }
+-%>
+
+<%= render 'availability/summary_holdings', template_opts %>
+<%#= leo_and_recall_links(doc, request_popup: request_popup) %>
+<%#= sc_lens_request_link(doc, outer_class: 'tray') %>
+<%= render 'availability/holdings', template_opts %>
+<%#= pda_purchase(doc, request_popup: request_popup, simulate: simulate_pda) %>
+<%#= about_pda(doc) %>
+<%#= access_restriction_text(doc) %>
+<%#= about_kluge_ruhe(doc) %>
+<%#= sc_lens_request_link(doc) unless (sc_items < 20) || in_popup? %>
+<%#= status_note(doc) %>

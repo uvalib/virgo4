@@ -1,0 +1,37 @@
+<%# app/views/availability/_summary_holdings.html.erb -%>
+<%-
+  doc = document ||= @document
+  libraries      ||= doc&.availability&.summary_libraries
+  return if libraries.blank?
+
+  summaries_id = 'holdings-summaries'
+-%>
+
+<div id="<%= summaries_id -%>" class="holdings-summaries">
+  <%- libraries.each_with_index do |library, library_idx| -%>
+
+    <%- library_css = library.name.downcase.tr(' ', '_') -%>
+    <%- library_css << ' first' if library_idx.zero? -%>
+    <div class="holdings-summary <%= library_css -%>">
+
+      <%# === Visible header === -%>
+      <%- control_id = "summary-collapse-#{library_idx}" -%>
+      <div class="library">
+        <button class="btn btn-link collapsed" data-toggle="collapse"
+                data-target="#<%= control_id -%>">
+          <%= library.name %> holdings summary
+        </button>
+      </div>
+
+      <%# === Collapsed details === -%>
+      <div id="<%= control_id -%>" class="collapse"
+           data-parent="#<%= summaries_id -%>">
+        <%- library.summary_locations.each do |location| -%>
+          <%= location_summary(library, location) %>
+        <%- end -%>
+      </div>
+
+    </div>
+
+  <%- end -%>
+</div>

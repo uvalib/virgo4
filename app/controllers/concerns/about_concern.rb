@@ -58,8 +58,8 @@ module AboutConcern
   #
   def get_topic_list(topic)
     case topic
-      when :library  then %w(TODO Libraries from\ Firehose) # TODO: Firehose library list
-      when :location then %w(TODO Locations from\ Firehose) # TODO: Firehose location list
+      when :library  then IlsService.new.get_library_list
+      when :location then IlsService.new.get_location_list
       else                [%Q(#{__method__}: unknown: "#{topic}")]
     end
   end

@@ -301,6 +301,33 @@ en:
             confirm:    'Are you sure you want to clear the %{log}?'
 
     # =========================================================================
+    # Availability
+    # =========================================================================
+
+    availability:
+
+      status:
+        available:      'Available'
+        error:          'Error'
+        mixed:          'Mixed'
+        none:           'None'
+        unavailable:    'Unavailable'
+
+      holding:
+
+        message:
+          error:        'Unable to retrieve information for this item'
+          no_info:      'No information available at this time'
+          unique_site:  'On-site Only'
+
+        tooltip:
+          item:         'Availability status for this individual copy or volume'
+          non_circ:     'This individual item cannot be checked out'
+
+        label:
+          non_circ:     'Non-Circ'
+
+    # =========================================================================
     # FIELD LABELS
     #
     # These labels apply to either the "_f" or "_a" form of the metadata field;
@@ -884,3 +911,20 @@ en:
         <<:                   *SORT_FIELD_LABELS
         newest:               'Date (newest)'
         oldest:               'Date (oldest)'
+
+  # ===========================================================================
+  # IlsService
+  # ===========================================================================
+
+  ils:
+
+    recv:
+      errors:
+        parse_error:  'ILS: malformed data: %{error}'
+        default:      'ILS: Error attempting to receive: %{error}'
+
+    xmit:
+      errors:
+        hold_error:   'ILS: Error attempting hold/recall: %{error}'
+        renew_error:  'ILS: Error attempting renewal: %{error}'
+        default:      'ILS: Error attempting to transmit: %{error}'

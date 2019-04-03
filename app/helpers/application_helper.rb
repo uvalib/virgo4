@@ -48,6 +48,8 @@ module ApplicationHelper
   # :section:
   # ===========================================================================
 
+  public
+
   # Generate a path to sign on and redirect to the given path.
   #
   # @param [String, nil] return_path  URL to redirect to after sign on.
@@ -62,6 +64,32 @@ module ApplicationHelper
     full_path << ('#' + anchor) if anchor.present?
     full_path = CGI.escape(full_path)
     "#{SIGN_ON_PATH}?redirect=#{full_path}"
+  end
+
+  # Indicate whether the ultimate target format is HTML.
+  #
+  # @param [Hash, nil] opt
+  #
+  def rendering_html?(opt)
+    ((opt[:format].to_s.downcase == 'html') if opt.is_a?(Hash)) ||
+      (request.format.html? if defined?(request))
+  end
+
+  # Indicate whether the ultimate target format is something other than HTML.
+  #
+  # @param [Hash, nil] opt
+  #
+  def rendering_non_html?(opt)
+    !rendering_html?(opt)
+  end
+
+  # Indicate whether the ultimate target format is JSON.
+  #
+  # @param [Hash, nil] opt
+  #
+  def rendering_json?(opt)
+    ((opt[:format].to_s.downcase == 'json') if opt.is_a?(Hash)) ||
+      (request.format.json? if defined?(request))
   end
 
   # ===========================================================================
@@ -157,36 +185,10 @@ module ApplicationHelper
   end
 
   # ===========================================================================
-  # :section:
+  # :section: Blacklight configuration "helper_methods"
   # ===========================================================================
 
   protected
-
-  # Indicate whether the ultimate target format is HTML.
-  #
-  # @param [Hash, nil] opt
-  #
-  def rendering_html?(opt)
-    ((opt[:format].to_s.downcase == 'html') if opt.is_a?(Hash)) ||
-      (request.format.html? if defined?(request))
-  end
-
-  # Indicate whether the ultimate target format is something other than HTML.
-  #
-  # @param [Hash, nil] opt
-  #
-  def rendering_non_html?(opt)
-    !rendering_html?(opt)
-  end
-
-  # Indicate whether the ultimate target format is JSON.
-  #
-  # @param [Hash, nil] opt
-  #
-  def rendering_json?(opt)
-    ((opt[:format].to_s.downcase == 'json') if opt.is_a?(Hash)) ||
-      (request.format.json? if defined?(request))
-  end
 
   # extract_config_options
   #

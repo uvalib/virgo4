@@ -96,6 +96,9 @@ module BlacklightHelper
   #
   # @return [ActiveSupport::SafeBuffer]
   #
+  # This method replaces:
+  # @see Blacklight::BlacklightHelperBehavior#render_index_field_label
+  #
   def render_index_field_label(*args)
     opt = args.extract_options!
     doc = args.first
@@ -120,10 +123,39 @@ module BlacklightHelper
   #
   # @return [ActiveSupport::SafeBuffer]
   #
+  # This method replaces:
+  # @see Blacklight::BlacklightHelperBehavior#render_document_show_field_label
+  #
   def render_document_show_field_label(*args)
     opt = args.extract_options!
     doc = args.first
     h(document_show_field_label(doc, opt[:field]))
+  end
+
+  # Render the document "heading" (title) in a content tag.
+  #
+  # @param [Array] args
+  #
+  # @overload render_document_heading(document, options)
+  #   @param [Blacklight::Document] document
+  #   @param [Hash]                 opt
+  #
+  # @overload render_document_heading(options)
+  #   @param [Hash] opt
+  #
+  # @option options [Symbol] :tag
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  # This method replaces:
+  # @see Blacklight::BlacklightHelperBehavior#render_document_heading
+  #
+  def render_document_heading(*args)
+    opt = args.last.is_a?(Hash) ? args.pop.dup : {}
+    doc = args.first || @document
+    tag = opt.delete(:tag) || :h4
+    opt.reverse_merge!(class: 'extra-document-title', itemprop: 'name')
+    content_tag(tag, presenter(doc).heading, opt)
   end
 
   # show_presenter_class
@@ -254,6 +286,17 @@ module BlacklightHelper
 
   public
 
+  # Generate a value that can be used for the :id attribute of an HTML element.
+  #
+  # @param [Blacklight::Document] doc   Default: @document.
+  #
+  # @return [String, nil]
+  #
+  def document_id(doc = nil)
+    doc ||= @document
+    'doc_' + doc.id.to_s.parameterize if doc
+  end
+
   # The current value of the page title (for browser history and browser tabs).
   #
   # @return [String]
@@ -309,15 +352,20 @@ module BlacklightHelper
     presenter(doc).heading(options)
   end
 
-  # Generate a value that can be used for the :id attribute of an HTML element.
+  # Render a document's availability.
   #
   # @param [Blacklight::Document] doc   Default: @document.
+  # @param [Hash, nil]            opt
   #
-  # @return [String, nil]
+  # @option opt [Boolean] :format     Default: *true*.
   #
-  def document_id(doc = nil)
+  # @return [String]
+  #
+  def availability(doc = nil, opt = nil)
     doc ||= @document
-    'doc_' + doc.id.to_s.parameterize if doc
+    options = { format: true }
+    options.merge!(opt) if opt.present?
+    presenter(doc).availability(options)
   end
 
 end

@@ -71,6 +71,75 @@ module Blacklight::Lens
     # :section: Blacklight::Lens::PresenterBehaviors overrides
     # =========================================================================
 
+    public
+
+    # Render availability information.
+    #
+    # If there was an error getting availability information, rescue here to
+    # prevent displaying the rest of the search results on the page.
+    #
+    # @param [Symbol]                status   Default is from `document`.
+    # @param [TrueClass, FalseClass] format   Default: *true*
+    # @param [Symbol]                mode     Default: :tabular
+    #
+    # @return [ActiveSupport::SafeBuffer]  If *format* is *true*.
+    # @return [String]                     If *format* is *false*.
+    # @return [nil]                        If missing document or availability.
+    #
+    # This method overrides:
+    # @see Blacklight::Lens::PresenterBehaviors#availability
+    #
+    def availability(status: nil, format: true, mode: :tabular)
+
+      status ||= document&.availability_status
+      label = super(status: status, format: format)
+      return if label.blank?
+      return label unless format
+
+      av = document.availability
+
+      lines =
+        case status
+          when :available, :mixed then av.library_locations_available
+          when :unavailable       then av.library_locations_unavailable
+        end
+
+      locations =
+        content_tag(:table, class: "shelf-locations #{mode}".squish) do
+          if lines
+            separator = content_tag(:td, '-', class: 'separator')
+            lines.map { |lib, loc|
+              content_tag(:tr, class: 'line') do
+                lib = content_tag(:td, lib, class: 'library')
+                loc =
+                  content_tag(:td, class: 'locations') do
+                    if mode == :tabular
+                      loc.map { |v| content_tag(:div, v) }.join.html_safe
+                    else
+                      loc.join(', ')
+                    end
+                  end
+                [lib, separator, loc].compact.join.html_safe
+              end
+            }.join("\n").html_safe
+          else
+            content_tag(:tr, class: 'line') do
+              content_tag(:td, class: 'error') do
+                av.error_message || 'Unknown error'
+              end
+            end
+          end
+        end
+
+      content_tag(:div, class: 'availability-status') do
+        label + locations
+      end
+    end
+
+    # =========================================================================
+    # :section: Blacklight::Lens::PresenterBehaviors overrides
+    # =========================================================================
+
     private
 
     # field_presenter

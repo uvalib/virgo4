@@ -17,14 +17,7 @@
 
 %dd-item-format {
     .label {
-        display:          inline-block;
-        margin:           2px -2px -1px;
-        padding:          0 4px 1px;
-        font-size:        smaller;
-        vertical-align:   top;
-        color:            white;
-        background-color: $gray-600;
-        border-radius:    4px;
+        @include badge($gray-600);
     }
 }
 
