@@ -1,0 +1,306 @@
+// app/assets/stylesheets/feature/_availability.scss
+
+//=============================================================================
+// Common definitions.
+//=============================================================================
+
+%availability-badge {
+
+    $fg-color: whitesmoke;
+
+    @include badge($gray-500,  $fg-color);
+
+    min-width:    5.5rem; // Wide enough for small caps "UNAVAILABLE".
+    font-weight:  bold;
+    font-variant: all-small-caps;
+
+    &.available   { background-color: $success; }
+    &.unavailable { background-color: salmon; }
+    &.mixed       { background-color: tan; }
+    &.error       { background-color: $danger; }
+    &.none        { background-color: $dark; }
+
+    &.non-circ    { background-color: $dark; min-width: unset; }
+}
+
+//=============================================================================
+// Availability in metadata listings
+//=============================================================================
+
+.availability-indicator {
+    @extend %availability-badge;
+}
+
+.availability-indicator + .availability-indicator {
+    margin-left: 0.5rem;
+}
+
+// The following metadata fields are not useful when availability is displayed.
+// Until they are eliminated from display they can be "removed" here.
+dt, dd {
+    &.blacklight-library_a,
+    &.blacklight-location_a,
+    &.blacklight-location2_a,
+    &.blacklight-summary_holdings_a {
+        display: none;
+    }
+}
+
+// Index status line (a.k.a. "brief availability").
+.availability-status {
+
+    @extend .d-sm-flex;
+
+    .status {
+        @extend %availability-badge;
+    }
+
+    .shelf-locations {
+
+        @extend .ml-2;
+
+        @include scroll-tall-element(12vh);
+
+        border: none;
+
+        .line {
+
+            .error {
+                // TODO: ???
+            }
+
+            .library {
+                font-weight: bold;
+                color:       #666;
+            }
+
+            .separator {
+                // TODO: ???
+            }
+
+            .locations {
+                // TODO: ???
+            }
+        }
+
+        &.linear {
+
+            display:    block;
+            margin-top: -0.25rem;
+
+            .line {
+
+                display: block;
+
+                > * {
+                    display: inline-block;
+                }
+
+                .separator {
+                    @extend .ml-1;
+                    @extend .mr-1;
+                }
+
+                .locations {
+                    display: inline;
+                }
+            }
+        }
+
+        &.tabular {
+
+            @extend .table;
+            @extend .table-sm;
+
+            width:      auto;
+            margin-top: -0.1rem;
+
+            .line {
+
+                @extend .py-1;
+
+                line-height: 0.90;
+                border:      none;
+
+                > * {
+                    line-height: 1.15;
+                    border:      none;
+                }
+
+                .separator {
+                    padding-left:  0;
+                    padding-right: 0;
+                }
+
+                .locations {
+
+                    display:        flex;
+                    flex-direction: column;
+
+                    *:not(:first-child) {
+                        margin-top: 0.25rem;
+                    }
+                }
+            }
+        }
+    }
+}
+
+//=============================================================================
+// Availability table - holdings from Sirsi
+//=============================================================================
+
+.holdings {
+
+    @extend .table;
+    @extend .table-sm;
+    //@extend .table-striped;
+    //@extend .table-hover;
+    @extend .table-responsive-md;
+
+    //table-layout: fixed;
+    //width:        100%;
+    border: 1px solid $gray-400;
+
+    thead {
+        @extend .thead-light;
+    }
+
+    // Table header row.
+    .head-row {
+
+        // TODO: header row
+
+        .holding-head {
+
+            // TODO: column header
+
+        }
+    }
+
+    // Data row.
+    .holding {
+
+        // TODO: data row
+
+        .holding-data {
+
+            &.library-name {
+                font-weight: bold;
+                color:       #666;
+            }
+
+            &.availability {
+                display: flex;
+            }
+        }
+    }
+}
+
+//=============================================================================
+// Availability table - summary holdings from Solr metadata
+//=============================================================================
+
+.holdings-summaries {
+
+    //@extend .card-deck;
+    //@extend .card-group;
+
+    .holdings-summary {
+
+        @extend .card;
+
+        width: 100%;
+
+        .library {
+
+            @extend .card-header;
+
+            padding:     0.5rem;
+            font-weight: bold;
+
+            button { padding: 0; }
+        }
+
+        .holding-group {
+
+            @extend .card-body;
+
+            display:        flex;
+            flex-direction: column;
+
+            &:not(:first-of-type) {
+              padding-top: 0;
+            }
+
+            // Begins a section for items at a particular location.
+            .home-location {
+
+                @extend .card-title;
+
+                font-weight: bold;
+            }
+
+            // A container element indicating a line in the summary.
+            .summary-group {
+
+                @extend .card-text;
+
+                .summary-call-number,
+                .summary-text,
+                .summary-note {
+                    display:     block;
+                    text-indent: -1rem;
+                }
+
+                // Each call number appears as a sub-section under a location.
+                .summary-call-number {
+                    margin-left: 2rem;
+                    font-weight: bold;
+                    color:       #666;
+                }
+
+                // Each line appears subordinate to a call number.
+                .summary-text {
+                    margin-left: 3rem;
+                }
+
+                // Standalone notes appear at the same level as text.
+                .summary-note {
+                    margin-left: 3rem;
+                    font-style:  italic;
+                }
+
+                // If the container element has .summary-group.note-entry that
+                // indicates the text includes a note which should be displayed
+                // on the same line as the text.
+                &.note-entry {
+
+                    display: inline-block;
+
+                    .summary-call-number {
+                        display: inline-block;
+                    }
+
+                    .summary-text {
+                        display: inline-block;
+                    }
+
+                    .summary-note {
+                        display:     inline;
+                        margin-left: 0.5rem;
+                        text-indent: 0;
+                        font-style:  normal;
+                        color:       #999;
+                    }
+                }
+            }
+
+            // Add a gap above the second and subsequent call numbers within a
+            // holding group.
+            .summary-group + .summary-group .summary-call-number {
+                margin-top: 1rem;
+            }
+        }
+    }
+}

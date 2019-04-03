@@ -81,6 +81,33 @@ module Blacklight::Document
       result
     end
 
+    # Get the first (or only) value of an index field.
+    #
+    # @param [String, Symbol] key
+    #
+    # This method overrides:
+    # @see Blacklight::Document#first
+    #
+    def first(key)
+      values(key).first
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    public
+
+    # Get the value(s) of an index field as an array.
+    #
+    # @param [String, Symbol] key
+    #
+    # @return [Array<String>]
+    #
+    def values(key)
+      Array.wrap(self[key]).compact
+    end
+
     # =========================================================================
     # :section:
     # =========================================================================
@@ -108,6 +135,54 @@ module Blacklight::Document
     #
     def discoverable?(*)
       true
+    end
+
+    # Indicate whether this document is a journal or other serial.
+    #
+    def journal?(*)
+    end
+
+    # Indicate whether this document represents an item that is accessible
+    # through Patron Driven Acquisitions (PDA).
+    #
+    def pda?(*)
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    public
+
+    # Indicate whether this document has any of the named feature(s).
+    #
+    # @param [Array<String, Array<String>>] *
+    #
+    # @return [String]                The first matching feature.
+    # @return [nil]                   If none of *features* were found.
+    #
+    def has_feature?(*)
+    end
+
+    # Physical item identifiers.
+    #
+    # @return [Array<String>]
+    #
+    def barcodes(*)
+      []
+    end
+
+    # =========================================================================
+    # :section:
+    # =========================================================================
+
+    public
+
+    # Indicate whether this is a de-spined item.
+    #
+    # @param [String] *
+    #
+    def despined?(*)
     end
 
     # =========================================================================

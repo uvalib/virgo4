@@ -1,0 +1,82 @@
+<%# app/views/availability/_holdings.html.erb -%>
+<%-
+  doc = document ||= @document
+  unique_site  = unique_site_type(doc) # :kluge, et. al.
+  availability = (doc&.availability unless unique_site)
+
+  return unless unique_site || availability
+
+  error = availability&.error_message
+  holdings = (availability&.holdings if availability&.visible_copies&.nonzero?)
+  missing_lost = (availability&.lost if holdings.blank?)
+
+  no_info_text = nil
+=begin
+  # In the Special Collections lens, if an item has any Special Collections
+  # holdings then only those holdings are shown; otherwise display it the
+  # usual way.  (The latter case only arises in virtual shelf browse; index
+  # search results would never show items without Special Collections
+  # holdings.)
+  if special_collections_lens? && error.blank?
+    sc_holdings = availability.special_collections_holdings
+    if sc_holdings.present?
+      holdings     = sc_holdings
+      no_info_text = 'No Special Collections items for this title.'
+    end
+  end
+=end
+
+  map_heading = 'Map'
+  map_heading = "<!-- #{map_heading} -->".html_safe if unique_site
+-%>
+
+<table class="holdings">
+  <thead>
+    <tr class="head-row">
+      <th class="holding-head library-name">Library</th>
+      <th class="holding-head location-name">Location</th>
+      <th class="holding-head map-it"><%= map_heading %></th>
+      <th class="holding-head num-available">Availability</th>
+      <th class="holding-head call-number">Call Number</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <%- if unique_site -%>
+
+      <%= unique_site_row(doc) %>
+
+    <%- elsif error -%>
+
+      <%= error_row(error: error) %>
+
+    <%- elsif holdings -%>
+
+      <%- holdings.each do |holding| -%>
+        <%- type_handlers = [:ils, :ill_ivy, :ill_leo, :sc].map do |type| -%>
+          <%- handler = nil &&'UVA::Request::Handler[type]' -%>
+          <%- [type, handler] if handler&.can_request?(holding) -%>
+        <%- end.compact.to_h -%>
+        <%- holding.copies.each do |copy| -%>
+          <%- css = [] -%>
+          <%- type_handlers.each_pair do |type, handler| -%>
+            <%- css << "type-#{type}" if handler.can_request?(copy) -%>
+          <%- end -%>
+          <%= item_row(doc, holding, copy, class: css) %>
+        <%- end -%>
+      <%- end -%>
+
+    <%- elsif missing_lost -%>
+
+      <%- missing_lost.each_pair do |lib, copy| -%>
+        <%= missing_row(doc, lib, copy) %>
+      <%- end -%>
+
+    <%- else -%>
+
+      <%= no_info_row(message: no_info_text) %>
+
+    <%- end -%>
+
+  </tbody>
+</table>

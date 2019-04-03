@@ -65,6 +65,39 @@
 }
 
 // ============================================================================
+// Text
+// ============================================================================
+
+/// This should probably be based on Bootstrap .badge
+///
+/// @param {Color} $bg-color        The background color.
+/// @param {Color} $fg-color        The text color.
+///
+@mixin badge($bg-color: $gray-500, $fg-color: white) {
+    display:          inline-block;
+    margin:           1px 0 auto;
+    padding:          0 4px 2px;
+    vertical-align:   top;
+    text-align:       center;
+    word-break:       keep-all;
+    font-size:        smaller;
+    color:            $fg-color;
+    background-color: $bg-color;
+    border-radius:    4px;
+}
+
+/// Make an element scroll vertically if it grows beyond a certain height.
+///
+/// @param {Number} $max-height       Maximum height of element; default: 21vh
+///
+@mixin scroll-tall-element($max-height: 21vh) {
+    max-height:          $max-height;
+    overflow-x:          hidden;
+    overflow-y:          auto;
+    overscroll-behavior: contain;
+}
+
+// ============================================================================
 // Animation
 // ============================================================================
 

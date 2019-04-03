@@ -112,9 +112,9 @@ class SolrDocument < LensDocument
     super(source_doc, response, lens)
   end
 
-  # =========================================================================
+  # ===========================================================================
   # :section: Blacklight::Document::Base overrides
-  # =========================================================================
+  # ===========================================================================
 
   public
 
@@ -139,6 +139,23 @@ class SolrDocument < LensDocument
   #
   def discoverable?
     super # TODO: Awaiting Solr field...
+  end
+
+  # ===========================================================================
+  # :section: Blacklight::Document::Base overrides
+  # ===========================================================================
+
+  public
+
+  # Indicate whether this is a de-spined item.
+  #
+  # @param [String] barcode
+  #
+  # This method overrides:
+  # @see Blacklight::Document::Base#despined?
+  #
+  def despined?(barcode)
+    values(:despined_barcodes_a).include?(barcode)
   end
 
 end

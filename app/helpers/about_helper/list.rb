@@ -75,44 +75,37 @@ module AboutHelper::List
   #
   def library_heading_row
     content_tag(:tr) do
-      content_tags(:th, *LIBRARY_COLUMNS, class: 'heading')
+      column_tags(:th, *LIBRARY_COLUMNS, class: 'heading')
     end
   end
 
   # Table rows for the library list.
   #
-  # @param [Firehose::LibraryList] list
-  # @param [Hash]                  opt
+  # @param [IlsLibraryList, Array<Ils::Library>] list
+  # @param [Hash, nil]                           opt
   #
   # @return [Array<ActiveSupport::SafeBuffer>]
   #
   def library_rows(list, opt = nil)
     html_opt = { class: 'data' }
     merge_html_options!(html_opt, opt)
-=begin # TODO: Firehose
-    list.libraries
+    list = list.libraries if list.is_a?(IlsLibraryList)
+    list
       .sort { |a, b| a.id.to_i <=> b.id.to_i }
       .map do |library|
-        entry = [
-          library.id,
-          library.code,
-          library.name,
-          library.leoable?,
-          library.deliverable?,
-          library.holdable?,
-          library.remote?
-        ].map { |v| v.presence || MISSING }
         content_tag(:tr) do
-          content_tags(:td, *entry, html_opt)
+          columns = [
+            library.id,
+            library.code,
+            library.name,
+            library.leoable?,
+            library.deliverable?,
+            library.holdable?,
+            library.remote?
+          ]
+          column_tags(:td, *columns, html_opt)
         end
       end
-=end
-    list.map do |library| # NOTE: temporary; to be removed
-      entry = [library] + ([MISSING] * (LIBRARY_COLUMNS.size - 1))
-      content_tag(:tr) do
-        content_tags(:td, *entry, html_opt)
-      end
-    end
   end
 
   # ===========================================================================
@@ -143,36 +136,28 @@ module AboutHelper::List
   #
   def location_heading_row
     content_tag(:tr) do
-      content_tags(:th, *LOCATION_COLUMNS, class: 'heading')
+      column_tags(:th, *LOCATION_COLUMNS, class: 'heading')
     end
   end
 
   # Table rows for the location list.
   #
-  # @param [Firehose::LocationList] list
-  # @param [Hash]                   opt
+  # @param [IlsLocationList, Array<Ils::Library>] list
+  # @param [Hash, nil]                            opt
   #
   # @return [Array<ActiveSupport::SafeBuffer>]
   #
   def location_rows(list, opt = nil)
     html_opt = { class: 'data' }
     merge_html_options!(html_opt, opt)
-=begin # TODO: Firehose
-    list.locations
+    list = list.locations if list.is_a?(IlsLocationList)
+    list
       .sort { |a, b| a.id.to_i <=> b.id.to_i }
       .map do |loc|
-        entry = [loc.id, loc.code, loc.name].map { |v| v.presence || MISSING }
         content_tag(:tr) do
-          content_tags(:td, *entry, html_opt)
+          column_tags(:td, loc.id, loc.code, loc.name, html_opt)
         end
       end
-=end
-    list.map do |loc| # NOTE: temporary; to be removed
-      entry = [loc] + ([MISSING] * (LOCATION_COLUMNS.size - 1))
-      content_tag(:tr) do
-        content_tags(:td, *entry, html_opt)
-      end
-    end
   end
 
   # ===========================================================================
@@ -236,9 +221,11 @@ module AboutHelper::List
   #
   # @return [ActiveSupport::SafeBuffer]
   #
-  def content_tags(tag, *args)
+  def column_tags(tag, *args)
     html_opt = args.last.is_a?(Hash) ? args.pop : {}
-    args.map { |arg| content_tag(tag, arg, html_opt) }.join.html_safe
+    args.map { |arg|
+      content_tag(tag, (arg || MISSING), html_opt)
+    }.join.html_safe
   end
 
   # ===========================================================================

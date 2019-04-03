@@ -64,13 +64,14 @@
         end
       }
     end
-  title = link_to_document(doc, counter: document_counter)
 
 -%>
 <div class="documentHeader row">
   <h3 class="index_title document-title-heading <%= title_class %>">
     <%= counter %>
-    <%= title %>
+    <div class="document-title">
+      <%= link_to_document(doc, counter: document_counter) %>
+    </div>
   </h3>
   <%= document_actions %>
 </div>

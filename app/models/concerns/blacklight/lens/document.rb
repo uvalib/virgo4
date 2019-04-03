@@ -9,6 +9,7 @@ require 'blacklight/lens'
 require_relative '../document/base'
 require_relative 'document/export'
 require_relative 'document/schema_org'
+require_relative 'document/availability'
 
 # Blacklight::Lens::Document
 #
@@ -25,6 +26,7 @@ module Blacklight::Lens::Document
   include Blacklight::Document::Base
   include Blacklight::Lens::Document::Export
   include Blacklight::Lens::Document::SchemaOrg
+  include Blacklight::Lens::Document::Availability
 
   # For Blacklight::Gallery
   include Blacklight::Gallery::OpenseadragonSolrDocument
@@ -75,6 +77,56 @@ module Blacklight::Lens::Document
   #
   def discoverable?
     !has?(:shadowed_location_f, 'UNDISCOVERABLE')
+  end
+
+  # Indicate whether this document is a journal or other serial.
+  #
+  # This method overrides:
+  # @see Blacklight::Document::Base#journal?
+  #
+  def journal?
+    has?(:format_f, 'Journal/Magazine')
+  end
+
+  # Indicate whether this document represents an item that is accessible
+  # through Patron Driven Acquisitions (PDA).
+  #
+  # This method overrides:
+  # @see Blacklight::Document::Base#pda?
+  #
+  def pda?
+    has_feature?('pda_print', 'pda_ebook')
+  end
+
+  # ===========================================================================
+  # :section: Blacklight::Document::Base overrides
+  # ===========================================================================
+
+  public
+
+  # Indicate whether this document has any of the named feature(s).
+  #
+  # @param [Array<String, Array<String>>] *
+  #
+  # @return [String]                  The first matching feature.
+  # @return [nil]                     If none of *features* were found.
+  #
+  # This method overrides:
+  # @see Blacklight::Document::Base#has_feature?
+  #
+  def has_feature?(*features)
+    has?(:feature_f, *features)
+  end
+
+  # Physical item identifiers.
+  #
+  # @return [Array<String>]
+  #
+  # This method overrides:
+  # @see Blacklight::Document::Base#barcodes
+  #
+  def barcodes(*)
+    values(:barcode_f)
   end
 
   # ===========================================================================

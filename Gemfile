@@ -114,6 +114,11 @@ gem 'ebsco-eds', '1.0.7'
 
 gem 'curb'
 
+gem 'representable', '~> 3.0'
+gem 'virtus', '~> 1.0'
+gem 'multi_json'
+gem 'nokogiri'
+
 # =============================================================================
 # :section: Blacklight testing and development
 # =============================================================================

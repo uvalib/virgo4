@@ -1,0 +1,22 @@
+<%# app/views/catalog/availability.html.erb -%>
+<%-
+  doc = document ||= @document
+  return unless doc
+
+  template_opts = { document: doc }
+-%>
+
+<%- if false # in_popup? -%>
+
+  <div class="availability-popup" role="grid">
+    <h2 class="availability-header">Availability</h2>
+    <div class="availability-scroller" role="article">
+      <%= render 'catalog/availability_table', template_opts %>
+    </div>
+  </div>
+
+<%- else -%>
+
+  <%= render 'catalog/availability_table', template_opts %>
+
+<%- end -%>

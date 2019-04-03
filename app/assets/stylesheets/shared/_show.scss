@@ -94,8 +94,33 @@ body.blacklight-show .document {
         }
     }
 
-    dd.blacklight-url_a {
-        word-break: keep-all;
+    // TODO: Unclear why this shows up the way it does...
+    .extra-document-title {
+        display: none;
+    }
+
+    .document-title,
+    .document-author {
+        @include scroll-tall-element(26vh);
+        padding-bottom: 4px;
+        line-height:    1.1;
+    }
+
+    dd {
+        @include scroll-tall-element;
+    }
+
+    // Allow these to be taller before adding a scrollbar.
+    dd.blacklight-subject_summary_a,
+    dd.blacklight-eds_abstract {
+        max-height: 50vh;
+    }
+
+    // These handle scrolling on their own.
+    dd.availability,
+    dd.blacklight-eds_html_fulltext {
+        max-height: unset;
+        overflow:   unset;
     }
 
     // TODO: temporary; fields should not actually be displayed as URLs

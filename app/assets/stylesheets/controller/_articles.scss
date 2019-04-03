@@ -189,10 +189,11 @@ dd.blacklight-eds_html_fulltext {
             @extend %article-full-width;
         }
 
-        max-height:  97vh;
-        overflow-x:  auto;
-        overflow-y:  scroll;
-        resize:      both;
+        max-height:          97vh;
+        overflow-x:          auto;
+        overflow-y:          scroll;
+        resize:              both;
+        overscroll-behavior: contain;
 
         // Settings that apply to any text not inside of an element like <p>.
         line-height: 1.25;

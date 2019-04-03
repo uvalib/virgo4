@@ -38,7 +38,7 @@ module HtmlHelper
   def css_classes(*args)
     yield(args) if block_given?
     args.flat_map { |a|
-      a.is_a?(Array) ? a : a.to_s.squish.split(' ')
+      a.is_a?(Array) ? a : a.to_s.squish.split(' ') if a.present?
     }.compact.uniq.join(' ').html_safe
   end
 
