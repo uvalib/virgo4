@@ -50,25 +50,6 @@ class Ils::Hold < Ils::Record::Base
 
   public
 
-  # Initialize a new instance.
-  #
-  # @param [Hash, String, nil] data
-  # @param [Hash, nil]         opt
-  #
-  def initialize(data = nil, **opt)
-    super
-    if error?
-      self.catalog_item   = Ils::CatalogItem.new(nil, error: exception)
-      self.pickup_library = Ils::PickupLibrary.new(nil, error: exception)
-    end
-  end
-
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
   # date_placed_f
   #
   # @return [String]

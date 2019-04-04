@@ -20,26 +20,7 @@ class IlsReserves < Ils::Message
 
   end
 
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
-  # Initialize a new instance.
-  #
-  # @param [Hash, String] data
-  # @param [Hash, nil]    opt
-  #
-  # @option options [Symbol] :format
-  #
-  # This method overrides:
-  # @see Ils::Record::Base#initialize
-  #
-  def initialize(data, **opt)
-    super
-    self.reserves = [] if error?
-  end
+  delegate_missing_to :reserves
 
 end
 

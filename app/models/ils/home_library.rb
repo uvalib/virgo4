@@ -50,6 +50,7 @@ class Ils::HomeLibrary < Ils::Record::Base
   # @param [Hash, nil]         opt
   #
   def initialize(data = nil, **opt)
+    @summary_locations = []
     if (_name = opt[:name]) || (_code = opt[:code])
       if _name && !_code
         n, c = lookup(_name)
@@ -70,7 +71,6 @@ class Ils::HomeLibrary < Ils::Record::Base
     super(data, opt)
     self.name = _name if _name
     self.code = _code if _code
-    @summary_locations = []
   end
 
   # ===========================================================================

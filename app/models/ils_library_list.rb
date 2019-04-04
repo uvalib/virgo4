@@ -20,26 +20,7 @@ class IlsLibraryList < Ils::Message
 
   end
 
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
-  # Initialize a new instance.
-  #
-  # @param [Hash, String] data
-  # @param [Hash, nil]    opt
-  #
-  # @option options [Symbol] :format
-  #
-  # This method overrides:
-  # @see Ils::Record::Base#initialize
-  #
-  def initialize(data, **opt)
-    super
-    self.libraries = [] if error?
-  end
+  delegate_missing_to :libraries
 
   # ===========================================================================
   # :section:
@@ -54,7 +35,7 @@ class IlsLibraryList < Ils::Message
   # @return [Ils::Library, nil]
   #
   def lookup(name)
-    (libraries || []).find do |v|
+    libraries.find do |v|
       v.name.casecmp(name).zero? || (v.code == name)
     end
   end
@@ -93,7 +74,7 @@ class IlsLibraryList < Ils::Message
   #
   def all(opt = nil)
     opt ||= {}
-    (libraries.sort_by!(&:name) || []).map { |library|
+    libraries.sort_by!(&:name).map { |library|
       not_included =
         opt.find do |condition, requirement|
           case condition

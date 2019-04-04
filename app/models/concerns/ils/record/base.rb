@@ -44,18 +44,14 @@ class Ils::Record::Base
         when Exception then opt[:error]
         when String    then Exception.new(opt[:error])
       end
-    @serializer_type =
-      if @exception
-        :hash
-      elsif (type = opt[:format])
-        unless SERIALIZER_TYPES.include?(type)
-          abort "#{type.inspect}: not in #{SERIALIZER_TYPES.inspect}"
-        end
-        type
-      else
-        DEFAULT_SERIALIZER_TYPE
-      end
-    deserialize(data)
+    if @exception
+      @serializer_type = :hash
+      initialize_attributes
+    else
+      @serializer_type = opt[:format] || DEFAULT_SERIALIZER_TYPE
+      assert_serializer_type(@serializer_type)
+      deserialize(data)
+    end
   end
 
   # ===========================================================================
@@ -82,19 +78,7 @@ class Ils::Record::Base
   # @return [nil]
   #
   def deserialize(data)
-    if valid?
-      serializer.deserialize(data)
-    else
-      serializer.deserialize_error_data
-    end
-  end
-
-  # The original data payload from the source.
-  #
-  # @return [String]
-  #
-  def source_data
-    serializer.source_data
+    serializer.deserialize(data)
   end
 
   # ===========================================================================
@@ -122,6 +106,41 @@ class Ils::Record::Base
   #
   def valid?
     !error?
+  end
+
+  # Default data used to initialize an error instance.
+  #
+  # @return [Hash{Symbol=>BasicObject}]
+  #
+  # @see Ils::Record::Associations#property_defaults
+  #
+  def default_data
+    self.class.property_defaults.deep_dup
+  end
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  protected
+
+  # Directly assign schema attributes.
+  #
+  # @param [Hash, nil] data           Default: #default_data
+  #
+  # @return [Hash{Symbol=>BasicObject}]
+  #
+  # == Usage Notes
+  # This is only intended for use in the initialization of an error instance.
+  #
+  def initialize_attributes(data = nil)
+    (data || default_data).each_pair do |attr, value|
+      case value
+        when Class then value = value.new
+        when Proc  then value = value.call(error: exception)
+      end
+      send(:"#{attr}=", value)
+    end
   end
 
 end

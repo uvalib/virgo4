@@ -20,26 +20,7 @@ class IlsError < Ils::Message
 
   end
 
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
-  # Initialize a new instance.
-  #
-  # @param [Hash, String] data
-  # @param [Hash, nil]    opt
-  #
-  # @option options [Symbol] :format
-  #
-  # This method overrides:
-  # @see Ils::Record::Base#initialize
-  #
-  def initialize(data, **opt)
-    super
-    self.violation = Ils::Violation.new(nil, error: exception) if error?
-  end
+  delegate_missing_to :violation
 
 end
 

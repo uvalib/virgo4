@@ -41,24 +41,6 @@ class Ils::Course < Ils::Record::Base
 
   public
 
-  # Initialize a new instance.
-  #
-  # @param [Hash, String, nil] data
-  # @param [Hash, nil]         opt
-  #
-  # @option options [SolrDocument] :doc
-  #
-  def initialize(data = nil, **opt)
-    super
-    self.reserves = [] if error?
-  end
-
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
   # sorted_reserves
   #
   # @return [Array<Reserve>]

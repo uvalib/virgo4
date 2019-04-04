@@ -42,27 +42,6 @@ class Ils::Holding < Ils::Record::Base
 
   public
 
-  # Initialize a new instance.
-  #
-  # @param [Hash, String, nil] data
-  # @param [Hash, nil]         opt
-  #
-  # @option options [SolrDocument] :doc
-  #
-  def initialize(data = nil, **opt)
-    super
-    if error?
-      self.library = Ils::HomeLibrary.new(nil, error: exception)
-      self.copies  = []
-    end
-  end
-
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
   # shadowed?
   #
   def shadowed?

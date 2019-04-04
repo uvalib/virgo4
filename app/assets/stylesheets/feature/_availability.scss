@@ -52,7 +52,10 @@ dt, dd {
     @extend .d-sm-flex;
 
     .status {
+
         @extend %availability-badge;
+
+        padding-bottom: 3px;
     }
 
     .shelf-locations {
@@ -123,8 +126,10 @@ dt, dd {
                 border:      none;
 
                 > * {
-                    line-height: 1.15;
-                    border:      none;
+                    padding-top:    0.25rem;
+                    padding-bottom: 0;
+                    line-height:    1.15;
+                    border:         none;
                 }
 
                 .separator {
@@ -158,8 +163,6 @@ dt, dd {
     //@extend .table-hover;
     @extend .table-responsive-md;
 
-    //table-layout: fixed;
-    //width:        100%;
     border: 1px solid $gray-400;
 
     thead {
@@ -192,6 +195,17 @@ dt, dd {
 
             &.availability {
                 display: flex;
+            }
+
+            &.no-info {
+
+                padding: 0.25rem;
+
+                .error {
+                    padding:          0 0.25rem;
+                    color:            white;
+                    background-color: $danger;
+                }
             }
         }
     }

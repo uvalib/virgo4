@@ -245,7 +245,7 @@ module AvailabilityHelper
     error   = opt.delete(:error)
     message = opt.delete(:message) || HOLDING_MESSAGE[:error]
     message += ": #{error}" if error.present?
-    message = content_tag(:div, ERB::Util.h(message), class: 'btn-danger')
+    message = content_tag(:div, ERB::Util.h(message), class: 'error')
     availability_spanning_row(message, opt)
   end
 

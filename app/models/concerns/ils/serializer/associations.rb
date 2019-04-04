@@ -14,40 +14,6 @@ module Ils::Serializer::Associations
 
   extend ActiveSupport::Concern
 
-  # The options to #attribute, #has_one, or #has_many definitions which
-  # indicate the specification of a type for the element or (in the case of
-  # #has_many) its constituent parts.
-  #
-  # @type [Array<Symbol>]
-  #
-  TYPE_OPTION_KEYS = %i[type extend decorator].freeze
-
-  # The types that may be given as the second argument to #attribute, #has_one,
-  # or #has_many definitions.
-  #
-  # @type [Hash{Symbol=>Object}]
-  #
-  SCALAR_DEFAULTS = {
-    '':          '',
-    Boolean:     false,
-    Date:        Date.new,
-    DateTime:    DateTime.new,
-    FalseClass:  false,
-    Float:       0.0,
-    Integer:     0,
-    Numeric:     0,
-    String:      '',
-    Symbol:      :'',
-    TrueClass:   true,
-  }.freeze
-
-  # The types that may be given as the second argument to #attribute, #has_one,
-  # or #has_many definitions.
-  #
-  # @type [Array<Symbol>]
-  #
-  SCALAR_TYPES = SCALAR_DEFAULTS.keys.freeze
-
   # The maximum number of elements within a collection.
   #
   # @type [Integer]
@@ -68,8 +34,8 @@ module Ils::Serializer::Associations
 
     public
 
-    # Simulate ActiveRecord::Attributes#attribute to define a data element that
-    # is handled as an attribute.
+    # Simulate ActiveRecord::Attributes#attribute to define a schema property
+    # that is handled as an attribute.
     #
     # @param [Symbol]                     name
     # @param [Class, String, Symbol, nil] type
@@ -91,7 +57,8 @@ module Ils::Serializer::Associations
     def attribute(name, type = nil, **opt)
       # If the type is missing or explicitly "String" then *type* will be
       # returned as *nil*.
-      type, opt  = get_type_opt(nil, type, opt)
+      type = extract_type_option!(opt) || type
+      type = get_type(nil, type)
       opt[:type] = type if type
 
       # Ensure that attributes get a type-appropriate default (otherwise they
@@ -103,8 +70,8 @@ module Ils::Serializer::Associations
       property(name, opt)
     end
 
-    # Simulate ActiveRecord::Associations#has_one to define a data element that
-    # is handled as a singleton element.
+    # Simulate ActiveRecord::Associations#has_one to define a schema property
+    # that is handled as a single element.
     #
     # @param [Symbol]                     name
     # @param [Class, String, Symbol, nil] type
@@ -124,7 +91,8 @@ module Ils::Serializer::Associations
     #     <XXX><elem>value</elem></XXX>
     #
     def has_one(name, type = nil, **opt, &block)
-      type, opt = get_type_opt(name, type, opt)
+      type = extract_type_option!(opt) || type
+      type = get_type(name, type)
       if scalar_type?(type)
         opt[:attribute] = false
         attribute(name, type, opt)
@@ -134,8 +102,8 @@ module Ils::Serializer::Associations
       end
     end
 
-    # Simulate ActiveRecord::Associations#has_many to define a data element
-    # collection.
+    # Simulate ActiveRecord::Associations#has_many to define a schema property
+    # that is handled as a collection.
     #
     # @param [Symbol]                     name
     # @param [Class, String, Symbol, nil] type
@@ -160,8 +128,8 @@ module Ils::Serializer::Associations
     #     <XXX><elem>...</elem>...<elem>...</elem></XXX>
     #
     def has_many(name, type = nil, count = MAX_HAS_MANY_COUNT, **opt, &block)
-      type, opt = get_type_opt(name, type, opt)
-      type ||= Axiom::Types::String
+      type = extract_type_option!(opt) || type
+      type = get_type(name, type) || Axiom::Types::String
 
       if scalar_type?(type)
         opt[:type]      = type
@@ -184,41 +152,40 @@ module Ils::Serializer::Associations
 
     protected
 
-    # Determine the class to be associated with a data element.
+    # Extract #TYPE_OPTION_KEYS.
     #
-    # @param [Symbol]                     name
-    # @param [Class, String, Symbol, nil] type
-    # @param [Hash, nil]                  opt
+    # @param [Hash] opt               May be modified.
     #
-    # @return [Array<(Class, Hash)>]
-    # @return [Array<(nil,   Hash)>]
+    # @return [Object, nil]
     #
-    def get_type_opt(name, type, opt)
-      opt  = opt.dup
-      type = opt.extract!(*TYPE_OPTION_KEYS).values.first || type || name
-      type = type.to_s.classify if type.is_a?(Symbol)
-      name = type.to_s.demodulize
-      if name.blank? || (name == 'String')
-        type = nil
-      elsif SCALAR_TYPES.include?(name.to_sym)
-        name = 'Boolean' if %w(TrueClass FalseClass).include?(name)
-        type = "Axiom::Types::#{name}"
-      elsif !(name = type.to_s).include?('::')
-        type = "Ils::#{name}"
-      end
-      type = type.constantize if type.is_a?(String)
-      return type, opt
+    def extract_type_option!(opt)
+      type_options = opt&.slice(*TYPE_OPTION_KEYS) || {}
+      opt.replace(opt.except(*type_options.keys)) if type_options.present?
+      type_options.values.first
     end
 
-    # Indicate whether the type is a scalar (not a representer) class.
+    # Determine the class to be associated with a data element.
     #
-    # @param [Class, nil] type
+    # @param [Symbol]                     property_name
+    # @param [Class, String, Symbol, nil] type
     #
-    # @return [Symbol]
+    # @return [Class]
+    # @return [nil]                   If implicitly or explicitly String.
     #
-    def scalar_type?(type)
-      name = type.to_s.demodulize.to_sym
-      SCALAR_TYPES.include?(name) || (type.parent == Object)
+    def get_type(property_name, type)
+      type ||= property_name
+      type = type.to_s.classify if type.is_a?(Symbol)
+      name = type.to_s
+      base = name.demodulize.to_sym
+      base = :Boolean if %i[TrueClass FalseClass].include?(base)
+      if base.blank? || (base == :String)
+        type = nil
+      elsif SCALAR_TYPES.include?(base)
+        type = "Axiom::Types::#{base}"
+      elsif !name.include?('::')
+        type = "Ils::#{name}"
+      end
+      type.is_a?(String) ? type.constantize : type
     end
 
     # decorator_class
@@ -234,23 +201,6 @@ module Ils::Serializer::Associations
         format = serializer_type.to_s.capitalize
         "#{record_class}::#{format}Serializer".constantize
       }
-    end
-
-    # element_name
-    #
-    # @param [String, Symbol] name
-    # @param [Symbol, nil]    mode
-    #
-    # @return [String]
-    #
-    def element_name(name, mode = nil)
-      name = name.to_s
-      case mode
-        when :underscore     then name = name.underscore
-        when :camelcase      then name = name.camelcase(:lower)
-        when :full_camelcase then name = name.camelcase(:upper)
-      end
-      name
     end
 
     # Format-specific operations for #attribute data elements.

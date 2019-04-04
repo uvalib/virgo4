@@ -91,24 +91,6 @@ class Ils::User < Ils::Record::Base
 
   public
 
-  # Initialize a new instance.
-  #
-  # @param [Hash, String, nil] data
-  # @param [Hash, nil]         opt
-  #
-  # @option options [SolrDocument] :doc
-  #
-  def initialize(data = nil, **opt)
-    super
-    self.holds = self.courses = self.checkouts = [] if error?
-  end
-
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
   # faculty?
   #
   def faculty?
