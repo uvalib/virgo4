@@ -52,12 +52,9 @@ class Ils::CatalogItem < Ils::Record::Base
   # @option options [SolrDocument] :doc
   #
   def initialize(data = nil, **opt)
-    @document = opt[:doc]
-    super(data, opt.except(:doc))
-    if error?
-      self.holdability = Ils::Holdability.new(nil, error: exception)
-      self.holdings    = []
-    end
+    opt = opt.dup
+    @document = opt.delete(:doc)
+    super(data, opt)
   end
 
   # ===========================================================================

@@ -23,7 +23,41 @@ module Ils
     #
     DEFAULT_SERIALIZER_TYPE = :json
 
-    # Possible relationships between a schema element defined by 'attribute',
+    # The options to #attribute, #has_one, or #has_many definitions which
+    # indicate the specification of a type for the schema property or (in the
+    # case of #has_many) its constituent parts.
+    #
+    # @type [Array<Symbol>]
+    #
+    TYPE_OPTION_KEYS = %i[type extend decorator].freeze
+
+    # A table of schema property scalar types mapped to literals which are
+    # their default values.
+    #
+    # @type [Hash{Symbol=>Object}]
+    #
+    SCALAR_DEFAULTS = {
+      '':          '',
+      Boolean:     false,
+      Date:        Date.new,
+      DateTime:    DateTime.new,
+      FalseClass:  false,
+      Float:       0.0,
+      Integer:     0,
+      Numeric:     0,
+      String:      '',
+      Symbol:      :'',
+      TrueClass:   true,
+    }.freeze
+
+    # The basic types that may be given as the second argument to #attribute,
+    # #has_one, or #has_many definitions.
+    #
+    # @type [Array<Symbol>]
+    #
+    SCALAR_TYPES = SCALAR_DEFAULTS.keys.freeze
+
+    # Possible relationships between a schema property defined by 'attribute',
     # 'has_one' or 'has_many' and the name of the serialized data element.
     #
     # @type [Array<Symbol>]
@@ -59,7 +93,7 @@ module Ils
     ELEMENT_NAMING_MODES =
       %i[default underscore camelcase full_camelcase].freeze
 
-    # The selected element naming mode.
+    # The selected schema property naming mode.
     #
     # @type [Symbol]
     #
@@ -75,8 +109,8 @@ module Ils
     #
     # @param [String, Hash] data
     #
-    # @return [Symbol]                  One of Ils::Schema#SERIALIZER_TYPES
-    # @return [nil]                     Otherwise
+    # @return [Symbol]                One of Ils::Schema#SERIALIZER_TYPES
+    # @return [nil]                   Otherwise
     #
     def format_of(data)
       if data.is_a?(Hash)
@@ -86,6 +120,45 @@ module Ils
       elsif data =~ /^\s*[{\[]/
         :json
       end
+    end
+
+    # Called to validate that *type* is in #SERIALIZER_TYPES.
+    #
+    # @param [Symbol] type
+    #
+    # @raise [SyntaxError]            If *type* is invalid.
+    #
+    def assert_serializer_type(type)
+      return if SERIALIZER_TYPES.include?(type)
+      raise SyntaxError, "#{type.inspect}: not in #{SERIALIZER_TYPES.inspect}"
+    end
+
+    # Indicate whether the type is a scalar (not a representer) class.
+    #
+    # @param [Class, nil] type
+    #
+    # @return [Symbol]
+    #
+    def scalar_type?(type)
+      name = type.to_s.demodulize.to_sym
+      SCALAR_TYPES.include?(name) || (type.parent == Object)
+    end
+
+    # Transform *name* into the form indicated by the given naming mode.
+    #
+    # @param [String, Symbol] name
+    # @param [Symbol, nil]    mode
+    #
+    # @return [String]
+    #
+    def element_name(name, mode = nil)
+      name = name.to_s
+      case mode
+        when :underscore     then name = name.underscore
+        when :camelcase      then name = name.camelcase(:lower)
+        when :full_camelcase then name = name.camelcase(:upper)
+      end
+      name
     end
 
   end

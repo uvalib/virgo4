@@ -64,13 +64,9 @@ class Ils::Copy < Ils::Record::Base
   # @param [Hash, nil]         opt
   #
   def initialize(data = nil, **opt)
-    @description = opt[:description] if opt[:description]
-    super(data, opt.except(:description))
-    if error?
-      self.current_location = Ils::CurrentLocation.new(nil, error: exception)
-      self.home_location    = Ils::HomeLocation.new(nil, error: exception)
-      self.item_type        = Ils::ItemType.new(nil, error: exception)
-    end
+    opt = opt.dup
+    @description = opt.delete(:description)
+    super(data, opt)
   end
 
   # ===========================================================================

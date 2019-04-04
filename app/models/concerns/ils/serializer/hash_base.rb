@@ -53,33 +53,6 @@ class Ils::Serializer::HashBase < Ils::Serializer::Base
     super
   end
 
-=begin
-  # ===========================================================================
-  # :section: Ils::Serializer::Base overrides
-  # ===========================================================================
-
-  protected
-
-  # Set source data string for JSON data.
-  #
-  # @param [String, Hash] data
-  #
-  # @return [String]
-  # @return [nil]                 If *data* is neither a String nor a Hash.
-  #
-  # This method overrides:
-  # @see Ils::Serializer::Base#set_source_data
-  #
-  def set_source_data(data)
-    @source_data ||=
-      if data.is_a?(String)
-        data.dup
-      elsif data
-        data.to_json
-      end
-  end
-=end
-
   # ===========================================================================
   # :section: Record field schema DSL
   # ===========================================================================

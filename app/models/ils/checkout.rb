@@ -52,27 +52,6 @@ class Ils::Checkout < Ils::Record::Base
 
   public
 
-  # Initialize a new instance.
-  #
-  # @param [Hash, String, nil] data
-  # @param [Hash, nil]         opt
-  #
-  # @option options [SolrDocument] :doc
-  #
-  def initialize(data = nil, **opt)
-    super
-    if error?
-      self.catalog_item = Ils::CatalogItem.new(nil, error: exception)
-      self.renewability = Ils::Renewability.new(nil, error: exception)
-    end
-  end
-
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
   # renewable?
   #
   def renewable?

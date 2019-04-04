@@ -20,6 +20,8 @@ class IlsPatron < Ils::Message
 
   end
 
+  delegate_missing_to :user
+
   # ===========================================================================
   # :section:
   # ===========================================================================
@@ -36,7 +38,6 @@ class IlsPatron < Ils::Message
   def initialize(data, **opt)
     data = strip_ldap_prefixes(data)
     super(data, opt)
-    self.user = Ils::User.new(nil, error: exception) if error?
   end
 
   # ===========================================================================

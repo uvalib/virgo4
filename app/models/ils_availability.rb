@@ -51,18 +51,14 @@ class IlsAvailability < Ils::Message
   # @see Ils::Record::Base#initialize
   #
   def initialize(data, **opt)
-    @document  = opt[:doc]  || abort('Missing doc parameter')
-    @lost      = opt[:lost] || {}
+    opt = opt.dup
+    @document  = opt.delete(:doc)  || abort('Missing doc parameter')
+    @lost      = opt.delete(:lost) || {}
     @libraries = []
-    super(data, opt.except(:doc, :lost))
-    if valid?
-      self.catalog_item.document = @document
-      set_summary_holdings
-      weed_holdings
-    else
-      self.catalog_item =
-        Ils::CatalogItem.new(nil, doc: @document, error: exception)
-    end
+    super(data, opt)
+    self.catalog_item.document = @document
+    set_summary_holdings
+    weed_holdings
   end
 
   delegate_missing_to :catalog_item

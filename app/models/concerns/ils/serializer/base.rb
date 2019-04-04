@@ -22,7 +22,7 @@ class Ils::Serializer::Base < Representable::Decorator
 
   public
 
-  # @type [String]
+  # @type [String, Hash]
   attr_reader :source_data
 
   # Initialize a new instance.
@@ -93,7 +93,8 @@ class Ils::Serializer::Base < Representable::Decorator
   # @return [nil]
   #
   # == Usage Notes
-  # This method must be overridden by the derived class to pass in :method.
+  # The derived class must override this to pass in :method via the arguments
+  # to `super`.
   #
   def deserialize(data, method = nil)
     return unless set_source_data(data)
@@ -114,15 +115,6 @@ class Ils::Serializer::Base < Representable::Decorator
     end
   end
 
-  # Use simulated data that will allow the serialization process to proceed.
-  #
-  # @return [Hash]
-  #
-  def deserialize_error_data
-    set_error_data
-    deserialize(nil)
-  end
-
   # ===========================================================================
   # :section:
   # ===========================================================================
@@ -139,16 +131,12 @@ class Ils::Serializer::Base < Representable::Decorator
   # @return [String]
   # @return [nil]                 If *data* is neither a String nor a Hash.
   #
+  # == Usage Notes
+  # This method will not be invoked (and @source_data will be *nil*) for an
+  # instance where #error? is *true*.
+  #
   def set_source_data(data)
     @source_data ||= (data.dup if data.is_a?(String) || data.is_a?(Hash))
-  end
-
-  # Set source data for error recovery.
-  #
-  # @return [Hash]
-  #
-  def set_error_data
-    @source_data = {}
   end
 
   # ===========================================================================

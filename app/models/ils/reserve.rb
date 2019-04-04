@@ -35,26 +35,6 @@ class Ils::Reserve < Ils::Record::Base
 
   end
 
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
-  # Initialize a new instance.
-  #
-  # @param [Hash, String, nil] data
-  # @param [Hash, nil]         opt
-  #
-  # @option options [SolrDocument] :doc
-  #
-  def initialize(data = nil, **opt)
-    super
-    if error?
-      self.catalog_item = Ils::CatalogItem.new(nil, error: exception)
-    end
-  end
-
 end
 
 __loading_end(__FILE__)

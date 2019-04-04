@@ -20,26 +20,7 @@ class IlsLocationList < Ils::Message
 
   end
 
-  # ===========================================================================
-  # :section:
-  # ===========================================================================
-
-  public
-
-  # Initialize a new instance.
-  #
-  # @param [Hash, String] data
-  # @param [Hash, nil]    opt
-  #
-  # @option options [Symbol] :format
-  #
-  # This method overrides:
-  # @see Ils::Record::Base#initialize
-  #
-  def initialize(data, **opt)
-    super
-    self.locations = [] if error?
-  end
+  delegate_missing_to :locations
 
   # ===========================================================================
   # :section:
@@ -54,7 +35,7 @@ class IlsLocationList < Ils::Message
   # @return [Ils::Location, nil]
   #
   def lookup(name)
-    (locations || []).find do |v|
+    locations.find do |v|
       v.name.casecmp(name).zero? || (v.code == name)
     end
   end
