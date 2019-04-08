@@ -749,7 +749,7 @@ class Config::Base
 
   # Generate a log message if the configured Solr is not appropriate.
   #
-  # @params [TrueClass, FalseClass] required
+  # @param [TrueClass, FalseClass] required
   #
   # @return [true]                  If the right Solr is configured.
   # @return [false]                 Otherwise

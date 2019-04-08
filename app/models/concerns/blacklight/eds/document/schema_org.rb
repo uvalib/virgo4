@@ -84,7 +84,7 @@ module Blacklight::Eds::Document
 
     # itemtype
     #
-    # @params [TrueClass, FalseClass, nil] peer_reviewed
+    # @param [TrueClass, FalseClass, nil] peer_reviewed
     #
     # @return [String]
     #

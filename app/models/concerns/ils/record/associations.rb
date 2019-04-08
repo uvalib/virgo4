@@ -32,8 +32,8 @@ module Ils::Record::Associations
     # In the context of a class derived from Ils::Record::Base, this definition
     # allows the method to be mapped directly to Module#attr_accessor.
     #
-    # @params [Array]     args
-    # @params [Hash, nil] opt
+    # @param [Array]     args
+    # @param [Hash, nil] opt
     #
     # @return [void]
     #
@@ -47,8 +47,8 @@ module Ils::Record::Associations
     # In the context of a class derived from Ils::Record::Base, this definition
     # allows the method to be mapped directly to Module#attr_accessor.
     #
-    # @params [Array]     args
-    # @params [Hash, nil] opt
+    # @param [Array]     args
+    # @param [Hash, nil] opt
     #
     # @return [void]
     #
@@ -62,8 +62,8 @@ module Ils::Record::Associations
     # In the context of a class derived from Ils::Record::Base, this definition
     # allows the method to be mapped directly to Module#attr_accessor.
     #
-    # @params [Array]     args
-    # @params [Hash, nil] opt
+    # @param [Array]     args
+    # @param [Hash, nil] opt
     #
     # @return [void]
     #
@@ -82,8 +82,8 @@ module Ils::Record::Associations
 
     # Define a single data element property.
     #
-    # @params [Array]     args
-    # @params [Hash, nil] opt
+    # @param [Array]     args
+    # @param [Hash, nil] opt
     #
     # args[0]   The attribute name
     # args[1]   The attribute type (if given).
@@ -97,8 +97,8 @@ module Ils::Record::Associations
 
     # Define an array data element property.
     #
-    # @params [Array]     args
-    # @params [Hash, nil] _opt        Unused
+    # @param [Array]     args
+    # @param [Hash, nil] _opt        Unused
     #
     # args[0]   The attribute name
     #
