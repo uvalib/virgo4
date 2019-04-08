@@ -5,6 +5,8 @@
 
 __loading_begin(__FILE__)
 
+require 'ils/error'
+
 # RescueConcern
 #
 module RescueConcern
@@ -40,6 +42,10 @@ module RescueConcern
     rescue_from *[
       Blacklight::Exceptions::InvalidRequest
     ], with: :handle_request_error
+
+    # ILS errors.
+    rescue_from Ils::RecvError, with: :handle_ils_recv_error
+    rescue_from Ils::XmitError, with: :handle_ils_xmit_error
 
   end
 
@@ -111,6 +117,34 @@ module RescueConcern
     flash_notice = i18n && I18n.t(i18n, default: '').presence
     flash_notice ||= I18n.t('blacklight.search.errors.request_error')
     handle_generic_error(exception, flash_notice, search_action_path)
+  end
+
+  # This method is executed when there is a problem with data coming from Sirsi
+  # (the Integrated Library System).
+  #
+  # @param [Ils::RecvError]      exception
+  # @param [String, Symbol, nil] i18n
+  #
+  def handle_ils_recv_error(exception, i18n = 'ils.recv.errors')
+    excp = exception.original_exception || exception
+    type = exception.class.to_s.demodulize
+    key  = type.underscore.to_sym
+    msg  = I18n.t(key, error: excp.message, scope: i18n, default: [:default])
+    handle_generic_error(exception, msg, root_path)
+  end
+
+  # This method is executed when there is a problem sending a request to Sirsi
+  # (the Integrated Library System).
+  #
+  # @param [Ils::XmitError]      exception
+  # @param [String, Symbol, nil] i18n
+  #
+  def handle_ils_xmit_error(exception, i18n = 'ils.xmit.errors')
+    excp = exception.original_exception || exception
+    type = exception.class.to_s.demodulize
+    key  = type.underscore.to_sym
+    msg  = I18n.t(key, error: excp.message, scope: i18n, default: [:default])
+    handle_generic_error(exception, msg, search_action_path)
   end
 
   # ===========================================================================

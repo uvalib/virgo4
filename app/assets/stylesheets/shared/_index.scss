@@ -119,6 +119,28 @@
             }
         }
 
+        .document-title {
+            @include scroll-tall-element(10.1vh);
+            padding-bottom: 1px;
+        }
+
+        dd {
+            @include scroll-tall-element(11vh);
+        }
+
+        // Allow these to be taller before adding a scrollbar.
+        dd.blacklight-subject_summary_a,
+        dd.blacklight-eds_abstract {
+            max-height: 25vh;
+        }
+
+        // These handle scrolling on their own.
+        dd.availability,
+        dd.blacklight-eds_html_fulltext {
+            max-height: unset;
+            overflow:   unset;
+        }
+
         dd.blacklight-url_a {
             a {
                 display:    block;

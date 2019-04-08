@@ -146,7 +146,7 @@ module Blacklight::Lens
         author_sep:         ', ',
         author_max:         nil,
         author_tag:         (DEF_AUTHOR_TAG if show_page),
-        author_class:       nil,
+        author_class:       'document-author',
         show_author:        show_page,
         show_linked_author: show_page,
       }
@@ -226,6 +226,22 @@ module Blacklight::Lens
       "(no title) - #{document.id}"
     end
 
+    # Render availability information.
+    #
+    # The default behavior here is to simply display the object.
+    #
+    # @param [Symbol]                status   Default is from `document`.
+    # @param [TrueClass, FalseClass] format   Default: *true*
+    #
+    # @return [ActiveSupport::SafeBuffer]  If *format* is *true*.
+    # @return [String]                     If *format* is *false*.
+    # @return [nil]                        If missing document or availability.
+    #
+    def availability(status: nil, format: true)
+      return unless status && (status != :none)
+      availability_label(status: status, format: format)
+    end
+
     # =========================================================================
     # :section:
     # =========================================================================
@@ -265,6 +281,25 @@ module Blacklight::Lens
       return unless field.present?
       fv_opt ||= {}
       field_value(field, fv_opt.merge(value: document[field]))
+    end
+
+    # Render a label for availability status.
+    #
+    # @param [Symbol]                status
+    # @param [TrueClass, FalseClass] format
+    #
+    # @return [ActiveSupport::SafeBuffer]  If *format* is *true*.
+    # @return [String]                     If *format* is *false*.
+    # @return [nil]                        If missing document or availability.
+    #
+    def availability_label(status:, format:)
+      label =
+        SolrDocument::AVAILABILITY_NAMES[status] || status.to_s.capitalize
+      if format
+        content_tag(:div, label, class: "status #{status.to_s.downcase}")
+      else
+        label
+      end
     end
 
     # =========================================================================
