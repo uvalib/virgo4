@@ -147,4 +147,11 @@ Rails.application.routes.draw do
 
   root to: 'catalog#index'
 
+  # ===========================================================================
+  # health check and version endpoints
+  # ===========================================================================
+
+  resources :healthcheck, only: [ :index ]
+  resources :version, only: [ :index ]
+
 end
