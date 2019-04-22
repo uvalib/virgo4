@@ -62,23 +62,88 @@ class Ils::Record::Base
 
   # A serializer instance of the currently-selected type.
   #
+  # @param [Symbol, nil] type         Default: #serializer_type
+  #
   # @return [Ils::Serializer::Base]
   #
-  def serializer
-    @serializer ||= self.class.serializers[serializer_type].new(self)
+  # @see Ils::Record::Schema::ClassMethods#serializers
+  #
+  def serializer(type = nil)
+    type ||= serializer_type
+    if type == serializer_type
+      @serializer ||= self.class.serializers[type].new(self)
+    else
+      self.class.serializers[type].new(self)
+    end
   end
 
   # Load data elements from the supplied data.
   #
-  # (If the data is a String, it must already be in JSON format.)
+  # (If the data is a String, it must already be in the form required by the
+  # serializer.)
   #
   # @param [String, Hash] data
+  # @param [Symbol, nil] type         Default: #serializer_type
   #
   # @return [Ils::Record::Base]
   # @return [nil]
   #
-  def deserialize(data)
-    serializer.deserialize(data)
+  # @see Ils::Serializer::Base#deserialize
+  #
+  def deserialize(data, type = nil)
+    serializer(type).deserialize(data)
+  end
+
+  # Serialize data elements to the indicated format.
+  #
+  # @param [Symbol, nil] type         Default: #serializer_type
+  # @param [Hash, nil]   opt
+  #
+  # @return [String]
+  #
+  # @see Ils::Serializer::Base#serialize
+  #
+  def serialize(type = nil, **opt)
+    serializer(type).serialize(**opt)
+  end
+
+  # Serialize the record instance into JSON format.
+  #
+  # @param [Hash, nil] opt
+  #
+  # @return [String]
+  #
+  # @see Ils::Serializer::JsonBase#serialize
+  #
+  def to_json(**opt)
+    serialize(:json, **opt)
+  end
+
+  # Serialize the record instance into XML format.
+  #
+  # @param [Hash, nil] opt
+  #
+  # @return [String]
+  #
+  # @see Ils::Serializer::XmlBase#serialize
+  #
+  def to_xml(**opt)
+    serialize(:xml, **opt)
+  end
+
+  # Serialize the record instance into a Hash.
+  #
+  # @param [Boolean, nil] symbolize_keys
+  # @param [Hash, nil]    opt
+  #
+  # @return [Hash]
+  #
+  # @see Ils::Serializer::HashBase#serialize
+  # @see Ils::Serializer::HashBase#SERIALIZE_SYMBOLIZE_KEYS
+  #
+  def to_hash(symbolize_keys: nil, **opt)
+    opt = opt.merge(symbolize_keys: symbolize_keys) unless symbolize_keys.nil?
+    serialize(:hash, **opt)
   end
 
   # ===========================================================================

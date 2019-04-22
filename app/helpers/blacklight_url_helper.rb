@@ -29,12 +29,16 @@ module BlacklightUrlHelper
   # @param [Blacklight::Document] doc
   # @param [Hash, nil]            opts
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [Hash, Blacklight::Document]
   #
   # @see Blacklight::Lens::SearchState#url_for_document
   #
   # This method overrides:
   # @see Blacklight::UrlHelperBehavior#url_for_document
+  #
+  # == Usage Notes
+  # This is intended for use with ActionView helper methods like #url_for and
+  # #link_to, which will interpret a hash as URL parameters.
   #
   def url_for_document(doc, opts = nil)
     search_state.url_for_document(doc, opts)
@@ -94,11 +98,11 @@ module BlacklightUrlHelper
     label = t('views.pagination.previous').html_safe
     opt   = { class: 'previous' }
     opt.merge!(options) if options.is_a?(Hash)
-    if (url = url_for_document(doc))
+    if (path = url_for_document(doc))
       count = search_session['counter'].to_i - 1
       opt.merge!(session_tracking_params(doc, count))
       opt[:rel] = 'prev'
-      link_to(label, url, opt)
+      link_to(label, path, opt)
     else
       opt[:class] += ' disabled'
       opt[:title] = t('blacklight.search.pagination.at_beginning')
@@ -120,11 +124,11 @@ module BlacklightUrlHelper
     label = t('views.pagination.next').html_safe
     opt   = { class: 'next' }
     opt.merge!(options) if options.is_a?(Hash)
-    if (url = url_for_document(doc))
+    if (path = url_for_document(doc))
       count = search_session['counter'].to_i + 1
       opt.merge!(session_tracking_params(doc, count))
       opt[:rel] = 'next'
-      link_to(label, url, opt)
+      link_to(label, path, opt)
     else
       opt[:class] += ' disabled'
       opt[:title] = t('blacklight.search.pagination.at_end')

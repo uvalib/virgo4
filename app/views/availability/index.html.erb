@@ -1,0 +1,16 @@
+<%# app/views/availability/index.html.erb -%>
+<%-
+  # Render summary status for one or more documents in HTML.
+
+  document ||= @document_list || @document
+  options  ||= {}
+
+  docs     = Array.wrap(document)
+  base_opt = {}
+
+-%>
+<%- docs.each_with_index do |doc, idx| -%>
+  <%- idx_options   = options.merge(index: idx) -%>
+  <%- template_opts = base_opt.merge(document: doc, options: idx_options) -%>
+  <%= render 'availability/status', template_opts %>
+<%- end -%>

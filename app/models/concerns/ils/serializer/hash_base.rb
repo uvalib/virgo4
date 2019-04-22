@@ -19,6 +19,12 @@ class Ils::Serializer::HashBase < Ils::Serializer::Base
   include Representable::Coercion
   include Ils::Serializer::HashAssociations
 
+  # Symbolize keys in the serialization result by default.
+  #
+  # @type [Boolean]
+  #
+  SERIALIZE_SYMBOLIZE_KEYS = true
+
   # ===========================================================================
   # :section: Ils::Serializer::Base overrides
   # ===========================================================================
@@ -28,14 +34,15 @@ class Ils::Serializer::HashBase < Ils::Serializer::Base
   # Render data elements.
   #
   # @param [Symbol, Proc, nil] method
+  # @param [Boolean, nil]      symbolize_keys
   #
   # @return [String]
   #
   # This method overrides:
   # @see Ils::Serializer::Base#serialize
   #
-  def serialize(method = :to_hash)
-    super
+  def serialize(method = :to_hash, symbolize_keys: SERIALIZE_SYMBOLIZE_KEYS)
+    symbolize_keys ? super.deep_symbolize_keys : super
   end
 
   # Load data elements.

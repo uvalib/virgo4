@@ -92,6 +92,14 @@ module ApplicationHelper
       (request.format.json? if defined?(request))
   end
 
+  # Placeholder image for asynchronous content.
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  def loading_placeholder
+    image_tag('loading-balls.gif', class: 'loading-placeholder')
+  end
+
   # ===========================================================================
   # :section: Blacklight configuration "helper_methods"
   # ===========================================================================

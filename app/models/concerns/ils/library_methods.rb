@@ -24,13 +24,21 @@ module Ils::LibraryMethods
   #
   # @type [Array<String, Regexp>]
   #
-  REMOTE_LIBRARIES = codes %w(BLANDY MT-LAKE AT-SEA INTERNET)
+  REMOTE_LIBRARIES = codes %w(BLANDY MT-LAKE)
+
+  # Library codes that do not represent actual libraries.
+  #
+  # @type [Array<String, Regexp>]
+  #
+  NON_PHYSICAL_LIBRARIES = codes 'UVA-LIB'
 
   # Libraries from which LEO cannot deliver.
   #
   # @type [Array<String, Regexp>]
   #
-  NON_LEO_LIBRARIES = (RESERVE_LIBRARIES + REMOTE_LIBRARIES).freeze
+  NON_LEO_LIBRARIES = (
+    RESERVE_LIBRARIES + REMOTE_LIBRARIES + NON_PHYSICAL_LIBRARIES
+  ).freeze
 
   # Libraries that should come after others in the availability list and in
   # summary holdings.
@@ -102,12 +110,12 @@ module Ils::LibraryMethods
     !match?((lib || code), NON_LEO_LIBRARIES)
   end
 
-  # is_sas?
+  # online?
   #
   # @param [String, nil] lib        Default: `code`.
   #
-  def is_sas?(lib = nil)
-    match?((lib || code), 'AT-SEA')
+  def online?(lib = nil)
+    match?((lib || code), 'UVA-LIB')
   end
 
   # is_special_collections?

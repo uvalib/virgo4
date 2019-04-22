@@ -3,7 +3,7 @@
   # Bootstrap pagination links.
 
   # Modify behavior if the original page was not a search listing.
-  origin ||= session[:origin]&.to_sym
+  origin ||= session[:origin]
   total  ||= search_session['total']
   anchor ||= nil
 
@@ -35,7 +35,7 @@
 -%>
 
 <div class='pagination-search-widgets'>
-  <div class="page_links">
+  <div class="page-links">
     <%= page_links %>
   </div>
   <div class="clearfix constraints-container">

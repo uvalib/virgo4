@@ -61,9 +61,12 @@ class IlsService
 
   # Get data from the ILS and update @response.
   #
-  # @param [Array<String>] args       Path components to the ILS API; if the
-  #                                     last is a Hash, it is passed as the
-  #                                     options to the cache #fetch.
+  # @param [Array<String>] args       Path components to the ILS API.
+  #
+  # args[0]   [String]  Path component.
+  # ...
+  # args[-2]  [String]  Path component.
+  # args[-1]  [Hash]    URL parameters.
   #
   # @return [Faraday::Response]
   #
@@ -81,9 +84,12 @@ class IlsService
 
   # Post data to the ILS and update @response.
   #
-  # @param [Array<String>] args       Path components to the ILS API; the last
-  #                                     should be a Hash containing the data
-  #                                     items to send.
+  # @param [Array<String>] args       Path components to the ILS API.
+  #
+  # args[0]   [String]  Path component.
+  # ...
+  # args[-2]  [String]  Path component.
+  # args[-1]  [Hash]    URL parameters.
   #
   # @return [Faraday::Response]
   #

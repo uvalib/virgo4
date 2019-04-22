@@ -1,0 +1,92 @@
+<%# app/views/availability/_holdings_complete.html.erb -%>
+<%-
+  # Content of the holdings element for a single document in HTML.
+
+  doc = document ||= @document
+  options ||= {}
+
+  map_heading = 'Map'
+  error = holdings = missing = no_info_text = nil
+
+  if (unique_site = unique_site_type(doc)) # :kluge, et. al.
+    map_heading = "<!-- #{map_heading} -->".html_safe
+
+  elsif (availability = doc&.availability)
+    error    = availability.error_message
+    holdings = availability.holdings if availability.visible_copies.nonzero?
+    missing  = availability.lost     if holdings.blank?
+
+  else
+    error = 'No document'
+  end
+
+  # Catalog entries which are "online only" do not show holdings information.
+  return if missing.blank? && holdings.blank?
+
+=begin
+  # In the Special Collections lens, if an item has any Special Collections
+  # holdings then only those holdings are shown; otherwise display it the
+  # usual way.  (The latter case only arises in virtual shelf browse; index
+  # search results would never show items without Special Collections
+  # holdings.)
+  if special_collections_lens? && error.blank?
+    sc_holdings = availability.special_collections_holdings
+    if sc_holdings.present?
+      holdings     = sc_holdings
+      no_info_text = 'No Special Collections items for this title.'
+    end
+  end
+=end
+
+-%>
+
+<table>
+  <thead>
+    <tr class="head-row">
+      <th class="holding-head library">Library</th>
+      <th class="holding-head location">Location</th>
+      <th class="holding-head map"><%= map_heading -%></th>
+      <th class="holding-head availability">Availability</th>
+      <th class="holding-head call_number">Call Number</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <%- if unique_site -%>
+
+      <%= unique_site_row(doc, options) %>
+
+    <%- elsif error -%>
+
+      <%= error_row(options.merge(error: error)) %>
+
+    <%- elsif holdings -%>
+
+      <%- holdings.each do |holding| -%>
+        <%- type_handlers = [:ils, :ill_ivy, :ill_leo, :sc].map do |type| -%>
+          <%- handler = nil &&'UVA::Request::Handler[type]' -%>
+          <%- [type, handler] if handler&.can_request?(holding) -%>
+        <%- end.compact.to_h -%>
+        <%- holding.copies.each do |copy| -%>
+          <%- css = [] -%>
+          <%- type_handlers.each_pair do |type, handler| -%>
+            <%- css << "type-#{type}" if handler.can_request?(copy) -%>
+          <%- end -%>
+          <%= item_row(doc, holding, copy, options.merge(class: css)) %>
+        <%- end -%>
+      <%- end -%>
+
+    <%- elsif missing -%>
+
+      <%- missing.each_pair do |lib, note| -%>
+        <%= missing_row(doc, lib, note, options) %>
+      <%- end -%>
+
+    <%- else -%>
+
+      <%= no_info_row(options.merge(message: no_info_text)) %>
+
+    <%- end -%>
+
+  </tbody>
+</table>

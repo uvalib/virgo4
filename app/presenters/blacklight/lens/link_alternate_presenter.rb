@@ -36,7 +36,9 @@ module Blacklight::Lens
     # @see Blacklight::LinkAlternatePresenter#href
     #
     def href(format)
-      view_context.search_state.url_for_document(document, format: format)
+      view_context.url_for(
+        view_context.search_state.url_for_document(document, format: format)
+      )
     end
 
   end

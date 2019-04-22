@@ -18,7 +18,7 @@
 //
 //  Required by Blacklight
 //
-//= require jquery
+//= require jquery3
 //= require popper
 //= require bootstrap
 //
@@ -43,4 +43,5 @@
 //
 //= require_tree ./shared
 //= require_tree ./feature
+//= require_tree ./catalog
 //= require_tree .

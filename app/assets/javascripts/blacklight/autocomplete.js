@@ -8,7 +8,7 @@
 //
 // Twitter Typeahead for autocomplete
 //= require twitter/typeahead
-//= require shared/assets
+//= require shared/constants
 
 // Overrides the provided Blacklight code in order to change to the arguments
 // to "suggest" based on the type of search selected.

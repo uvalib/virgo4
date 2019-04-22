@@ -1,29 +1,28 @@
-<%# app/views/availability/_holdings.html.erb -%>
+<%# app/views/availability/_status.html.erb -%>
 <%-
-  # Render holdings for a single document in HTML.
+  # Render summary status for a single document in HTML.
   #
   # If *pending* is *true* then the status element will be a placeholder that
   # will be replaced asynchronously by the client.
 
   doc = document ||= @document
-  index   ||= 0
-  options ||= {}
-  pending ||= false
+  index      ||= 0
+  show_count ||= false # TODO: ???
+  pending    ||= false
 
   doc_id = doc&.id || "unknown_#{index}"
 
-  id   = "holdings_#{doc_id}"
-  css  = 'holdings'
+  id   = "availability_#{doc_id}"
+  css  = 'availability-status'
   css += ' complete' unless pending
 
-  template_opts = { document: doc, options: options, pending: pending }
+  template_opts = { document: doc, show_count: show_count, pending: pending }
 
 -%>
 <div id="<%= id -%>" class="<%= css -%>" data-turbolinks-permanent>
   <%- if pending -%>
     <%= loading_placeholder %>
   <%- else -%>
-    <%= render 'availability/summary_holdings',  template_opts %>
-    <%= render 'availability/holdings_complete', template_opts %>
+    <%= render 'availability/status_complete', template_opts %>
   <%- end -%>
 </div>

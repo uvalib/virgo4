@@ -1,0 +1,11 @@
+<%# app/views/availability/show.html.erb -%>
+<%-
+  # Render availability details for a single document in HTML.
+
+  doc = document ||= @document
+  options ||= {}
+
+  template_opts = { document: doc, options: options }
+
+-%>
+<%= render 'availability/holdings', template_opts %>

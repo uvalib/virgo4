@@ -74,10 +74,11 @@ module LayoutHelper
   # TODO: needs work
   #
   def external_stylesheets(*args)
+    opt   = args.extract_options!.merge('data-turbolinks-track': '')
     tags, paths = args.partition { |arg| arg.include?('<link') }
     paths = (EXTERNAL_FONTS + paths).reject(&:blank?)
     tags  = tags.reject(&:blank?).uniq.join(META_TAG_SEPARATOR).html_safe
-    stylesheet_link_tag(*paths) + tags
+    stylesheet_link_tag(*paths, opt) + tags
   end
 
   # external_scripts
@@ -89,11 +90,12 @@ module LayoutHelper
   # TODO: needs work
   #
   def external_scripts(*args)
+    opt   = args.extract_options!.merge('data-turbolinks-track': '')
     tags, paths = args.partition { |arg| arg.include?('<script') }
     paths = (EXTERNAL_SCRIPTS + [DEFAULT_JQUERY] + paths).reject(&:blank?)
     tags << ACCESS_ANALYTICS
     tags  = tags.reject(&:blank?).uniq.join(META_TAG_SEPARATOR).html_safe
-    javascript_include_tag(*paths) + tags
+    javascript_include_tag(*paths, opt) + tags
   end
 
 end

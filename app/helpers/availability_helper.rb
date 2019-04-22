@@ -63,9 +63,12 @@ module AvailabilityHelper
   #
   # @param [Ils::Holding] holding
   # @param [Ils::Copy]    copy
-  # @param [Hash]         opt         Passed to self#availability_link
+  # @param [Hash]         opt
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [ActiveSupport::SafeBuffer] If `html?(opt)`.
+  # @return [String]                    Otherwise.
+  #
+  # @see #availability_indicator
   #
   def availability_button(holding, copy, **opt)
     opt = opt.dup
@@ -81,11 +84,13 @@ module AvailabilityHelper
   #
   # @param [Hash, nil] opt
   #
+  # @option opt [Symbol] :format
   # @option opt [String] :av_mode
   # @option opt [String] :av_label
   # @option opt [String] :disabled
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [ActiveSupport::SafeBuffer] If `html?(opt)`.
+  # @return [String]                    Otherwise.
   #
   def availability_indicator(**opt)
     html_opt = {
@@ -93,24 +98,26 @@ module AvailabilityHelper
       class:    'availability-indicator',
       disabled: true
     }
-    html_opt.merge!(opt) if opt.present?
+    html_opt.merge!(opt.except(:format))
     av_mode  = html_opt.delete(:av_mode)
     av_label = html_opt.delete(:av_label)
-    disabled = html_opt.delete(:disabled)
-
-    html_opt[:class] =
-      css_classes(html_opt[:class]) do |classes|
-        classes << av_mode
-        classes << 'active' unless disabled
-      end
-    html_opt.except!(:tabindex, :'aria-expanded') if disabled
-
-    content_tag(:span, html_opt) do
+    av_label =
       case av_label
         when false     then ''
         when true, nil then av_mode.to_s.capitalize
         else                av_label.to_s
       end
+    if non_html?(opt)
+      av_label
+    else
+      disabled = html_opt.delete(:disabled)
+      html_opt[:class] =
+        css_classes(html_opt[:class]) do |classes|
+          classes << av_mode
+          classes << 'active' unless disabled
+        end
+      html_opt.except!(:tabindex, :'aria-expanded') if disabled
+      content_tag(:span, av_label, html_opt)
     end
   end
 
@@ -124,7 +131,10 @@ module AvailabilityHelper
   #
   # @param [Hash, nil] opt
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [ActiveSupport::SafeBuffer] If `html?(opt)`.
+  # @return [String]                    Otherwise.
+  #
+  # @see #availability_indicator
   #
   def non_circ_indicator(**opt)
     html_opt = {
@@ -132,7 +142,7 @@ module AvailabilityHelper
       av_label: HOLDING_LABEL[:non_circ],
       title:    HOLDING_TOOLTIP[:non_circ]
     }
-    html_opt.merge!(opt) if opt.present?
+    html_opt.merge!(opt)
     availability_indicator(html_opt)
   end
 
@@ -143,31 +153,41 @@ module AvailabilityHelper
   # @param [Ils::Copy]    copy
   # @param [Hash, nil]    opt
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [ActiveSupport::SafeBuffer] If `html?(opt)`.
+  # @return [Hash]                      Otherwise.
   #
   # @see #availability_row
   # @see #non_circ_indicator
   # @see #disbound_icon
   #
   def item_row(doc, holding, copy, **opt)
+    fmt  = opt.slice(:format)
+    html = html?(fmt)
 
     # Add CSS classes to indicate the requests for which it is eligible.
-    types = request_type_classes(holding, copy)
-    opt = opt.merge(class: css_classes(opt[:class], types)) if types.present?
+    if html
+      types = request_type_classes(holding, copy)
+      opt = opt.merge(class: css_classes(opt[:class], types)) if types.present?
+    end
 
-    button_opt = { title: HOLDING_TOOLTIP[:item], disabled: true }
+    # Create the Availability column with additional elements as necessary.
+    button_opt = html ? { title: HOLDING_TOOLTIP[:item], disabled: true } : fmt
+    availability = availability_button(holding, copy, button_opt)
+    icons = []
+    icons << non_circ_indicator(fmt) unless copy.circulates?
+    icons << disbound_icon(fmt) if doc.despined?(copy.barcode)
+    if icons.present?
+      icons.unshift(availability)
+      availability = html ? safe_join(icons, ' ') : icons.join(', ')
+    end
+
     columns = {
-      'library-name':  holding.library.name,
-      'location-name': location_text(holding, copy),
-      'map-it':        link_to_map(holding, copy),
-      'availability':  availability_button(holding, copy, button_opt),
-      'call-number':   holding.call_number
+      library:      holding.library.name,
+      location:     location_text(holding, copy),
+      map:          link_to_map(holding, copy, fmt),
+      availability: availability,
+      call_number:  holding.call_number
     }
-
-    # Additional elements for the Availability column.
-    columns[:availability] << non_circ_indicator unless copy.circulates?
-    columns[:availability] << disbound_icon if doc.despined?(copy.barcode)
-
     availability_row(columns, **opt)
   end
 
@@ -176,17 +196,18 @@ module AvailabilityHelper
   # @param [SolrDocument] doc
   # @param [Hash, nil]    opt
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [ActiveSupport::SafeBuffer] If `html?(opt)`.
+  # @return [Hash]                      Otherwise.
   #
   # @see #availability_row
   #
   def unique_site_row(doc, **opt)
     columns = {
-      'library-name':  doc.values(:library_f).join(', '),
-      'location-name': doc.values(:location_f).join(', '),
-      'map-it':        '<!-- no map -->'.html_safe,
-      'availability':  HOLDING_MESSAGE[:unique_site],
-      'call-number':   doc.call_numbers.first
+      library:      doc.values(:library_f).join(', '),
+      location:     doc.values(:location_f).join(', '),
+      map:          ('<!-- no map -->'.html_safe if html?(opt)),
+      availability: HOLDING_MESSAGE[:unique_site],
+      call_number:  doc.call_numbers.first
     }
     availability_row(columns, **opt)
   end
@@ -196,22 +217,25 @@ module AvailabilityHelper
   #
   # @param [SolrDocument] doc
   # @param [String]       lib
-  # @param [String]       copy
+  # @param [String]       note
   # @param [Hash, nil]    opt
   #
-  # @return [ActiveSupport::SafeBuffer]
-  #
-  # @see IlsAvailability#lost
+  # @return [ActiveSupport::SafeBuffer] If `html?(opt)`.
+  # @return [Hash]                      Otherwise.
   #
   # @see #availability_row
+  # @see IlsAvailability#lost
   #
-  def missing_row(doc, lib, copy, **opt)
+  def missing_row(doc, lib, note, **opt)
+    fmt = opt.slice(:format)
+    loc = note.capitalize
+    loc = content_tag(:em, loc) if html?(fmt)
     columns = {
-      'library-name':  lib,
-      'location-name': content_tag(:em, ERB::Util.h(copy.capitalize)),
-      'map-it':        link_to_map(nil, nil),
-      'availability':  availability_button(nil, nil),
-      'call-number':   doc.call_numbers.first
+      library:      lib,
+      location:     loc,
+      map:          link_to_map(nil, nil, fmt),
+      availability: availability_button(nil, nil, fmt),
+      call_number:  doc.call_numbers.first
     }
     availability_row(columns, **opt)
   end
@@ -221,12 +245,13 @@ module AvailabilityHelper
   #
   # @param [Hash, nil] opt
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [ActiveSupport::SafeBuffer] If `html?(opt)`.
+  # @return [String]                    Otherwise.
   #
   # @see #availability_spanning_row
   #
   def no_info_row(**opt)
-    opt = opt.dup
+    opt     = opt.dup
     message = opt.delete(:message) || HOLDING_MESSAGE[:no_info]
     availability_spanning_row(message, opt)
   end
@@ -236,7 +261,8 @@ module AvailabilityHelper
   #
   # @param [Hash, nil] opt
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @return [ActiveSupport::SafeBuffer] If `html?(opt)`.
+  # @return [String]                    Otherwise.
   #
   # @see #availability_spanning_row
   #
@@ -245,7 +271,7 @@ module AvailabilityHelper
     error   = opt.delete(:error)
     message = opt.delete(:message) || HOLDING_MESSAGE[:error]
     message += ": #{error}" if error.present?
-    message = content_tag(:div, ERB::Util.h(message), class: 'error')
+    message = content_tag(:div, message, class: 'error') if html?(opt)
     availability_spanning_row(message, opt)
   end
 
@@ -254,16 +280,22 @@ module AvailabilityHelper
   # @param [Hash]      columns
   # @param [Hash, nil] opt
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @option opt [Symbol] :format
+  #
+  # @return [ActiveSupport::SafeBuffer] If `html?(opt)`.
+  # @return [Hash]                      Otherwise.
+  #
+  # @see #holdings_element
   #
   def availability_row(columns, **opt)
-    css_class = css_classes(HOLDING_CSS_CLASS, opt[:class])
-    content_tag(:tr, opt.merge(class: css_class)) do
-      columns.map { |attr, value|
-        content_tag(:td, class: "holding-data #{attr}") do
-          ERB::Util.h(value)
+    if non_html?(opt)
+      columns
+    else
+      holdings_element(opt) do
+        columns.map do |attr, value|
+          content_tag(:td, value, class: "holding-data #{attr}")
         end
-      }.join("\n").html_safe
+      end
     end
   end
 
@@ -272,15 +304,62 @@ module AvailabilityHelper
   # @param [String, ActiveSupport::SafeBuffer] content
   # @param [Hash, nil]                         opt
   #
-  # @return [ActiveSupport::SafeBuffer]
+  # @option opt [Symbol] :format
+  #
+  # @return [ActiveSupport::SafeBuffer] If `html?(opt)`.
+  # @return [String]                    Otherwise.
+  #
+  # @see #holdings_element
   #
   def availability_spanning_row(content, **opt)
-    css_class = css_classes(HOLDING_CSS_CLASS, opt[:class])
-    content_tag(:tr, opt.merge(class: css_class)) do
-      content_tag(:td, colspan: 5, class: 'holding-data no-info') do
-        ERB::Util.h(content)
+    if non_html?(opt)
+      content
+    else
+      holdings_element(opt) do
+        content_tag(:td, content, colspan: 5, class: 'holding-data no-info')
       end
     end
+  end
+
+  # An HTML holdings row wrapping content supplied through the block.
+  #
+  # @param [Hash, nil] opt
+  #
+  # @return [ActiveSupport::SafeBuffer]
+  #
+  # == Usage Notes
+  # `html?(opt)` is assumed to be *true*.
+  #
+  def holdings_element(**opt)
+    css_class = css_classes(HOLDING_CSS_CLASS, opt[:class])
+    content_tag(:tr, opt.merge(class: css_class)) do
+      lines = [nil]
+      lines += Array.wrap(yield)
+      lines << nil
+      safe_join(lines, "\n")
+    end
+  end
+
+  # ===========================================================================
+  # :section:
+  # ===========================================================================
+
+  private
+
+  # Indicate whether the options imply or specify HTML format.
+  #
+  # @param [Hash] opt
+  #
+  def html?(opt)
+    opt[:format].blank? || (opt[:format].to_s == 'html')
+  end
+
+  # Indicate whether the options specify a non-HTML format.
+  #
+  # @param [Hash] opt
+  #
+  def non_html?(opt)
+    !html?(opt)
   end
 
   # ===========================================================================
@@ -302,7 +381,7 @@ module AvailabilityHelper
     location_name = content_tag(:div, location_name, class: 'home-location')
 
     summaries =
-      location.summaries.map { |summary|
+      location.summaries.map do |summary|
         cn   = summary.call_number.presence
         text = summary.text.presence
         note = summary.note.presence
@@ -311,16 +390,16 @@ module AvailabilityHelper
             classes << 'note-entry' if note && (cn || text)
           end
         content_tag(:div, class: summary_group_classes) do
-          [].tap { |parts|
-            parts << content_tag(:div, cn, class: 'summary-call-number') if cn
-            parts << content_tag(:div, text, class: 'summary-text') if text
-            parts << content_tag(:div, note, class: 'summary-note') if note
-          }.join.html_safe
+          parts = []
+          parts << content_tag(:div, cn, class: 'summary-call-number') if cn
+          parts << content_tag(:div, text, class: 'summary-text')      if text
+          parts << content_tag(:div, note, class: 'summary-note')      if note
+          safe_join(parts)
         end
-      }.join("\n").html_safe
+      end
 
     content_tag(:div, class: 'holding-group') do
-      location_name + summaries
+      location_name + safe_join(summaries, "\n")
     end
   end
 
@@ -330,39 +409,70 @@ module AvailabilityHelper
 
   public
 
+  # Text returned for non-HTML formats.
+  #
+  # @type [String]
+  #
+  DISBOUND_LABEL = 'disbound'
+
+  # Informational text displayed in the popup.
+  #
+  # @type [ActiveSupport::SafeBuffer]
+  #
   DISBOUND_TEXT = <<~HEREDOC.html_safe.freeze
     This item was disbound in the UVA Library’s first digitization project,
     1998-99, which included a select group of public domain books.
   HEREDOC
 
+  # Tooltip shown if the popup is closed.
+  #
+  # @type [String]
+  #
   DISBOUND_OPEN  = 'Click for circulation status explanation.'
+
+  # Tooltip shown if the popup is open.
+  #
+  # @type [String]
+  #
   DISBOUND_CLOSE = 'Click to dismiss this popup.'
 
   # disbound_help_icon
   #
+  # @param [Hash, nil] opt
+  #
+  # @option opt [Symbol] :format
+  #
   # @return [ActiveSupport::SafeBuffer]
   #
-  def disbound_icon
-    container_opt = {
+  def disbound_icon(**opt)
+
+    return DISBOUND_LABEL if non_html?(opt)
+
+    html_opt = {
       class:         'disbound-help-link',
       role:          'button',
       tabindex:      0,
       title:         DISBOUND_OPEN,
       'aria-label':  DISBOUND_OPEN
     }
+    html_opt.merge!(opt.except(:format))
+
     icon_opt = {
       class:         'fa fa-question-circle disbound-help-icon',
       'aria-hidden': true
     }
+    icon = content_tag(:div, '', icon_opt)
+
     text_opt = {
       class:         'disbound-help-container',
       role:          'note',
       title:         DISBOUND_CLOSE,
       'aria-label':  DISBOUND_CLOSE,
     }
-    content_tag(:div, container_opt) do
-      content_tag(:div, '', icon_opt) +
-      content_tag(:div, DISBOUND_TEXT, text_opt)
+    text = content_tag(:div, DISBOUND_TEXT, text_opt)
+
+    content_tag(:div, html_opt) do
+      icon + text
     end
   end
 
@@ -392,6 +502,10 @@ module AvailabilityHelper
 
   public
 
+  # Text for SC locations.
+  #
+  # @type [Hash{Symbol=>String}]
+  #
   SC_LOCATION_TEXT = {
     default:    'Special Collections',
     in_process: 'Contact Special Collections',
@@ -435,26 +549,40 @@ module AvailabilityHelper
 
   public
 
+  # Text used to indicate that no map link is provided.
+  #
+  # @type [String]
+  #
+  NO_MAP_LABEL = 'N/A'
+
   # The link to a map for the item's physical location.
   #
   # @param [Ils::Holding] holding
   # @param [Ils::Copy]    copy
-  # @param [Boolean]      na_map      Show "N/A" for missing map.
+  # @param [Boolean]      missing     Show #NO_MAP_LABEL for missing map.
+  # @param [Hash, nil]    opt
   #
   # @return [ActiveSupport::SafeBuffer]
   # @return [nil]                       If there was no map for the item and
   #                                       *na_map* was set to *false*.
   #
-  def link_to_map(holding, copy, na_map = true)
+  # == Usage Notes
+  # The default for :na_map depends on the format:
+  # *true*  if html?(opt)
+  # *false* if non_html?(opt)
+  #
+  def link_to_map(holding, copy, missing: nil, **opt)
     map = nil # TODO: stacks map links
 =begin
     #map = copy&.stacks_map(holding)
     map = Map.find_best_map(holding, copy) if copy.available?
 =end
-    if map
+    if non_html?(opt)
+      map&.url || (NO_MAP_LABEL if missing.is_a?(TrueClass))
+    elsif map&.url
       outlink('Map', map.url, class: 'map-link', title: 'Map')
-    elsif na_map
-      content_tag(:span, 'N/A', class: 'map-indicator no-map')
+    elsif !missing.is_a?(FalseClass)
+      content_tag(:span, NO_MAP_LABEL, class: 'map-indicator no-map')
     end
   end
 
@@ -465,6 +593,9 @@ module AvailabilityHelper
   public
 
   # Document types to which this module applies.
+  #
+  # @type [Hash{Symbol=>Hash}]
+  #
   UNIQUE_SITE = {
     kluge: {
       label: 'Kluge-Ruhe Study Center',

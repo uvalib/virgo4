@@ -17,10 +17,9 @@
   template_opts = { document: doc }
 -%>
 
-<%= render 'availability/summary_holdings', template_opts %>
 <%#= leo_and_recall_links(doc, request_popup: request_popup) %>
 <%#= sc_lens_request_link(doc, outer_class: 'tray') %>
-<%= render 'availability/holdings', template_opts %>
+<%= render 'catalog/holdings', template_opts %>
 <%#= pda_purchase(doc, request_popup: request_popup, simulate: simulate_pda) %>
 <%#= about_pda(doc) %>
 <%#= access_restriction_text(doc) %>

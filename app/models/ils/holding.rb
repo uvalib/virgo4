@@ -64,6 +64,12 @@ class Ils::Holding < Ils::Record::Base
     library.present? && library.leoable?
   end
 
+  # online?
+  #
+  def online?
+    library.present? && library.online?
+  end
+
   # special_collections?
   #
   def special_collections?

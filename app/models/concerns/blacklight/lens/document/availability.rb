@@ -26,6 +26,15 @@ module Blacklight::Lens::Document
     #
     AVAILABILITY_STATUS = AVAILABILITY_NAMES.keys.freeze
 
+    # Empty availability data.
+    #
+    # @type [Hash]
+    #
+    AVAILABILITY_DATA_TEMPLATE = {
+      status:    :none,
+      locations: {}
+    }.freeze
+
     # =========================================================================
     # :section:
     # =========================================================================
@@ -34,17 +43,22 @@ module Blacklight::Lens::Document
 
     # Availability information.
     #
-    # @return [IlsAvailability]
-    # @return [nil]
+    # @param [Boolean] fetch          If *false*, do not acquire availability
+    #                                   data if it is not already present.
     #
-    def availability
-      @availability ||= fetch_availability
+    # @return [IlsAvailability]
+    # @return [nil]                   If #supports_availability? is *false*, or
+    #                                   if *fetch* is *false* and data is not
+    #                                   already present.
+    #
+    def availability(fetch = true)
+      @availability ||= (fetch_availability if fetch)
     end
 
     # Force a fetch of availability information.
     #
     # @return [IlsAvailability]
-    # @return [nil]
+    # @return [nil]                   If #supports_availability? is *false*.
     #
     def refresh_availability
       @availability = fetch_availability
@@ -53,16 +67,19 @@ module Blacklight::Lens::Document
     # Get availability information from the source.
     #
     # @return [IlsAvailability]
-    # @return [nil]
+    # @return [nil]                   If #supports_availability? is *false*.
+    #
+    # @see #index_availability
+    # @see IlsService::Recv::Availability#get_availability
     #
     def fetch_availability
-      return unless has_availability?
+      return unless supports_availability?
       index_availability || availability_service.get_availability(self)
     end
 
     # Indicate whether the document can have availability information.
     #
-    def has_availability?
+    def supports_availability?
       id.start_with?('u') || has?(:availability_a)
     end
 
@@ -79,23 +96,78 @@ module Blacklight::Lens::Document
     #
     # :mixed          If there are multiple libraries with available copies.
     #
+    # @param [Boolean] fetch          If *false*, do not acquire availability
+    #                                   data if it is not already present.
+    #
     # @return [Symbol]                A member of #AVAILABILITY_STATUS.
     #
+    # @see IlsAvailability#library_copy_counts
     # @see IlsAvailability#library_available_counts
     #
-    def availability_status
-      if (av = availability).blank?
+    def availability_status(fetch = true)
+      if (av = availability(fetch)).blank?
         :none
       elsif av.error?
         :error
       elsif (cp_counts = av.library_copy_counts).blank?
-        :none
+        :unavailable
       elsif (av_counts = av.library_available_counts).blank?
         :unavailable
       elsif av_counts.find { |lib, available| available < cp_counts[lib] }
         :mixed
       else
         :available
+      end
+    end
+
+    # availability_data
+    #
+    # @param [Boolean] fetch          If *false*, do not acquire availability
+    #                                   data if it is not already present.
+    #
+    # @return [Hash]
+    #
+    # @see #availability_status
+    # @see IlsAvailability#library_copies_available
+    # @see IlsAvailability#library_copies_unavailable
+    #
+    # == Example
+    # {
+    #   status: :available,
+    #   locations: {
+    #     '3rd Floor East Reading Room' => {
+    #       id:     15,
+    #       code:   '3EAST',
+    #       name:   '3rd Floor East Reading Room',
+    #       count:  1
+    #     }
+    #   }
+    # }
+    #
+    def availability_data(fetch = true)
+      AVAILABILITY_DATA_TEMPLATE.dup.tap do |result|
+        if (av = availability(fetch)).present?
+          result[:status] = availability_status
+          library_copies =
+            case result[:status]
+              when :available, :mixed then av.library_copies_available
+              when :unavailable       then av.library_copies_unavailable
+            end
+          result[:locations] =
+            if library_copies.blank?
+              av.lost
+            else
+              library_copies.map { |library, copies|
+                count = {}
+                copies.each do |copy|
+                  location = copy.location.name.to_sym
+                  count[location] ||= copy.location.to_hash.merge(count: 0)
+                  count[location][:count] += 1
+                end
+                [library, count]
+              }.to_h
+            end
+        end
       end
     end
 

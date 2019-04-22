@@ -1,0 +1,55 @@
+<%# app/views/availability/_status_complete.html.erb -%>
+<%-
+  # Content of the summary status element for a single document in HTML.
+
+  doc = document ||= @document
+  show_count ||= false # TODO: ???
+
+  data = doc&.availability_data || SolrDocument::AVAILABILITY_DATA_TEMPLATE
+
+  status    = data[:status]
+  locations = data[:locations]
+  none      = (status == :none)
+  error     = (status == :error)
+  missing   = locations.first&.last&.is_a?(String)
+  status    = status.to_s.downcase
+
+  # Catalog entries which are "online only" do not show holdings information.
+  return if missing.blank? && locations.blank?
+
+-%>
+<div class="status <%= status -%>"><%= status.capitalize -%></div>
+<table class="shelf-locations tabular">
+  <%- if none -%>
+    <tr class="line">
+      <!--empty-->
+    </tr>
+  <%- elsif error -%>
+    <tr class="line">
+      <td class="error">
+        <%= doc&.availability&.error_message || 'Unknown error' %>
+      </td>
+    </tr>
+  <%- elsif missing -%>
+    <%- locations.each_pair do |library, note| -%>
+      <tr class="line">
+        <td class="library"><%= library -%></td>
+        <td class="separator">-</td>
+        <td class="locations"><%= note -%></td>
+      </tr>
+    <%- end -%>
+  <%- else -%>
+    <%- locations.each_pair do |library, location_counts| -%>
+      <tr class="line">
+        <td class="library"><%= library -%></td>
+        <td class="separator">-</td>
+        <td class="locations">
+          <%- location_counts.each_pair do |name, loc_count| -%>
+            <%- n = (loc_count[:count].to_i if show_count) -%>
+            <div><%= name -%><%= "&nbsp;[#{n}]".html_safe if n -%></div>
+          <%- end -%>
+        </td>
+      </tr>
+    <%- end -%>
+  <%- end -%>
+</table>

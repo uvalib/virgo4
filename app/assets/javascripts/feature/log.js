@@ -1,6 +1,6 @@
-// app/assets/feature/log.js
+// app/assets/javascripts/feature/log.js
 //
-// Adds functionality to Blacklight::Gallery.
+// Adds functionality to About Rails Log page.
 
 Blacklight.onLoad(function() {
 

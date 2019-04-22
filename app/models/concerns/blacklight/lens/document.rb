@@ -118,6 +118,17 @@ module Blacklight::Lens::Document
     has?(:feature_f, *features)
   end
 
+  # Library of Congress (LoC) call numbers for this document.
+  #
+  # @return [Array<String>]
+  #
+  # This method overrides:
+  # @see Blacklight::Document::Base#call_numbers
+  #
+  def call_numbers(*)
+    values(:lc_call_number_a).map { |v| v.sub(/^LC:/, '').squish }.uniq
+  end
+
   # Physical item identifiers.
   #
   # @return [Array<String>]

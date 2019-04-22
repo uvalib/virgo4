@@ -43,6 +43,14 @@ module Ils::Record::Schema
       serializers[:xml]
     end
 
+    # The Hash serializer for the including class.
+    #
+    # @return [Ils::Serializer::HashBase]
+    #
+    def hash_serializer
+      serializers[:hash]
+    end
+
     # Schema definition block method.
     #
     # This method is used within the definition of a class derived from
