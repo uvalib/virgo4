@@ -1,4 +1,4 @@
-// app/assets/feature/gallery.js
+// app/assets/javascripts/feature/gallery.js
 //
 // Adds functionality to Blacklight::Gallery.
 

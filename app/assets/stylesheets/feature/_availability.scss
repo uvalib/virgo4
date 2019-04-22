@@ -51,6 +51,11 @@ dt, dd {
 
     @extend .d-sm-flex;
 
+    .loading-placeholder {
+        margin-top:    0.5rem;
+        margin-bottom: 1.25rem;
+    }
+
     .status {
 
         @extend %availability-badge;
@@ -155,7 +160,7 @@ dt, dd {
 // Availability table - holdings from Sirsi
 //=============================================================================
 
-.holdings {
+.holdings table {
 
     @extend .table;
     @extend .table-sm;
@@ -188,7 +193,7 @@ dt, dd {
 
         .holding-data {
 
-            &.library-name {
+            &.library {
                 font-weight: bold;
                 color:       #666;
             }

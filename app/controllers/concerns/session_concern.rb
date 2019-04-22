@@ -69,6 +69,16 @@ module SessionConcern
 
   end
 
+  # Controllers which do not cause the session origin to be reset.
+  #
+  # @type [Array<Symbol>]
+  #
+  # @see #set_origin
+  #
+  NON_ORIGIN_CONTROLLER = %i[
+    availability
+  ].freeze
+
   # ===========================================================================
   # :section:
   # ===========================================================================
@@ -119,10 +129,12 @@ module SessionConcern
   #
   # @return [void]
   #
+  # @see #NON_ORIGIN_CONTROLLER
+  #
   def set_origin
     return unless params[:action] == 'index'
-    origin = (params[:controller].presence unless request.path == root_path)
-    session[:origin] = origin || :root
+    c = (request.path == root_path) ? :root : params[:controller].to_s.to_sym
+    session[:origin] = c unless c.blank? || NON_ORIGIN_CONTROLLER.include?(c)
   end
 
   # Change or eliminate :sort based on the request URL.  Additionally, remove

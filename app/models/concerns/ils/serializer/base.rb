@@ -57,17 +57,18 @@ class Ils::Serializer::Base < Representable::Decorator
   # Render data elements in serialized format.
   #
   # @param [Symbol, Proc] method
+  # @param [Hash, nil]    opt         Options argument for *method*.
   #
   # @return [String]
   #
   # == Usage Notes
   # This method must be overridden by the derived class to pass in :method.
   #
-  def serialize(method)
+  def serialize(method, **opt)
     start_time = Time.now
     case method
-      when Symbol then send(method)
-      when Proc   then method.call
+      when Symbol then send(method, **opt)
+      when Proc   then method.call(**opt)
       else             abort "#{__method__}: subclass must supply method"
     end
   rescue => error

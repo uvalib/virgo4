@@ -8,6 +8,49 @@ if (!LOAD_TIME) {
     LOAD_TIME = Date.now();
 
     // ========================================================================
+    // Basic values and enumerations
+    // ========================================================================
+
+    /**
+     * Multiply by this to indicate that the a quantity represents a time span
+     * in milliseconds.
+     *
+     * @constant
+     * @type {number}
+     */
+    var MILLISECONDS = 1;
+
+    /**
+     * @constant
+     * @type {number}
+     */
+    var MS_PER_SECOND = 1000 * MILLISECONDS;
+
+    /**
+     * Multiply by this to indicate that the a quantity represents a time span
+     * in seconds.
+     *
+     * @constant
+     * @type {number}
+     */
+    var SECONDS = MS_PER_SECOND;
+
+    /**
+     * @constant
+     * @type {number}
+     */
+    var SEC_PER_MINUTE = 60 * SECONDS;
+
+    /**
+     * Multiply by this to indicate that the a quantity represents a time span
+     * in minutes.
+     *
+     * @constant
+     * @type {number}
+     */
+    var MINUTES = SEC_PER_MINUTE;
+
+    // ========================================================================
     // JSDoc typedefs
     // ========================================================================
 
@@ -19,6 +62,32 @@ if (!LOAD_TIME) {
      * @type {string|HTMLElement|jQuery}
      */
     var Selector;
+
+    // ========================================================================
+    // Function definitions - Time and date
+    // ========================================================================
+
+    /**
+     * Milliseconds since the given time.
+     *
+     * @param {number} timestamp      Original `Date.now()` value.
+     *
+     * @return {number}
+     */
+    function delta(timestamp) {
+        return Date.now() - timestamp;
+    }
+
+    /**
+     * Seconds since the given time.
+     *
+     * @param {number} timestamp      Original `Date.now()` value.
+     *
+     * @return {number}
+     */
+    function secondsSince(timestamp) {
+        return delta(timestamp) / MS_PER_SECOND;
+    }
 
     // ========================================================================
     // Function definitions - Element values

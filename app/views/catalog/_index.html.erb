@@ -9,7 +9,6 @@
   dd_width = 12 - dt_width
 
   doc_presenter = index_presenter(doc)
-  availability  = doc_presenter.availability
 
 -%>
 <dl class="document-metadata dl-invert row">
@@ -22,12 +21,12 @@
       <%= doc_presenter.field_value(field_config) %>
     </dd>
   <%- end -%>
-  <%- if availability -%>
+  <%- if doc.supports_availability? -%>
     <dt class="availability col-md-<%= dt_width -%>">
       Availability
     </dt>
     <dd class="availability col-md-<%= dd_width -%>">
-      <%= availability %>
+      <%= render 'catalog/status', document: doc %>
     </dd>
   <%- end -%>
 </dl>

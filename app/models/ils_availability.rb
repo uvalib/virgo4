@@ -131,6 +131,16 @@ class IlsAvailability < Ils::Message
       end
   end
 
+  # Indicate whether the catalog entry is for a title that is only online.
+  #
+  # In this case availability/holdings information would not be displayed for
+  # the entry (despite the fact that it comes from the ILS) because it is
+  # always available through its URL.
+  #
+  def online_only?
+    library_copies_available.blank? && lost.blank?
+  end
+
   # ===========================================================================
   # :section:
   # ===========================================================================

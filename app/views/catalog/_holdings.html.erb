@@ -1,0 +1,24 @@
+<%# app/views/catalog/_holdings.html.erb -%>
+<%-
+  # Render holdings for a single document in HTML.
+  #
+  # If the document needs to acquire availability data then the status element
+  # will be a placeholder that will be replaced asynchronously by the client.
+
+  doc = document ||= @document
+  index ||= search_session['counter'].to_i
+
+  unique_site           = unique_site_type(doc) # :kluge, et. al.
+  supports_availability = (doc&.supports_availability? unless unique_site)
+  availability_present  = (doc&.availability(false) if supports_availability)
+
+  return unless unique_site || supports_availability
+
+  template_opts = {
+    document: doc,
+    index:    index,
+    pending:  !(unique_site || availability_present)
+  }
+
+-%>
+<%= render 'availability/holdings', template_opts %>

@@ -25,7 +25,7 @@ xml.feed('xmlns' => 'http://www.w3.org/2005/Atom',
   id        = alternate.merge(content_format: nil, type: 'text/html')
 
   xml.link rel: 'self',      href: url_for(search)
-  xml.link rel: 'alternate', href: url_for(alt), type: 'text/html'
+  xml.link rel: 'alternate', href: url_for(alternate), type: 'text/html'
   xml.id   url_for(id)
 
   # === Navigational and context links

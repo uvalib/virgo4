@@ -352,22 +352,6 @@ module BlacklightHelper
     presenter(doc).heading(options)
   end
 
-  # Render a document's availability.
-  #
-  # @param [Blacklight::Document] doc   Default: @document.
-  # @param [Hash, nil]            opt
-  #
-  # @option opt [Boolean] :format     Default: *true*.
-  #
-  # @return [String]
-  #
-  def availability(doc = nil, opt = nil)
-    doc ||= @document
-    options = { format: true }
-    options.merge!(opt) if opt.present?
-    presenter(doc).availability(options)
-  end
-
 end
 
 __loading_end(__FILE__)

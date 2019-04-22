@@ -164,6 +164,17 @@ module Blacklight::Document
     def has_feature?(*)
     end
 
+    # Library of Congress (LoC) call numbers for this document.
+    #
+    # @return [Array<String>]
+    #
+    # === References
+    # @see https://www.loc.gov/catdir/cpso/lcco
+    #
+    def call_numbers(*)
+      []
+    end
+
     # Physical item identifiers.
     #
     # @return [Array<String>]

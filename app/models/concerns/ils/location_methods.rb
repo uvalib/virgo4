@@ -14,6 +14,7 @@ module Ils::LocationMethods
   include Ils::Common
   extend  Ils::Common
 
+  ONLINE_LOCATIONS    = codes 'INTERNET'
   HOLD_LOCATIONS      = codes /HOLD/
   RESERVE_LOCATIONS   = codes /RESV/, /RSRV/, /RESERVE/, 'PATFAMCOLL'
   REFERENCE_LOCATIONS = codes /REF/,  'FA-SLIDERF'
@@ -100,6 +101,14 @@ module Ils::LocationMethods
   # ===========================================================================
 
   public
+
+  # online?
+  #
+  # @param [String, nil] loc        Default: `code`.
+  #
+  def online?(loc = nil)
+    match?((loc || code), ONLINE_LOCATIONS)
+  end
 
   # lost?
   #
